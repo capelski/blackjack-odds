@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
-import { getHandKey, getHandScores, getHandSymbols } from '../logic/hand';
+import { getHandScores, getHandSymbols } from '../logic/hand';
 import { Dictionary, Hand, HandProbabilities } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
@@ -14,9 +14,9 @@ interface HandsTableProps {
 
 const getHandRows = (hand: Hand, expandedRows: Dictionary<boolean>): Hand[] => {
     const handRows = [hand];
-    const handKey = getHandKey(hand);
+    const handSymbols = getHandSymbols(hand);
 
-    if (expandedRows[handKey]) {
+    if (expandedRows[handSymbols]) {
         hand.followingHands.forEach((followingHand) => {
             handRows.push(...getHandRows(followingHand, expandedRows));
         });
