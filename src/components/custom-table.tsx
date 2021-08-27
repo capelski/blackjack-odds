@@ -1,8 +1,9 @@
 import React, { CSSProperties } from 'react';
-import { Column, Row, useTable } from 'react-table';
+import { Cell, Column, Row, useTable } from 'react-table';
 
 interface CustomTableProps<T extends {}> {
     columns: Column<T>[];
+    columnStyle?: (cell: Cell<T>) => CSSProperties | undefined;
     data: T[];
     rowStyle?: (row: Row<T>) => CSSProperties | undefined;
 }
@@ -41,15 +42,20 @@ export const CustomTable = <T extends {}>(props: CustomTableProps<T>) => {
                     return (
                         <tr style={props.rowStyle && props.rowStyle(row)} {...row.getRowProps()}>
                             {row.cells.map((cell) => {
+                                const baseColumnStyle: CSSProperties = {
+                                    padding: 4,
+                                    paddingBottom: 8,
+                                    paddingTop: 8,
+                                    textAlign: 'center'
+                                };
+                                const columnStyle: CSSProperties = props.columnStyle
+                                    ? { ...baseColumnStyle, ...props.columnStyle(cell) }
+                                    : baseColumnStyle;
+
                                 return (
                                     <td
                                         {...cell.getCellProps()}
-                                        style={{
-                                            padding: 4,
-                                            paddingBottom: 8,
-                                            paddingTop: 8,
-                                            textAlign: 'center'
-                                        }}
+                                        style={columnStyle}
                                         key={row.id + '-' + cell.column.id}
                                     >
                                         {cell.render('Cell')}

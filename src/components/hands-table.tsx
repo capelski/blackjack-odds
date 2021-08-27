@@ -160,5 +160,13 @@ export const HandsTable = (props: HandsTableProps) => {
         return { columns, data };
     }, [expandedRows, props.rootHands]);
 
-    return <CustomTable columns={columns} data={data} />;
+    return (
+        <CustomTable
+            columns={columns}
+            columnStyle={(cell) =>
+                cell.column.id === 'expander' ? { textAlign: 'left' } : undefined
+            }
+            data={data}
+        />
+    );
 };
