@@ -4,6 +4,6 @@ export type Hand = {
     cardSymbols: string[];
     followingHands: Hand[];
     lastCard: CardOutcome;
-    value: number;
-    values: number[];
+    score: number;
+    scores: number[];
 };

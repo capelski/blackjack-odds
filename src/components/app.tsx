@@ -1,6 +1,7 @@
 import React from 'react';
 import { getAllCardOutcomes, getCardOutcomesWeight } from '../logic/card-outcome';
 import { getAllHands } from '../logic/hand';
+import { getHandsNextCardProbabilities } from '../logic/hand-probabilities';
 import { HandsTable } from './hands-table';
 
 export const App: React.FC = () => {
@@ -8,5 +9,16 @@ export const App: React.FC = () => {
     const hands = getAllHands(cardOutcomes);
     const outcomesWeight = getCardOutcomesWeight(cardOutcomes);
 
-    return <HandsTable hands={hands} outcomesWeight={outcomesWeight} />;
+    const handsNextCardProbabilities = getHandsNextCardProbabilities(
+        hands.handsDictionary,
+        outcomesWeight
+    );
+
+    return (
+        <HandsTable
+            handsNextCardProbabilities={handsNextCardProbabilities}
+            outcomesWeight={outcomesWeight}
+            rootHands={hands.rootHands}
+        />
+    );
 };

@@ -1,14 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
-import { maximumScore } from '../logic/constants';
-import { getHandKey } from '../logic/hand';
-import { Dictionary, Hand } from '../types';
+import { dealerStandingScore, maximumScore } from '../logic/constants';
+import { getHandKey, getHandScores, getHandSymbols } from '../logic/hand';
+import { Dictionary, Hand, HandProbabilities } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface HandsTableProps {
-    hands: Hand[];
+    handsNextCardProbabilities: Dictionary<HandProbabilities>;
     outcomesWeight: number;
+    rootHands: Hand[];
 }
 
 const getHandRows = (hand: Hand, expandedRows: Dictionary<boolean>): Hand[] => {
@@ -32,7 +33,7 @@ export const HandsTable = (props: HandsTableProps) => {
             {
                 accessor: 'followingHands',
                 Cell: (cellProps: CellProps<Hand, Hand['followingHands']>) => {
-                    const cardSymbols = cellProps.row.original.cardSymbols.join(',');
+                    const cardSymbols = getHandSymbols(cellProps.row.original);
                     const symbolsNumber = cellProps.row.original.cardSymbols.length;
                     const hasChildRows = cellProps.value.length > 0;
 
@@ -60,30 +61,28 @@ export const HandsTable = (props: HandsTableProps) => {
                 id: 'expander'
             },
             {
-                accessor: 'cardSymbols',
-                Cell: (cellProps: CellProps<Hand, Hand['cardSymbols']>) => (
-                    <span>{cellProps.value.join(',')}</span>
+                Cell: (cellProps: CellProps<Hand>) => (
+                    <span>{getHandSymbols(cellProps.row.original)}</span>
                 ),
                 Header: 'Cards',
                 id: 'cards'
             },
             {
-                accessor: 'values',
-                Cell: (cellProps: CellProps<Hand, Hand['values']>) => {
+                Cell: (cellProps: CellProps<Hand>) => {
                     return (
                         <span
                             style={{
                                 color:
-                                    cellProps.row.original.value > maximumScore ? 'red' : 'black',
+                                    cellProps.row.original.score > maximumScore ? 'red' : 'black',
                                 fontWeight: 'bold'
                             }}
                         >
-                            {cellProps.value.join('/')}
+                            {getHandScores(cellProps.row.original)}
                         </span>
                     );
                 },
                 Header: 'Score',
-                id: 'value'
+                id: 'score'
             },
             {
                 accessor: 'lastCard',
@@ -95,15 +94,71 @@ export const HandsTable = (props: HandsTableProps) => {
                 ),
                 Header: 'Probability',
                 id: 'probability'
+            },
+            {
+                columns: [
+                    {
+                        Cell: (cellProps: CellProps<Hand>) => {
+                            const handScores = getHandScores(cellProps.row.original);
+                            return cellProps.row.original.score < maximumScore ? (
+                                <RoundedFloat
+                                    value={
+                                        props.handsNextCardProbabilities[handScores]
+                                            .opponentRelative.lower
+                                    }
+                                />
+                            ) : (
+                                '-'
+                            );
+                        },
+                        Header: `<${dealerStandingScore}`,
+                        id: 'lower'
+                    },
+                    {
+                        Cell: (cellProps: CellProps<Hand>) => {
+                            const handScores = getHandScores(cellProps.row.original);
+                            return cellProps.row.original.score < maximumScore ? (
+                                <RoundedFloat
+                                    value={
+                                        props.handsNextCardProbabilities[handScores]
+                                            .opponentRelative.equal +
+                                        props.handsNextCardProbabilities[handScores]
+                                            .opponentRelative.higher
+                                    }
+                                />
+                            ) : (
+                                '-'
+                            );
+                        },
+                        Header: `>=${dealerStandingScore}`,
+                        id: 'equal-or-higher'
+                    },
+                    {
+                        Cell: (cellProps: CellProps<Hand>) => {
+                            const handScores = getHandScores(cellProps.row.original);
+                            return cellProps.row.original.score < maximumScore ? (
+                                <RoundedFloat
+                                    value={props.handsNextCardProbabilities[handScores].overMaximum}
+                                />
+                            ) : (
+                                '-'
+                            );
+                        },
+                        Header: `>${maximumScore}`,
+                        id: 'over-maximum'
+                    }
+                ],
+                Header: 'Next card',
+                id: 'next-card-probabilities'
             }
         ];
 
-        const data = props.hands
+        const data = props.rootHands
             .map((hand) => getHandRows(hand, expandedRows))
             .reduce((reduced, row) => reduced.concat(row), []);
 
         return { columns, data };
-    }, [expandedRows, props.hands]);
+    }, [expandedRows, props.rootHands]);
 
     return <CustomTable columns={columns} data={data} />;
 };

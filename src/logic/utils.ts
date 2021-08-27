@@ -10,15 +10,15 @@ export const cartesianProduct = <T, U, R>(
     }, []);
 };
 
-export const getValidValues = (values: number[]) => {
-    const validValues = values.filter((x) => x <= maximumScore);
-    return validValues.length > 0 ? validValues : [values[0]];
+export const getValidScores = (scores: number[]) => {
+    const validScores = scores.filter((x) => x <= maximumScore);
+    return validScores.length > 0 ? validScores : [scores[0]];
 };
 
-export const removeDuplicates = <T>(values: T[]) => {
-    for (let i = values.length; i > 0; --i) {
-        if (values[i] === values[i - 1]) {
-            values.splice(i, 1);
+export const removeDuplicates = <T>(items: T[]) => {
+    for (let i = items.length; i > 0; --i) {
+        if (items[i] === items[i - 1]) {
+            items.splice(i, 1);
         }
     }
 };

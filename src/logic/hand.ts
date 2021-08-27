@@ -1,10 +1,10 @@
 import { CardOutcome, Dictionary, Hand } from '../types';
 import { maximumScore } from './constants';
-import { cartesianProduct, getValidValues, removeDuplicates } from './utils';
+import { cartesianProduct, getValidScores, removeDuplicates } from './utils';
 
-const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined) => {
-    const handValues = previousHand
-        ? getHandNextValues(previousHand.values, cardOutcome.values)
+const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): Hand => {
+    const handScores = previousHand
+        ? getHandNextScores(previousHand.scores, cardOutcome.values)
         : cardOutcome.values;
 
     return {
@@ -13,12 +13,12 @@ const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined) =>
             : [cardOutcome.symbol],
         followingHands: [],
         lastCard: cardOutcome,
-        value: getHandValue(handValues),
-        values: handValues
+        score: getHandScore(handScores),
+        scores: handScores
     };
 };
 
-export const getAllHands = (cardOutcomes: CardOutcome[]): Hand[] => {
+export const getAllHands = (cardOutcomes: CardOutcome[]) => {
     const rootHands: Hand[] = cardOutcomes.map((cardOutcome) => createHand(cardOutcome, undefined));
 
     const handsDictionary: Dictionary<Hand> = {};
@@ -36,7 +36,7 @@ export const getAllHands = (cardOutcomes: CardOutcome[]): Hand[] => {
 
                 hand.followingHands.push(followingHand);
 
-                if (followingHand.value < maximumScore) {
+                if (followingHand.score < maximumScore) {
                     handsQueue.push(followingHand);
                 }
             });
@@ -45,24 +45,32 @@ export const getAllHands = (cardOutcomes: CardOutcome[]): Hand[] => {
         }
     }
 
-    return rootHands;
-};
-
-export const getHandNextValues = (previousValues: number[], nextValues: number[]) => {
-    const possibleValues = cartesianProduct(previousValues, nextValues, (x, y) => x + y).sort(
-        (a, b) => a - b
-    );
-
-    removeDuplicates(possibleValues);
-
-    return getValidValues(possibleValues);
-};
-
-export const getHandValue = (values: number[]) => {
-    return [...values].reverse().find((x) => x <= maximumScore) || values[0];
+    return { handsDictionary, rootHands };
 };
 
 export const getHandKey = (hand: Hand) => {
     const sortedSymbols = [...hand.cardSymbols].sort();
     return sortedSymbols.join(',');
+};
+
+const getHandNextScores = (previousScores: number[], nextValues: number[]) => {
+    const possibleScores = cartesianProduct(previousScores, nextValues, (x, y) => x + y).sort(
+        (a, b) => a - b
+    );
+
+    removeDuplicates(possibleScores);
+
+    return getValidScores(possibleScores);
+};
+
+export const getHandSymbols = (hand: Hand) => {
+    return hand.cardSymbols.join(',');
+};
+
+const getHandScore = (scores: number[]) => {
+    return [...scores].reverse().find((x) => x <= maximumScore) || scores[0];
+};
+
+export const getHandScores = (hand: Hand) => {
+    return hand.scores.join('/');
 };
