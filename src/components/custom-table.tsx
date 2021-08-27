@@ -47,7 +47,8 @@ export const CustomTable = <T extends {}>(props: CustomTableProps<T>) => {
                                         style={{
                                             padding: 4,
                                             paddingBottom: 8,
-                                            paddingTop: 8
+                                            paddingTop: 8,
+                                            textAlign: 'center'
                                         }}
                                         key={row.id + '-' + cell.column.id}
                                     >
