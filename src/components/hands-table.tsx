@@ -1,7 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
-import { getHandScores, getHandSymbols } from '../logic/hand';
+import { getHandProbabilities, getHandScores, getHandSymbols } from '../logic/hand';
 import { Dictionary, Hand, HandProbabilities } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
@@ -99,12 +99,15 @@ export const HandsTable = (props: HandsTableProps) => {
                 columns: [
                     {
                         Cell: (cellProps: CellProps<Hand>) => {
-                            const handScores = getHandScores(cellProps.row.original);
+                            const handProbabilities = getHandProbabilities(
+                                cellProps.row.original,
+                                props.handsNextCardProbabilities
+                            );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
                                     value={
-                                        props.handsNextCardProbabilities[handScores]
-                                            .opponentRelative.lower
+                                        handProbabilities.opponentRelative[dealerStandingScore]
+                                            .lower
                                     }
                                 />
                             ) : (
@@ -116,14 +119,17 @@ export const HandsTable = (props: HandsTableProps) => {
                     },
                     {
                         Cell: (cellProps: CellProps<Hand>) => {
-                            const handScores = getHandScores(cellProps.row.original);
+                            const handProbabilities = getHandProbabilities(
+                                cellProps.row.original,
+                                props.handsNextCardProbabilities
+                            );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
                                     value={
-                                        props.handsNextCardProbabilities[handScores]
-                                            .opponentRelative.equal +
-                                        props.handsNextCardProbabilities[handScores]
-                                            .opponentRelative.higher
+                                        handProbabilities.opponentRelative[dealerStandingScore]
+                                            .equal +
+                                        handProbabilities.opponentRelative[dealerStandingScore]
+                                            .higher
                                     }
                                 />
                             ) : (
@@ -135,11 +141,12 @@ export const HandsTable = (props: HandsTableProps) => {
                     },
                     {
                         Cell: (cellProps: CellProps<Hand>) => {
-                            const handScores = getHandScores(cellProps.row.original);
+                            const handProbabilities = getHandProbabilities(
+                                cellProps.row.original,
+                                props.handsNextCardProbabilities
+                            );
                             return cellProps.row.original.score < maximumScore ? (
-                                <RoundedFloat
-                                    value={props.handsNextCardProbabilities[handScores].overMaximum}
-                                />
+                                <RoundedFloat value={handProbabilities.overMaximum} />
                             ) : (
                                 '-'
                             );
