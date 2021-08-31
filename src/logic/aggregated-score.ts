@@ -1,5 +1,12 @@
-import { AggregatedScore, Dictionary, Hand } from '../types';
+import { AggregatedScore, Dictionary, Hand, HandProbabilities } from '../types';
 import { getHandScores, getHandSymbols } from './hand';
+
+export const getAggregatedScoreProbabilities = (
+    aggregatedScore: AggregatedScore,
+    handsProbabilities: Dictionary<HandProbabilities>
+) => {
+    return handsProbabilities[aggregatedScore.scores];
+};
 
 export const getAggregatedScores = (hands: Dictionary<Hand>): Dictionary<AggregatedScore> => {
     const aggregatedScores: Dictionary<AggregatedScore> = {};

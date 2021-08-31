@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react';
 import { CellProps, Column } from 'react-table';
+import { getAggregatedScoreProbabilities } from '../logic/aggregated-score';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
 import { AggregatedScore, Dictionary, HandProbabilities } from '../types';
 import { CustomTable } from './custom-table';
@@ -33,15 +34,16 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
             {
                 columns: [
                     {
-                        accessor: 'scores',
-                        Cell: (
-                            cellProps: CellProps<AggregatedScore, AggregatedScore['scores']>
-                        ) => {
+                        Cell: (cellProps: CellProps<AggregatedScore>) => {
+                            const scoreProbabilities = getAggregatedScoreProbabilities(
+                                cellProps.row.original,
+                                props.handsNextCardProbabilities
+                            );
                             return (
                                 <RoundedFloat
                                     value={
-                                        props.handsNextCardProbabilities[cellProps.value]
-                                            .opponentRelative.lower
+                                        scoreProbabilities.opponentRelative[dealerStandingScore]
+                                            .lower
                                     }
                                 />
                             );
@@ -50,17 +52,18 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         id: 'lower'
                     },
                     {
-                        accessor: 'scores',
-                        Cell: (
-                            cellProps: CellProps<AggregatedScore, AggregatedScore['scores']>
-                        ) => {
+                        Cell: (cellProps: CellProps<AggregatedScore>) => {
+                            const scoreProbabilities = getAggregatedScoreProbabilities(
+                                cellProps.row.original,
+                                props.handsNextCardProbabilities
+                            );
                             return (
                                 <RoundedFloat
                                     value={
-                                        props.handsNextCardProbabilities[cellProps.value]
-                                            .opponentRelative.equal +
-                                        props.handsNextCardProbabilities[cellProps.value]
-                                            .opponentRelative.higher
+                                        scoreProbabilities.opponentRelative[dealerStandingScore]
+                                            .equal +
+                                        scoreProbabilities.opponentRelative[dealerStandingScore]
+                                            .higher
                                     }
                                 />
                             );
@@ -69,18 +72,12 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         id: 'equal-or-higher'
                     },
                     {
-                        accessor: 'scores',
-                        Cell: (
-                            cellProps: CellProps<AggregatedScore, AggregatedScore['scores']>
-                        ) => {
-                            return (
-                                <RoundedFloat
-                                    value={
-                                        props.handsNextCardProbabilities[cellProps.value]
-                                            .overMaximum
-                                    }
-                                />
+                        Cell: (cellProps: CellProps<AggregatedScore>) => {
+                            const scoreProbabilities = getAggregatedScoreProbabilities(
+                                cellProps.row.original,
+                                props.handsNextCardProbabilities
                             );
+                            return <RoundedFloat value={scoreProbabilities.overMaximum} />;
                         },
                         Header: `>${maximumScore}`,
                         id: 'over-maximum'
