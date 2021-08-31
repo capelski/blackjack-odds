@@ -19,6 +19,10 @@ export const getAllCardOutcomes = (): CardOutcome[] => {
     ];
 };
 
+export const getCardOutcomeScores = (cardOutcome: CardOutcome) => {
+    return cardOutcome.values.join('/');
+};
+
 export const getCardOutcomesWeight = (cardOutcomes: CardOutcome[]) => {
     return cardOutcomes.reduce((reduced, next) => reduced + next.weight, 0);
 };

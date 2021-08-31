@@ -1,6 +1,7 @@
+import { Dictionary } from './dictionary';
 import { RelativeProbabilities } from './relative-probabilities';
 
 export type HandProbabilities = {
-    opponentRelative: RelativeProbabilities;
+    opponentRelative: Dictionary<RelativeProbabilities>;
     overMaximum: number;
 };
