@@ -105,10 +105,7 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
-                                    value={
-                                        handProbabilities.opponentRelative[dealerStandingScore]
-                                            .lower
-                                    }
+                                    value={handProbabilities.lower[dealerStandingScore]}
                                 />
                             ) : (
                                 '-'
@@ -126,10 +123,8 @@ export const HandsTable = (props: HandsTableProps) => {
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
                                     value={
-                                        handProbabilities.opponentRelative[dealerStandingScore]
-                                            .equal +
-                                        handProbabilities.opponentRelative[dealerStandingScore]
-                                            .higher
+                                        handProbabilities.equal[dealerStandingScore] +
+                                        handProbabilities.higher[dealerStandingScore]
                                     }
                                 />
                             ) : (

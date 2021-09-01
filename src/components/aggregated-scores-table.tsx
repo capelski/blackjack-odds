@@ -41,10 +41,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                             return (
                                 <RoundedFloat
-                                    value={
-                                        scoreProbabilities.opponentRelative[dealerStandingScore]
-                                            .lower
-                                    }
+                                    value={scoreProbabilities.lower[dealerStandingScore]}
                                 />
                             );
                         },
@@ -60,10 +57,8 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             return (
                                 <RoundedFloat
                                     value={
-                                        scoreProbabilities.opponentRelative[dealerStandingScore]
-                                            .equal +
-                                        scoreProbabilities.opponentRelative[dealerStandingScore]
-                                            .higher
+                                        scoreProbabilities.equal[dealerStandingScore] +
+                                        scoreProbabilities.higher[dealerStandingScore]
                                     }
                                 />
                             );

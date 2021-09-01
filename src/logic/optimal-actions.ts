@@ -35,8 +35,7 @@ export const getOptimalActions = (
         cardOutcomes.forEach((cardOutcome) => {
             const hittingLoss = scoreProbabilities.overMaximum;
             const standingLoss =
-                cardsProbabilities[cardOutcome.symbol].opponentRelative[aggregatedScore.score]
-                    .higher;
+                cardsProbabilities[cardOutcome.symbol].higher[aggregatedScore.score];
 
             optimalActions[aggregatedScore.scores][cardOutcome.symbol] =
                 standingLoss <= hittingLoss ? Action.Standing : Action.Hitting;

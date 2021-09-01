@@ -1,6 +1,8 @@
-import { OpponentProbabilities } from './opponent-probabilities';
+import { RelativeProbabilities } from './relative-probabilities';
 
 export type HandProbabilities = {
-    opponentRelative: OpponentProbabilities;
+    equal: RelativeProbabilities;
+    higher: RelativeProbabilities;
+    lower: RelativeProbabilities;
     overMaximum: number;
 };
