@@ -3,11 +3,15 @@ import { maximumScore } from './constants';
 import { getHandScores } from './hand';
 import { createRelativeProbabilities, mergeRelativeProbabilities } from './relative-probabilities';
 
-const createHandProbabilities = (
-    aggregatedScores: Dictionary<AggregatedScore>,
-    hand: Hand | undefined,
-    outcomesWeight: number
-): HandProbabilities => {
+const createHandProbabilities = ({
+    aggregatedScores,
+    hand,
+    outcomesWeight
+}: {
+    aggregatedScores: Dictionary<AggregatedScore>;
+    hand: Hand | undefined;
+    outcomesWeight: number;
+}): HandProbabilities => {
     return {
         equal: createRelativeProbabilities(aggregatedScores, (score) =>
             hand === undefined
@@ -45,14 +49,18 @@ export const getHandsNextCardProbabilities = (
     Object.values(hands).forEach((hand) => {
         if (handsProbabilities[getHandScores(hand)] === undefined) {
             const followingHandsData = hand.followingHands.map((followingHand) => {
-                return createHandProbabilities(aggregatedScores, followingHand, outcomesWeight);
+                return createHandProbabilities({
+                    aggregatedScores,
+                    hand: followingHand,
+                    outcomesWeight
+                });
             });
 
             handsProbabilities[getHandScores(hand)] = followingHandsData.reduce<HandProbabilities>(
                 (reduced, next) => {
                     return mergeHandProbabilities(reduced, next);
                 },
-                createHandProbabilities(aggregatedScores, undefined, outcomesWeight)
+                createHandProbabilities({ aggregatedScores, hand: undefined, outcomesWeight })
             );
         }
     });
