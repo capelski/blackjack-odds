@@ -1,45 +1,39 @@
-import {
-    AggregatedScore,
-    Dictionary,
-    Hand,
-    HandProbabilities,
-    RelativeProbabilities
-} from '../types';
+import { AggregatedScore, Dictionary, Hand, HandProbabilities } from '../types';
 import { maximumScore } from './constants';
 import { getHandScores } from './hand';
+import { createOpponentProbabilities, mergeOpponentProbabilities } from './opponent-probabilities';
 
 const createHandProbabilities = (
     aggregatedScores: Dictionary<AggregatedScore>,
-    handProbabilities: HandProbabilities | undefined
+    hand: Hand | undefined,
+    outcomesWeight: number
 ): HandProbabilities => {
-    return {
-        opponentRelative: Object.values(aggregatedScores).reduce<Dictionary<RelativeProbabilities>>(
-            (reduced, next) => {
-                // TODO Create separate objects for soft scores
-                const opponentRelative: RelativeProbabilities = reduced[next.score] || {
-                    equal:
-                        handProbabilities === undefined
-                            ? 0
-                            : handProbabilities.opponentRelative[next.score].equal,
-                    higher:
-                        handProbabilities === undefined
-                            ? 0
-                            : handProbabilities.opponentRelative[next.score].higher,
-                    lower:
-                        handProbabilities === undefined
-                            ? 0
-                            : handProbabilities.opponentRelative[next.score].lower,
-                    score: next.score
-                };
-                return {
-                    ...reduced,
-                    [next.score]: opponentRelative
-                };
-            },
-            {}
-        ),
-        overMaximum: handProbabilities === undefined ? 0 : handProbabilities.overMaximum
-    };
+    return hand === undefined
+        ? {
+              opponentRelative: createOpponentProbabilities(aggregatedScores, (score) => {
+                  return {
+                      equal: 0,
+                      higher: 0,
+                      lower: 0,
+                      score
+                  };
+              }),
+              overMaximum: 0
+          }
+        : {
+              opponentRelative: createOpponentProbabilities(aggregatedScores, (score) => {
+                  return {
+                      equal: hand.score === score ? hand.lastCard.weight / outcomesWeight : 0,
+                      higher:
+                          hand.score <= maximumScore && hand.score > score
+                              ? hand.lastCard.weight / outcomesWeight
+                              : 0,
+                      lower: hand.score < score ? hand.lastCard.weight / outcomesWeight : 0,
+                      score
+                  };
+              }),
+              overMaximum: hand.score > maximumScore ? hand.lastCard.weight / outcomesWeight : 0
+          };
 };
 
 export const getHandsNextCardProbabilities = (
@@ -51,43 +45,25 @@ export const getHandsNextCardProbabilities = (
 
     Object.values(hands).forEach((hand) => {
         if (handsProbabilities[getHandScores(hand)] === undefined) {
-            handsProbabilities[getHandScores(hand)] = hand.followingHands.reduce<HandProbabilities>(
-                (reducedFollowingHands, followingHand) => {
-                    const nextReducedFollowingHands = createHandProbabilities(
-                        aggregatedScores,
-                        reducedFollowingHands
-                    );
+            const followingHandsData = hand.followingHands.map((followingHand) => {
+                return createHandProbabilities(aggregatedScores, followingHand, outcomesWeight);
+            });
 
-                    // TODO Consider soft scores when available
-                    nextReducedFollowingHands.overMaximum +=
-                        followingHand.score > maximumScore
-                            ? followingHand.lastCard.weight / outcomesWeight
-                            : 0;
-
-                    Object.values(nextReducedFollowingHands.opponentRelative).forEach(
-                        (opponentRelative) => {
-                            (opponentRelative.equal +=
-                                followingHand.score === opponentRelative.score
-                                    ? followingHand.lastCard.weight / outcomesWeight
-                                    : 0),
-                                (opponentRelative.higher +=
-                                    followingHand.score <= maximumScore &&
-                                    followingHand.score > opponentRelative.score
-                                        ? followingHand.lastCard.weight / outcomesWeight
-                                        : 0),
-                                (opponentRelative.lower +=
-                                    followingHand.score < opponentRelative.score
-                                        ? followingHand.lastCard.weight / outcomesWeight
-                                        : 0);
-                        }
-                    );
-
-                    return nextReducedFollowingHands;
+            handsProbabilities[getHandScores(hand)] = followingHandsData.reduce<HandProbabilities>(
+                (reduced, next) => {
+                    return mergeHandProbabilities(reduced, next);
                 },
-                createHandProbabilities(aggregatedScores, undefined)
+                createHandProbabilities(aggregatedScores, undefined, outcomesWeight)
             );
         }
     });
 
     return handsProbabilities;
+};
+
+const mergeHandProbabilities = (a: HandProbabilities, b: HandProbabilities): HandProbabilities => {
+    return {
+        opponentRelative: mergeOpponentProbabilities(a.opponentRelative, b.opponentRelative),
+        overMaximum: a.overMaximum + b.overMaximum
+    };
 };
