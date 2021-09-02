@@ -1,15 +1,22 @@
-import { AllAggregatedScores, RelativeProbabilities } from '../types';
+import { AggregatedScore, AllAggregatedScores, RelativeProbabilities } from '../types';
 
 export const createRelativeProbabilities = (
     aggregatedScores: AllAggregatedScores,
-    probabilityGetter: (score: number) => number
+    probabilityGetter: (aggregatedScore: AggregatedScore) => number
 ): RelativeProbabilities => {
     return Object.values(aggregatedScores).reduce<RelativeProbabilities>((reduced, next) => {
         return {
             ...reduced,
-            [next.scores]: probabilityGetter(next.score)
+            [next.scores]: probabilityGetter(next)
         };
     }, {});
+};
+
+export const getScoreRelativeProbabilities = (
+    relativeProbabilities: RelativeProbabilities,
+    score: number | AggregatedScore
+) => {
+    return relativeProbabilities[typeof score === 'number' ? String(score) : score.scores];
 };
 
 export const mergeRelativeProbabilities = (

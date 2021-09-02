@@ -3,6 +3,11 @@ import { CellProps, Column } from 'react-table';
 import { getHandProbabilities } from '../logic/all-hands-probabilities';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
 import { getHandScores, getHandSymbols } from '../logic/hand';
+import {
+    getEqualToScoreProbability,
+    getHigherThanScoreProbability,
+    getLowerThanScoreProbability
+} from '../logic/hand-probabilities';
 import { AllHandsProbabilities, ExpandedRows, Hand } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
@@ -106,7 +111,10 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
-                                    value={handProbabilities.lower[dealerStandingScore]}
+                                    value={getLowerThanScoreProbability(
+                                        handProbabilities,
+                                        dealerStandingScore
+                                    )}
                                 />
                             ) : (
                                 '-'
@@ -124,8 +132,14 @@ export const HandsTable = (props: HandsTableProps) => {
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
                                     value={
-                                        handProbabilities.equal[dealerStandingScore] +
-                                        handProbabilities.higher[dealerStandingScore]
+                                        getEqualToScoreProbability(
+                                            handProbabilities,
+                                            dealerStandingScore
+                                        ) +
+                                        getHigherThanScoreProbability(
+                                            handProbabilities,
+                                            dealerStandingScore
+                                        )
                                     }
                                 />
                             ) : (

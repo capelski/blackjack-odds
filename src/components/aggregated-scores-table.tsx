@@ -2,6 +2,11 @@ import React, { useMemo } from 'react';
 import { CellProps, Column } from 'react-table';
 import { getAggregatedScoreProbabilities } from '../logic/all-hands-probabilities';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
+import {
+    getEqualToScoreProbability,
+    getHigherThanScoreProbability,
+    getLowerThanScoreProbability
+} from '../logic/hand-probabilities';
 import { AggregatedScore, AllAggregatedScores, AllHandsProbabilities } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
@@ -41,7 +46,10 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                             return (
                                 <RoundedFloat
-                                    value={scoreProbabilities.lower[dealerStandingScore]}
+                                    value={getLowerThanScoreProbability(
+                                        scoreProbabilities,
+                                        dealerStandingScore
+                                    )}
                                 />
                             );
                         },
@@ -57,8 +65,14 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             return (
                                 <RoundedFloat
                                     value={
-                                        scoreProbabilities.equal[dealerStandingScore] +
-                                        scoreProbabilities.higher[dealerStandingScore]
+                                        getEqualToScoreProbability(
+                                            scoreProbabilities,
+                                            dealerStandingScore
+                                        ) +
+                                        getHigherThanScoreProbability(
+                                            scoreProbabilities,
+                                            dealerStandingScore
+                                        )
                                     }
                                 />
                             );

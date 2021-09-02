@@ -1,7 +1,11 @@
-import { AllAggregatedScores, Hand, HandProbabilities } from '../types';
+import { AggregatedScore, AllAggregatedScores, Hand, HandProbabilities } from '../types';
 import { maximumScore } from './constants';
 import { isHandBelowStandingScore } from './hand';
-import { createRelativeProbabilities, mergeRelativeProbabilities } from './relative-probabilities';
+import {
+    createRelativeProbabilities,
+    getScoreRelativeProbabilities,
+    mergeRelativeProbabilities
+} from './relative-probabilities';
 
 export const createEmptyHandProbabilities = ({
     aggregatedScores
@@ -35,31 +39,32 @@ export const createPartialHandProbabilities = ({
     return {
         equal: createRelativeProbabilities(
             aggregatedScores,
-            (score) =>
+            (aggregatedScore) =>
                 nextCardWeight! *
                 (isBelowStandingScore
-                    ? followingHandProbabilities.equal[score]
-                    : followingHand.score === score
+                    ? getEqualToScoreProbability(followingHandProbabilities, aggregatedScore)
+                    : followingHand.score === aggregatedScore.score
                     ? 1
                     : 0)
         ),
         higher: createRelativeProbabilities(
             aggregatedScores,
-            (score) =>
+            (aggregatedScore) =>
                 nextCardWeight! *
                 (isBelowStandingScore
-                    ? followingHandProbabilities.higher[score]
-                    : followingHand.score <= maximumScore && followingHand.score > score
+                    ? getHigherThanScoreProbability(followingHandProbabilities, aggregatedScore)
+                    : followingHand.score <= maximumScore &&
+                      followingHand.score > aggregatedScore.score
                     ? 1
                     : 0)
         ),
         lower: createRelativeProbabilities(
             aggregatedScores,
-            (score) =>
+            (aggregatedScore) =>
                 nextCardWeight! *
                 (isBelowStandingScore
-                    ? followingHandProbabilities.lower[score]
-                    : followingHand.score < score
+                    ? getLowerThanScoreProbability(followingHandProbabilities, aggregatedScore)
+                    : followingHand.score < aggregatedScore.score
                     ? 1
                     : 0)
         ),
@@ -71,6 +76,27 @@ export const createPartialHandProbabilities = ({
                 ? 1
                 : 0)
     };
+};
+
+export const getEqualToScoreProbability = (
+    handProbabilities: HandProbabilities,
+    score: number | AggregatedScore
+) => {
+    return getScoreRelativeProbabilities(handProbabilities.equal, score);
+};
+
+export const getHigherThanScoreProbability = (
+    handProbabilities: HandProbabilities,
+    score: number | AggregatedScore
+) => {
+    return getScoreRelativeProbabilities(handProbabilities.higher, score);
+};
+
+export const getLowerThanScoreProbability = (
+    handProbabilities: HandProbabilities,
+    score: number | AggregatedScore
+) => {
+    return getScoreRelativeProbabilities(handProbabilities.lower, score);
 };
 
 export const mergeHandProbabilities = (
