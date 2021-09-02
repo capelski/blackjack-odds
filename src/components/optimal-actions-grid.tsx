@@ -39,29 +39,32 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                     </span>
                 ))}
             </div>
-            {Object.keys(props.optimalActions).map((scoreKey) => {
+            {Object.values(props.optimalActions).map((scoreOptimalActions) => {
+                const displayScores = scoreOptimalActions.aggregatedScore.scores;
+
                 return (
-                    <div key={scoreKey} style={{ display: 'flex', width: '100%' }}>
+                    <div key={displayScores} style={{ display: 'flex', width: '100%' }}>
                         <span
                             style={{
                                 ...spanStyle,
                                 borderLeft: '1px solid black'
                             }}
                         >
-                            {scoreKey}
+                            {displayScores}
                         </span>
-                        {Object.keys(props.optimalActions[scoreKey]).map((key) => (
-                            <span
-                                style={{
-                                    ...spanStyle,
-                                    backgroundColor:
-                                        actionColors[props.optimalActions[scoreKey][key]]
-                                }}
-                                key={key}
-                            >
-                                {props.optimalActions[scoreKey][key].substring(0, 1)}
-                            </span>
-                        ))}
+                        {Object.values(scoreOptimalActions.actions).map((optimalAction) => {
+                            return (
+                                <span
+                                    style={{
+                                        ...spanStyle,
+                                        backgroundColor: actionColors[optimalAction.playerAction]
+                                    }}
+                                    key={optimalAction.dealerCard.symbol}
+                                >
+                                    {optimalAction.playerAction.substring(0, 1)}
+                                </span>
+                            );
+                        })}
                     </div>
                 );
             })}

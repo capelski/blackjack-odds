@@ -28,7 +28,10 @@ export const getOptimalActions = ({
             aggregatedScore,
             playerProbabilities
         );
-        optimalActions[aggregatedScore.scores] = {};
+        optimalActions[aggregatedScore.scores] = {
+            actions: {},
+            aggregatedScore: aggregatedScore
+        };
 
         cardOutcomes.forEach((cardOutcome) => {
             const dealerCardProbabilities = getCardOutcomeProbabilities(
@@ -43,9 +46,12 @@ export const getOptimalActions = ({
                 playerScoreProbabilities.equal[aggregatedScore.score];
             const standingLoss = dealerCardProbabilities.higher[aggregatedScore.score];
 
-            optimalActions[aggregatedScore.scores][cardOutcome.symbol] =
-                standingLoss <= hittingLoss ? Action.Standing : Action.Hitting;
+            optimalActions[aggregatedScore.scores].actions[cardOutcome.symbol] = {
+                dealerCard: cardOutcome,
+                playerAction: standingLoss <= hittingLoss ? Action.Standing : Action.Hitting
+            };
         });
     });
+
     return optimalActions;
 };
