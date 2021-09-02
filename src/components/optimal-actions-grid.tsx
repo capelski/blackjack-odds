@@ -1,13 +1,30 @@
-import React, { CSSProperties } from 'react';
+import React, { CSSProperties, useState } from 'react';
+import {
+    getAggregatedScoreProbabilities,
+    getCardOutcomeProbabilities
+} from '../logic/all-hands-probabilities';
 import { actionColors } from '../logic/constants';
-import { CardOutcome, OptimalActions } from '../types';
+import {
+    getEqualToScoreProbability,
+    getLowerThanScoreProbability
+} from '../logic/hand-probabilities';
+import {
+    getAggregatedScoreHittingLoss,
+    getAggregatedScoreStandingLoss
+} from '../logic/optimal-actions';
+import { AllHandsProbabilities, CardOutcome, ExpandedRows, OptimalActions } from '../types';
+import { RoundedFloat } from './rounded-float';
 
 interface OptimalActionsGridProps {
     cardOutcomes: CardOutcome[];
+    dealerProbabilities: AllHandsProbabilities;
     optimalActions: OptimalActions;
+    playerProbabilities: AllHandsProbabilities;
 }
 
 export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => {
+    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+
     const spanStyle: CSSProperties = {
         borderBottom: '1px solid black',
         borderRight: '1px solid black',
@@ -41,6 +58,11 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
             </div>
             {Object.values(props.optimalActions).map((scoreOptimalActions) => {
                 const displayScores = scoreOptimalActions.aggregatedScore.scores;
+                const aggregatedScoreProbabilities = getAggregatedScoreProbabilities(
+                    scoreOptimalActions.aggregatedScore,
+                    props.playerProbabilities
+                );
+                const isRowExpanded = expandedRows[displayScores];
 
                 return (
                     <div key={displayScores} style={{ display: 'flex', width: '100%' }}>
@@ -51,8 +73,24 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                             }}
                         >
                             {displayScores}
+                            <span
+                                onClick={() => {
+                                    setExpandedRows({
+                                        ...expandedRows,
+                                        [displayScores]: !isRowExpanded
+                                    });
+                                }}
+                                style={{ cursor: 'pointer' }}
+                            >
+                                {isRowExpanded ? '✖️' : '👁️'}
+                            </span>
                         </span>
                         {Object.values(scoreOptimalActions.actions).map((optimalAction) => {
+                            const cardProbabilities = getCardOutcomeProbabilities(
+                                optimalAction.dealerCard,
+                                props.dealerProbabilities
+                            );
+
                             return (
                                 <span
                                     style={{
@@ -62,6 +100,46 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                     key={optimalAction.dealerCard.symbol}
                                 >
                                     {optimalAction.playerAction.substring(0, 1)}
+                                    {isRowExpanded && (
+                                        <React.Fragment>
+                                            <br />
+                                            <br />
+                                            H. loss:
+                                            <RoundedFloat
+                                                value={aggregatedScoreProbabilities.overMaximum}
+                                            />
+                                            <br />
+                                            H. less:
+                                            <RoundedFloat
+                                                value={
+                                                    getLowerThanScoreProbability(
+                                                        aggregatedScoreProbabilities,
+                                                        scoreOptimalActions.aggregatedScore
+                                                    ) +
+                                                    getEqualToScoreProbability(
+                                                        aggregatedScoreProbabilities,
+                                                        scoreOptimalActions.aggregatedScore
+                                                    )
+                                                }
+                                            />
+                                            <br />
+                                            H. worst:
+                                            <RoundedFloat
+                                                value={getAggregatedScoreHittingLoss(
+                                                    scoreOptimalActions.aggregatedScore,
+                                                    aggregatedScoreProbabilities
+                                                )}
+                                            />
+                                            <br />
+                                            S. loss:
+                                            <RoundedFloat
+                                                value={getAggregatedScoreStandingLoss(
+                                                    scoreOptimalActions.aggregatedScore,
+                                                    cardProbabilities
+                                                )}
+                                            />
+                                        </React.Fragment>
+                                    )}
                                 </span>
                             );
                         })}

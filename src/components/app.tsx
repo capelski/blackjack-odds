@@ -37,7 +37,12 @@ export const App: React.FC = () => {
     return (
         <div>
             <h3>Optimal actions</h3>
-            <OptimalActionsGrid cardOutcomes={cardOutcomes} optimalActions={optimalActions} />
+            <OptimalActionsGrid
+                cardOutcomes={cardOutcomes}
+                dealerProbabilities={dealerProbabilities}
+                optimalActions={optimalActions}
+                playerProbabilities={playerNextCardProbabilities}
+            />
 
             <h3>Scores table</h3>
             <AggregatedScoresTable
