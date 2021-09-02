@@ -65,7 +65,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                                 <React.Fragment>
                                     <br />
                                     {cellProps.value.map((combination) => (
-                                        <React.Fragment>
+                                        <React.Fragment key={combination}>
                                             <br />
                                             <span>{combination}</span>
                                         </React.Fragment>
