@@ -72,7 +72,7 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                 borderLeft: '1px solid black'
                             }}
                         >
-                            {displayScores}
+                            {displayScores}{' '}
                             <span
                                 onClick={() => {
                                     setExpandedRows({
