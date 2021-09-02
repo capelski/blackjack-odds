@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
 import { getAggregatedScoreProbabilities } from '../logic/all-hands-probabilities';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
@@ -7,7 +7,12 @@ import {
     getHigherThanScoreProbability,
     getLowerThanScoreProbability
 } from '../logic/hand-probabilities';
-import { AggregatedScore, AllAggregatedScores, AllHandsProbabilities } from '../types';
+import {
+    AggregatedScore,
+    AllAggregatedScores,
+    AllHandsProbabilities,
+    ExpandedRows
+} from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
@@ -18,12 +23,33 @@ interface AggregatedScoresTableProps {
 }
 
 export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
+    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+
     const columns = useMemo(
         (): Column<AggregatedScore>[] => [
             {
                 accessor: 'scores',
                 Cell: (cellProps: CellProps<AggregatedScore, AggregatedScore['scores']>) => {
-                    return <span>{cellProps.value}</span>;
+                    const isRowExpanded = expandedRows[cellProps.value];
+
+                    return (
+                        <span>
+                            {cellProps.value}{' '}
+                            <span
+                                onClick={() => {
+                                    setExpandedRows({
+                                        ...expandedRows,
+                                        [cellProps.value]: !isRowExpanded
+                                    });
+                                }}
+                                style={{
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {isRowExpanded ? '✖️' : '👁️'}
+                            </span>
+                        </span>
+                    );
                 },
                 Header: 'Score',
                 id: 'score'
@@ -31,7 +57,23 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
             {
                 accessor: 'combinations',
                 Cell: (cellProps: CellProps<AggregatedScore, AggregatedScore['combinations']>) => {
-                    return <span>{cellProps.value.length}</span>;
+                    const isRowExpanded = expandedRows[cellProps.row.original.scores];
+                    return (
+                        <span>
+                            {cellProps.value.length}
+                            {isRowExpanded && (
+                                <React.Fragment>
+                                    <br />
+                                    {cellProps.value.map((combination) => (
+                                        <React.Fragment>
+                                            <br />
+                                            <span>{combination}</span>
+                                        </React.Fragment>
+                                    ))}
+                                </React.Fragment>
+                            )}
+                        </span>
+                    );
                 },
                 Header: 'Combinations',
                 id: 'combinations'
@@ -96,12 +138,12 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                 id: 'next-card-probabilities'
             }
         ],
-        [props.handsNextCardProbabilities, props.aggregatedScores]
+        [expandedRows, props.handsNextCardProbabilities, props.aggregatedScores]
     );
 
     const data = useMemo(() => {
         return Object.values(props.aggregatedScores).sort((a, b) => a.score - b.score);
-    }, [props.aggregatedScores]);
+    }, [expandedRows, props.handsNextCardProbabilities, props.aggregatedScores]);
 
     return <CustomTable columns={columns} data={data} />;
 };
