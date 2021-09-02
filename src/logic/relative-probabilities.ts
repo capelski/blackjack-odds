@@ -1,13 +1,13 @@
-import { Dictionary, AggregatedScore, RelativeProbabilities } from '../types';
+import { AllAggregatedScores, RelativeProbabilities } from '../types';
 
 export const createRelativeProbabilities = (
-    aggregatedScores: Dictionary<AggregatedScore>,
-    opponentRelativeGetter: (score: number) => number
+    aggregatedScores: AllAggregatedScores,
+    probabilityGetter: (score: number) => number
 ): RelativeProbabilities => {
     return Object.values(aggregatedScores).reduce<RelativeProbabilities>((reduced, next) => {
         return {
             ...reduced,
-            [next.scores]: opponentRelativeGetter(next.score)
+            [next.scores]: probabilityGetter(next.score)
         };
     }, {});
 };

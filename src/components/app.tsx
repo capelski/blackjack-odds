@@ -1,5 +1,5 @@
 import React from 'react';
-import { getAggregatedScores } from '../logic/aggregated-score';
+import { getAllAggregatedScores } from '../logic/all-aggregated-scores';
 import { getAllCardOutcomes, getCardOutcomesWeight } from '../logic/card-outcome';
 import { dealerStandingScore } from '../logic/constants';
 import { getAllHands } from '../logic/hand';
@@ -14,7 +14,7 @@ export const App: React.FC = () => {
     const hands = getAllHands(cardOutcomes);
     const outcomesWeight = getCardOutcomesWeight(cardOutcomes);
 
-    const aggregatedScores = getAggregatedScores(hands.handsDictionary);
+    const aggregatedScores = getAllAggregatedScores(hands.handsDictionary);
     const handsNextCardProbabilities = getHandsProbabilities(
         aggregatedScores,
         hands.handsDictionary,

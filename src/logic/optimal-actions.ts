@@ -1,16 +1,16 @@
 import {
     Action,
-    AggregatedScore,
+    AllAggregatedScores,
     CardOutcome,
     Dictionary,
     HandProbabilities,
     OptimalActions
 } from '../types';
-import { getAggregatedScoreProbabilities } from './aggregated-score';
+import { getAggregatedScoreProbabilities } from './all-aggregated-scores';
 import { getCardOutcomeScores } from './card-outcome';
 
 export const getOptimalActions = (
-    aggregatedScores: Dictionary<AggregatedScore>,
+    aggregatedScores: AllAggregatedScores,
     cardOutcomes: CardOutcome[],
     handsProbabilities: Dictionary<HandProbabilities>,
     dealerProbabilities: Dictionary<HandProbabilities>

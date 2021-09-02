@@ -1,4 +1,4 @@
-import { AggregatedScore, Dictionary, Hand, HandProbabilities } from '../types';
+import { AllAggregatedScores, Dictionary, Hand, HandProbabilities } from '../types';
 import { maximumScore } from './constants';
 import { getHandScores } from './hand';
 import { createRelativeProbabilities, mergeRelativeProbabilities } from './relative-probabilities';
@@ -6,7 +6,7 @@ import { createRelativeProbabilities, mergeRelativeProbabilities } from './relat
 const createEmptyHandProbabilities = ({
     aggregatedScores
 }: {
-    aggregatedScores: Dictionary<AggregatedScore>;
+    aggregatedScores: AllAggregatedScores;
 }): HandProbabilities => {
     return {
         equal: createRelativeProbabilities(aggregatedScores, () => 0),
@@ -23,7 +23,7 @@ const createPartialHandProbabilities = ({
     outcomesWeight,
     standingScore
 }: {
-    aggregatedScores: Dictionary<AggregatedScore>;
+    aggregatedScores: AllAggregatedScores;
     followingHand: Hand;
     handsProbabilities: Dictionary<HandProbabilities>;
     outcomesWeight: number;
@@ -74,7 +74,7 @@ const createPartialHandProbabilities = ({
 };
 
 export const getHandsProbabilities = (
-    aggregatedScores: Dictionary<AggregatedScore>,
+    aggregatedScores: AllAggregatedScores,
     hands: Dictionary<Hand>,
     outcomesWeight: number,
     standingScore: number | undefined
@@ -108,7 +108,7 @@ const mergeHandProbabilities = (a: HandProbabilities, b: HandProbabilities): Han
 };
 
 const setHandProbabilities = (
-    aggregatedScores: Dictionary<AggregatedScore>,
+    aggregatedScores: AllAggregatedScores,
     hand: Hand,
     handsProbabilities: Dictionary<HandProbabilities>,
     outcomesWeight: number,

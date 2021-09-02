@@ -1,6 +1,13 @@
-import { AggregatedScore, Dictionary, Hand, HandProbabilities } from '../types';
+import {
+    AggregatedScore,
+    AllAggregatedScores,
+    Dictionary,
+    Hand,
+    HandProbabilities
+} from '../types';
 import { getHandScores, getHandSymbols } from './hand';
 
+// TODO Move to AllHandProbabilities logic
 export const getAggregatedScoreProbabilities = (
     aggregatedScore: AggregatedScore,
     handsProbabilities: Dictionary<HandProbabilities>
@@ -8,8 +15,8 @@ export const getAggregatedScoreProbabilities = (
     return handsProbabilities[aggregatedScore.scores];
 };
 
-export const getAggregatedScores = (hands: Dictionary<Hand>): Dictionary<AggregatedScore> => {
-    const aggregatedScores: Dictionary<AggregatedScore> = {};
+export const getAllAggregatedScores = (hands: Dictionary<Hand>): AllAggregatedScores => {
+    const aggregatedScores: AllAggregatedScores = {};
 
     Object.values(hands)
         .filter((hand) => hand.cardSymbols.length > 1)
