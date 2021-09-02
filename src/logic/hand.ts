@@ -1,4 +1,4 @@
-import { CardOutcome, Dictionary, Hand, HandProbabilities } from '../types';
+import { CardOutcome, Dictionary, Hand } from '../types';
 import { maximumScore } from './constants';
 import { cartesianProduct, getValidScores, removeDuplicates } from './utils';
 
@@ -53,14 +53,6 @@ export const getHandKey = (hand: Hand) => {
     return sortedSymbols.join(',');
 };
 
-export const getHandProbabilities = (
-    hand: Hand,
-    handsProbabilities: Dictionary<HandProbabilities>
-) => {
-    const handScores = getHandScores(hand);
-    return handsProbabilities[handScores];
-};
-
 const getHandNextScores = (previousScores: number[], nextValues: number[]) => {
     const possibleScores = cartesianProduct(previousScores, nextValues, (x, y) => x + y).sort(
         (a, b) => a - b
@@ -81,4 +73,8 @@ const getHandScore = (scores: number[]) => {
 
 export const getHandScores = (hand: Hand) => {
     return hand.scores.join('/');
+};
+
+export const isHandBelowStandingScore = (hand: Hand, standingScore: number | undefined) => {
+    return standingScore !== undefined && hand.score < standingScore;
 };

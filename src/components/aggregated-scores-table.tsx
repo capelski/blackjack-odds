@@ -1,14 +1,14 @@
 import React, { useMemo } from 'react';
 import { CellProps, Column } from 'react-table';
-import { getAggregatedScoreProbabilities } from '../logic/all-aggregated-scores';
+import { getAggregatedScoreProbabilities } from '../logic/all-hands-probabilities';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
-import { AggregatedScore, AllAggregatedScores, Dictionary, HandProbabilities } from '../types';
+import { AggregatedScore, AllAggregatedScores, AllHandsProbabilities } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface AggregatedScoresTableProps {
     aggregatedScores: AllAggregatedScores;
-    handsNextCardProbabilities: Dictionary<HandProbabilities>;
+    handsNextCardProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
 }
 

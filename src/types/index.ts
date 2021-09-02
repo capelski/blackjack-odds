@@ -1,6 +1,7 @@
 export { Action } from './action';
 export { AggregatedScore } from './aggregated-score';
 export { AllAggregatedScores } from './all-aggregated-scores';
+export { AllHandsProbabilities } from './all-hands-probabilities';
 export { CardOutcome } from './card-outcome';
 export { Dictionary } from './dictionary';
 export { Hand } from './hand';

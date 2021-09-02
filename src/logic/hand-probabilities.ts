@@ -1,9 +1,9 @@
-import { AllAggregatedScores, Dictionary, Hand, HandProbabilities } from '../types';
+import { AllAggregatedScores, Hand, HandProbabilities } from '../types';
 import { maximumScore } from './constants';
-import { getHandScores } from './hand';
+import { isHandBelowStandingScore } from './hand';
 import { createRelativeProbabilities, mergeRelativeProbabilities } from './relative-probabilities';
 
-const createEmptyHandProbabilities = ({
+export const createEmptyHandProbabilities = ({
     aggregatedScores
 }: {
     aggregatedScores: AllAggregatedScores;
@@ -16,16 +16,16 @@ const createEmptyHandProbabilities = ({
     };
 };
 
-const createPartialHandProbabilities = ({
+export const createPartialHandProbabilities = ({
     aggregatedScores,
     followingHand,
-    handsProbabilities,
+    followingHandProbabilities,
     outcomesWeight,
     standingScore
 }: {
     aggregatedScores: AllAggregatedScores;
     followingHand: Hand;
-    handsProbabilities: Dictionary<HandProbabilities>;
+    followingHandProbabilities: HandProbabilities;
     outcomesWeight: number;
     standingScore: number | undefined;
 }): HandProbabilities => {
@@ -38,7 +38,7 @@ const createPartialHandProbabilities = ({
             (score) =>
                 nextCardWeight! *
                 (isBelowStandingScore
-                    ? handsProbabilities[getHandScores(followingHand)].equal[score]
+                    ? followingHandProbabilities.equal[score]
                     : followingHand.score === score
                     ? 1
                     : 0)
@@ -48,7 +48,7 @@ const createPartialHandProbabilities = ({
             (score) =>
                 nextCardWeight! *
                 (isBelowStandingScore
-                    ? handsProbabilities[getHandScores(followingHand)].higher[score]
+                    ? followingHandProbabilities.higher[score]
                     : followingHand.score <= maximumScore && followingHand.score > score
                     ? 1
                     : 0)
@@ -58,7 +58,7 @@ const createPartialHandProbabilities = ({
             (score) =>
                 nextCardWeight! *
                 (isBelowStandingScore
-                    ? handsProbabilities[getHandScores(followingHand)].lower[score]
+                    ? followingHandProbabilities.lower[score]
                     : followingHand.score < score
                     ? 1
                     : 0)
@@ -66,86 +66,21 @@ const createPartialHandProbabilities = ({
         overMaximum:
             nextCardWeight! *
             (isBelowStandingScore
-                ? handsProbabilities[getHandScores(followingHand)].overMaximum
+                ? followingHandProbabilities.overMaximum
                 : followingHand.score > maximumScore
                 ? 1
                 : 0)
     };
 };
 
-export const getHandsProbabilities = (
-    aggregatedScores: AllAggregatedScores,
-    hands: Dictionary<Hand>,
-    outcomesWeight: number,
-    standingScore: number | undefined
-): Dictionary<HandProbabilities> => {
-    const handsProbabilities: Dictionary<HandProbabilities> = {};
-
-    Object.values(hands).forEach((hand) => {
-        setHandProbabilities(
-            aggregatedScores,
-            hand,
-            handsProbabilities,
-            outcomesWeight,
-            standingScore
-        );
-    });
-
-    return handsProbabilities;
-};
-
-const isHandBelowStandingScore = (hand: Hand, standingScore: number | undefined) => {
-    return standingScore !== undefined && hand.score < standingScore;
-};
-
-const mergeHandProbabilities = (a: HandProbabilities, b: HandProbabilities): HandProbabilities => {
+export const mergeHandProbabilities = (
+    a: HandProbabilities,
+    b: HandProbabilities
+): HandProbabilities => {
     return {
         equal: mergeRelativeProbabilities(a.equal, b.equal),
         higher: mergeRelativeProbabilities(a.higher, b.higher),
         lower: mergeRelativeProbabilities(a.lower, b.lower),
         overMaximum: a.overMaximum + b.overMaximum
     };
-};
-
-const setHandProbabilities = (
-    aggregatedScores: AllAggregatedScores,
-    hand: Hand,
-    handsProbabilities: Dictionary<HandProbabilities>,
-    outcomesWeight: number,
-    standingScore: number | undefined
-) => {
-    if (handsProbabilities[getHandScores(hand)] === undefined) {
-        hand.followingHands
-            .filter((followingHand) => isHandBelowStandingScore(followingHand, standingScore))
-            .forEach((followingHand) => {
-                setHandProbabilities(
-                    aggregatedScores,
-                    followingHand,
-                    handsProbabilities,
-                    outcomesWeight,
-                    standingScore
-                );
-            });
-
-        const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
-            return createPartialHandProbabilities({
-                aggregatedScores,
-                followingHand,
-                handsProbabilities,
-                outcomesWeight,
-                standingScore
-            });
-        });
-
-        const handProbabilities = followingHandsProbabilities.reduce<HandProbabilities>(
-            (reduced, next) => {
-                return mergeHandProbabilities(reduced, next);
-            },
-            createEmptyHandProbabilities({
-                aggregatedScores
-            })
-        );
-
-        handsProbabilities[getHandScores(hand)] = handProbabilities;
-    }
 };

@@ -1,13 +1,14 @@
 import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
+import { getHandProbabilities } from '../logic/all-hands-probabilities';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
-import { getHandProbabilities, getHandScores, getHandSymbols } from '../logic/hand';
-import { Dictionary, Hand, HandProbabilities } from '../types';
+import { getHandScores, getHandSymbols } from '../logic/hand';
+import { AllHandsProbabilities, Dictionary, Hand } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface HandsTableProps {
-    handsNextCardProbabilities: Dictionary<HandProbabilities>;
+    handsNextCardProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
     rootHands: Hand[];
 }

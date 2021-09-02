@@ -1,46 +1,47 @@
 import {
     Action,
     AllAggregatedScores,
+    AllHandsProbabilities,
     CardOutcome,
-    Dictionary,
-    HandProbabilities,
     OptimalActions
 } from '../types';
-import { getAggregatedScoreProbabilities } from './all-aggregated-scores';
-import { getCardOutcomeScores } from './card-outcome';
+import {
+    getAggregatedScoreProbabilities,
+    getCardOutcomeProbabilities
+} from './all-hands-probabilities';
 
-export const getOptimalActions = (
-    aggregatedScores: AllAggregatedScores,
-    cardOutcomes: CardOutcome[],
-    handsProbabilities: Dictionary<HandProbabilities>,
-    dealerProbabilities: Dictionary<HandProbabilities>
-): OptimalActions => {
+export const getOptimalActions = ({
+    aggregatedScores,
+    cardOutcomes,
+    dealerProbabilities,
+    playerProbabilities
+}: {
+    aggregatedScores: AllAggregatedScores;
+    cardOutcomes: CardOutcome[];
+    dealerProbabilities: AllHandsProbabilities;
+    playerProbabilities: AllHandsProbabilities;
+}): OptimalActions => {
     const optimalActions: OptimalActions = {};
-    const dealerCardsProbabilities = cardOutcomes.reduce<Dictionary<HandProbabilities>>(
-        (reduced, next) => {
-            return {
-                ...reduced,
-                [next.symbol]: dealerProbabilities[getCardOutcomeScores(next)]
-            };
-        },
-        {}
-    );
 
     Object.values(aggregatedScores).forEach((aggregatedScore) => {
-        const scoreProbabilities = getAggregatedScoreProbabilities(
+        const playerScoreProbabilities = getAggregatedScoreProbabilities(
             aggregatedScore,
-            handsProbabilities
+            playerProbabilities
         );
         optimalActions[aggregatedScore.scores] = {};
 
         cardOutcomes.forEach((cardOutcome) => {
+            const dealerCardProbabilities = getCardOutcomeProbabilities(
+                cardOutcome,
+                dealerProbabilities
+            );
+
             // TODO Make it optional to consider the lower/equal probabilities
             const hittingLoss =
-                scoreProbabilities.overMaximum +
-                scoreProbabilities.lower[aggregatedScore.score] +
-                scoreProbabilities.equal[aggregatedScore.score];
-            const standingLoss =
-                dealerCardsProbabilities[cardOutcome.symbol].higher[aggregatedScore.score];
+                playerScoreProbabilities.overMaximum +
+                playerScoreProbabilities.lower[aggregatedScore.score] +
+                playerScoreProbabilities.equal[aggregatedScore.score];
+            const standingLoss = dealerCardProbabilities.higher[aggregatedScore.score];
 
             optimalActions[aggregatedScore.scores][cardOutcome.symbol] =
                 standingLoss <= hittingLoss ? Action.Standing : Action.Hitting;
