@@ -3,7 +3,7 @@ import { CellProps, Column } from 'react-table';
 import { getHandProbabilities } from '../logic/all-hands-probabilities';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
 import { getHandScores, getHandSymbols } from '../logic/hand';
-import { AllHandsProbabilities, Dictionary, Hand } from '../types';
+import { AllHandsProbabilities, ExpandedRows, Hand } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
@@ -13,7 +13,7 @@ interface HandsTableProps {
     rootHands: Hand[];
 }
 
-const getHandRows = (hand: Hand, expandedRows: Dictionary<boolean>): Hand[] => {
+const getHandRows = (hand: Hand, expandedRows: ExpandedRows): Hand[] => {
     const handRows = [hand];
     const handSymbols = getHandSymbols(hand);
 
@@ -27,7 +27,7 @@ const getHandRows = (hand: Hand, expandedRows: Dictionary<boolean>): Hand[] => {
 };
 
 export const HandsTable = (props: HandsTableProps) => {
-    const [expandedRows, setExpandedRows] = useState<Dictionary<boolean>>({});
+    const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
     const { columns, data } = useMemo((): { columns: Column<Hand>[]; data: Hand[] } => {
         const columns: Column<Hand>[] = [

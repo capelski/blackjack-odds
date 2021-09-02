@@ -1,9 +1,11 @@
 export { Action } from './action';
 export { AggregatedScore } from './aggregated-score';
 export { AllAggregatedScores } from './all-aggregated-scores';
+export { AllHands } from './all-hands';
 export { AllHandsProbabilities } from './all-hands-probabilities';
 export { CardOutcome } from './card-outcome';
 export { Dictionary } from './dictionary';
+export { ExpandedRows } from './expanded-rows';
 export { Hand } from './hand';
 export { HandProbabilities } from './hand-probabilities';
 export { OptimalActions } from './optimal-actions';

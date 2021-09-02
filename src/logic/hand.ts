@@ -1,8 +1,8 @@
-import { CardOutcome, Dictionary, Hand } from '../types';
+import { CardOutcome, Hand } from '../types';
 import { maximumScore } from './constants';
 import { cartesianProduct, getValidScores, removeDuplicates } from './utils';
 
-const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): Hand => {
+export const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): Hand => {
     const handScores = previousHand
         ? getHandNextScores(previousHand.scores, cardOutcome.values)
         : cardOutcome.values;
@@ -16,36 +16,6 @@ const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): H
         score: getHandScore(handScores),
         scores: handScores
     };
-};
-
-export const getAllHands = (cardOutcomes: CardOutcome[]) => {
-    const rootHands: Hand[] = cardOutcomes.map((cardOutcome) => createHand(cardOutcome, undefined));
-
-    const handsDictionary: Dictionary<Hand> = {};
-    const handsQueue = [...rootHands];
-
-    while (handsQueue.length > 0) {
-        const hand = handsQueue.pop()!;
-        const handKey = getHandKey(hand);
-
-        if (handsDictionary[handKey] === undefined) {
-            handsDictionary[handKey] = hand;
-
-            cardOutcomes.forEach((cardOutcome) => {
-                const followingHand = createHand(cardOutcome, hand);
-
-                hand.followingHands.push(followingHand);
-
-                if (followingHand.score < maximumScore) {
-                    handsQueue.push(followingHand);
-                }
-            });
-        } else {
-            hand.followingHands = handsDictionary[handKey].followingHands;
-        }
-    }
-
-    return { handsDictionary, rootHands };
 };
 
 export const getHandKey = (hand: Hand) => {

@@ -1,9 +1,9 @@
 import React from 'react';
 import { getAllAggregatedScores } from '../logic/all-aggregated-scores';
+import { getAllHands, getRootHands } from '../logic/all-hands';
 import { getAllHandsProbabilities } from '../logic/all-hands-probabilities';
 import { getAllCardOutcomes, getCardOutcomesWeight } from '../logic/card-outcome';
 import { dealerStandingScore } from '../logic/constants';
-import { getAllHands } from '../logic/hand';
 import { getOptimalActions } from '../logic/optimal-actions';
 import { AggregatedScoresTable } from './aggregated-scores-table';
 import { HandsTable } from './hands-table';
@@ -11,19 +11,19 @@ import { OptimalActionsGrid } from './optimal-actions-grid';
 
 export const App: React.FC = () => {
     const cardOutcomes = getAllCardOutcomes();
-    const hands = getAllHands(cardOutcomes);
+    const allHands = getAllHands(cardOutcomes);
     const outcomesWeight = getCardOutcomesWeight(cardOutcomes);
 
-    const aggregatedScores = getAllAggregatedScores(hands.handsDictionary);
+    const aggregatedScores = getAllAggregatedScores(allHands);
     const playerNextCardProbabilities = getAllHandsProbabilities(
         aggregatedScores,
-        hands.handsDictionary,
+        allHands,
         outcomesWeight,
         undefined
     );
     const dealerProbabilities = getAllHandsProbabilities(
         aggregatedScores,
-        hands.handsDictionary,
+        allHands,
         outcomesWeight,
         dealerStandingScore
     );
@@ -50,7 +50,7 @@ export const App: React.FC = () => {
             <HandsTable
                 handsNextCardProbabilities={playerNextCardProbabilities}
                 outcomesWeight={outcomesWeight}
-                rootHands={hands.rootHands}
+                rootHands={getRootHands(allHands, cardOutcomes)}
             />
         </div>
     );

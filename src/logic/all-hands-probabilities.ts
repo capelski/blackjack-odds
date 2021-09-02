@@ -1,9 +1,9 @@
 import {
     AggregatedScore,
     AllAggregatedScores,
+    AllHands,
     AllHandsProbabilities,
     CardOutcome,
-    Dictionary,
     Hand,
     HandProbabilities
 } from '../types';
@@ -24,7 +24,7 @@ export const getAggregatedScoreProbabilities = (
 
 export const getAllHandsProbabilities = (
     aggregatedScores: AllAggregatedScores,
-    hands: Dictionary<Hand>,
+    hands: AllHands,
     outcomesWeight: number,
     standingScore: number | undefined
 ): AllHandsProbabilities => {
