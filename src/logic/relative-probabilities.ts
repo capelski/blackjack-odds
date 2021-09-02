@@ -7,7 +7,7 @@ export const createRelativeProbabilities = (
     return Object.values(aggregatedScores).reduce<RelativeProbabilities>((reduced, next) => {
         return {
             ...reduced,
-            [next.score]: reduced[next.score] || opponentRelativeGetter(next.score)
+            [next.scores]: opponentRelativeGetter(next.score)
         };
     }, {});
 };

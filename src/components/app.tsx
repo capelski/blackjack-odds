@@ -1,8 +1,9 @@
 import React from 'react';
 import { getAggregatedScores } from '../logic/aggregated-score';
 import { getAllCardOutcomes, getCardOutcomesWeight } from '../logic/card-outcome';
+import { dealerStandingScore } from '../logic/constants';
 import { getAllHands } from '../logic/hand';
-import { getHandsNextCardProbabilities } from '../logic/hand-probabilities';
+import { getHandsProbabilities } from '../logic/hand-probabilities';
 import { getOptimalActions } from '../logic/optimal-actions';
 import { AggregatedScoresTable } from './aggregated-scores-table';
 import { HandsTable } from './hands-table';
@@ -14,15 +15,23 @@ export const App: React.FC = () => {
     const outcomesWeight = getCardOutcomesWeight(cardOutcomes);
 
     const aggregatedScores = getAggregatedScores(hands.handsDictionary);
-    const handsNextCardProbabilities = getHandsNextCardProbabilities(
+    const handsNextCardProbabilities = getHandsProbabilities(
         aggregatedScores,
         hands.handsDictionary,
-        outcomesWeight
+        outcomesWeight,
+        undefined
+    );
+    const dealerProbabilities = getHandsProbabilities(
+        aggregatedScores,
+        hands.handsDictionary,
+        outcomesWeight,
+        dealerStandingScore
     );
     const optimalActions = getOptimalActions(
         aggregatedScores,
         cardOutcomes,
-        handsNextCardProbabilities
+        handsNextCardProbabilities,
+        dealerProbabilities
     );
 
     return (
