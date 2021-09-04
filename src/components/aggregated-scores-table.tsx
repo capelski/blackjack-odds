@@ -30,8 +30,8 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
     const { columns, data } = useMemo(() => {
         const columns: Column<AggregatedScore>[] = [
             {
-                accessor: 'scores',
-                Cell: (cellProps: CellProps<AggregatedScore, AggregatedScore['scores']>) => {
+                accessor: 'key',
+                Cell: (cellProps: CellProps<AggregatedScore, AggregatedScore['key']>) => {
                     const isRowExpanded = expandedRows[cellProps.value];
 
                     return (
@@ -59,7 +59,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
             {
                 accessor: 'combinations',
                 Cell: (cellProps: CellProps<AggregatedScore, AggregatedScore['combinations']>) => {
-                    const isRowExpanded = expandedRows[cellProps.row.original.scores];
+                    const isRowExpanded = expandedRows[cellProps.row.original.key];
                     return (
                         <span>
                             {cellProps.value.length}

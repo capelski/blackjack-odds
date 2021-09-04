@@ -13,8 +13,9 @@ export const getAllAggregatedScores = (allHands: AllHands): AllAggregatedScores 
             if (aggregatedScores[handScores] === undefined) {
                 aggregatedScores[handScores] = {
                     combinations: [handSymbols],
+                    key: handScores,
                     score: hand.score,
-                    scores: handScores
+                    scores: hand.scores
                 };
             } else {
                 aggregatedScores[handScores].combinations.push(handSymbols);

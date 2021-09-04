@@ -1,5 +1,6 @@
 export type AggregatedScore = {
     combinations: string[];
+    key: string;
     score: number;
-    scores: string;
+    scores: number[];
 };

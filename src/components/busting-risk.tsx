@@ -14,8 +14,7 @@ interface BustingRiskProps {
 export const BustingRisk: React.FC<BustingRiskProps> = (props) => {
     const riskOptions = Object.values(props.allAggregatedScores)
         .filter(
-            (aggregatedScore) =>
-                aggregatedScore.scores.indexOf('/') === -1 && aggregatedScore.score > 10
+            (aggregatedScore) => aggregatedScore.scores.length === 1 && aggregatedScore.score > 10
         )
         .map((aggregatedScore) => {
             const scoreProbabilities = getAggregatedScoreProbabilities(

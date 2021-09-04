@@ -35,7 +35,7 @@ export const getOptimalActions = ({
             aggregatedScore,
             playerProbabilities
         );
-        optimalActions[aggregatedScore.scores] = {
+        optimalActions[aggregatedScore.key] = {
             actions: {},
             aggregatedScore: aggregatedScore
         };
@@ -55,7 +55,7 @@ export const getOptimalActions = ({
                 dealerCardProbabilities
             );
 
-            optimalActions[aggregatedScore.scores].actions[cardOutcome.symbol] = {
+            optimalActions[aggregatedScore.key].actions[cardOutcome.symbol] = {
                 dealerCard: cardOutcome,
                 playerAction: standingLoss <= hittingLoss ? Action.Standing : Action.Hitting
             };

@@ -58,7 +58,7 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                 ))}
             </div>
             {Object.values(props.optimalActions).map((scoreOptimalActions) => {
-                const displayScores = scoreOptimalActions.aggregatedScore.scores;
+                const displayScores = scoreOptimalActions.aggregatedScore.key;
                 const aggregatedScoreProbabilities = getAggregatedScoreProbabilities(
                     scoreOptimalActions.aggregatedScore,
                     props.playerProbabilities

@@ -19,7 +19,7 @@ export const getAggregatedScoreProbabilities = (
     aggregatedScore: AggregatedScore,
     allHandsProbabilities: AllHandsProbabilities
 ) => {
-    return allHandsProbabilities[aggregatedScore.scores];
+    return allHandsProbabilities[aggregatedScore.key];
 };
 
 export const getAllHandsProbabilities = (

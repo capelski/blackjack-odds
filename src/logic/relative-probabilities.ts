@@ -7,7 +7,7 @@ export const createRelativeProbabilities = (
     return Object.values(aggregatedScores).reduce<RelativeProbabilities>((reduced, next) => {
         return {
             ...reduced,
-            [next.scores]: probabilityGetter(next)
+            [next.key]: probabilityGetter(next)
         };
     }, {});
 };
@@ -16,7 +16,7 @@ export const getScoreRelativeProbabilities = (
     relativeProbabilities: RelativeProbabilities,
     score: number | AggregatedScore
 ) => {
-    return relativeProbabilities[typeof score === 'number' ? String(score) : score.scores];
+    return relativeProbabilities[typeof score === 'number' ? String(score) : score.key];
 };
 
 export const mergeRelativeProbabilities = (
