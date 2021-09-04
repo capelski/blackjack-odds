@@ -18,6 +18,7 @@ import { RoundedFloat } from './rounded-float';
 interface OptimalActionsGridProps {
     cardOutcomes: CardOutcome[];
     dealerProbabilities: AllHandsProbabilities;
+    decimals: number;
     optimalActions: OptimalActions;
     playerProbabilities: AllHandsProbabilities;
 }
@@ -106,11 +107,13 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                             <br />
                                             H. loss:
                                             <RoundedFloat
+                                                decimals={props.decimals}
                                                 value={aggregatedScoreProbabilities.overMaximum}
                                             />
                                             <br />
                                             H. less:
                                             <RoundedFloat
+                                                decimals={props.decimals}
                                                 value={
                                                     getLowerThanScoreProbability(
                                                         aggregatedScoreProbabilities,
@@ -125,6 +128,7 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                             <br />
                                             H. worst:
                                             <RoundedFloat
+                                                decimals={props.decimals}
                                                 value={getAggregatedScoreHittingLoss(
                                                     scoreOptimalActions.aggregatedScore,
                                                     aggregatedScoreProbabilities
@@ -133,6 +137,7 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                             <br />
                                             S. loss:
                                             <RoundedFloat
+                                                decimals={props.decimals}
                                                 value={getAggregatedScoreStandingLoss(
                                                     scoreOptimalActions.aggregatedScore,
                                                     cardProbabilities

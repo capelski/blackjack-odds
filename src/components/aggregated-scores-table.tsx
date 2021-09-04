@@ -18,6 +18,7 @@ import { RoundedFloat } from './rounded-float';
 
 interface AggregatedScoresTableProps {
     aggregatedScores: AllAggregatedScores;
+    decimals: number;
     longRunPlayerProbabilities: AllHandsProbabilities;
     nextCardPlayerProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
@@ -89,6 +90,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                             return (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={getLowerThanScoreProbability(
                                         scoreProbabilities,
                                         dealerStandingScore
@@ -107,6 +109,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                             return (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={
                                         getEqualToScoreProbability(
                                             scoreProbabilities,
@@ -129,7 +132,13 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                                 cellProps.row.original,
                                 props.nextCardPlayerProbabilities
                             );
-                            return <RoundedFloat value={scoreProbabilities.overMaximum} />;
+
+                            return (
+                                <RoundedFloat
+                                    decimals={props.decimals}
+                                    value={scoreProbabilities.overMaximum}
+                                />
+                            );
                         },
                         Header: `>${maximumScore}`,
                         id: 'next-card-over-maximum'
@@ -148,6 +157,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                             return (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={getLowerThanScoreProbability(
                                         scoreProbabilities,
                                         dealerStandingScore
@@ -166,6 +176,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                             return (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={
                                         getEqualToScoreProbability(
                                             scoreProbabilities,
@@ -188,7 +199,12 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                                 cellProps.row.original,
                                 props.longRunPlayerProbabilities
                             );
-                            return <RoundedFloat value={scoreProbabilities.overMaximum} />;
+                            return (
+                                <RoundedFloat
+                                    decimals={props.decimals}
+                                    value={scoreProbabilities.overMaximum}
+                                />
+                            );
                         },
                         Header: `>${maximumScore}`,
                         id: 'long-run-over-maximum'
@@ -200,6 +216,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
         ],
         [
             expandedRows,
+            props.decimals,
             props.longRunPlayerProbabilities,
             props.nextCardPlayerProbabilities,
             props.aggregatedScores
@@ -210,6 +227,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
         return Object.values(props.aggregatedScores).sort((a, b) => a.score - b.score);
     }, [
         expandedRows,
+        props.decimals,
         props.longRunPlayerProbabilities,
         props.nextCardPlayerProbabilities,
         props.aggregatedScores

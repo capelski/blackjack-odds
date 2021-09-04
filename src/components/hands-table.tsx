@@ -13,6 +13,7 @@ import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface HandsTableProps {
+    decimals: number;
     longRunPlayerProbabilities: AllHandsProbabilities;
     nextCardPlayerProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
@@ -95,6 +96,7 @@ export const HandsTable = (props: HandsTableProps) => {
                 accessor: 'lastCard',
                 Cell: (cellProps: CellProps<Hand, Hand['lastCard']>) => (
                     <RoundedFloat
+                        decimals={props.decimals}
                         value={cellProps.value.weight / props.outcomesWeight}
                         isPercentage={true}
                     />
@@ -112,6 +114,7 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={getLowerThanScoreProbability(
                                         handProbabilities,
                                         dealerStandingScore
@@ -132,6 +135,7 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={
                                         getEqualToScoreProbability(
                                             handProbabilities,
@@ -157,7 +161,10 @@ export const HandsTable = (props: HandsTableProps) => {
                                 props.nextCardPlayerProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
-                                <RoundedFloat value={handProbabilities.overMaximum} />
+                                <RoundedFloat
+                                    decimals={props.decimals}
+                                    value={handProbabilities.overMaximum}
+                                />
                             ) : (
                                 '-'
                             );
@@ -179,6 +186,7 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={getLowerThanScoreProbability(
                                         handProbabilities,
                                         dealerStandingScore
@@ -199,6 +207,7 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
+                                    decimals={props.decimals}
                                     value={
                                         getEqualToScoreProbability(
                                             handProbabilities,
@@ -224,7 +233,10 @@ export const HandsTable = (props: HandsTableProps) => {
                                 props.longRunPlayerProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
-                                <RoundedFloat value={handProbabilities.overMaximum} />
+                                <RoundedFloat
+                                    decimals={props.decimals}
+                                    value={handProbabilities.overMaximum}
+                                />
                             ) : (
                                 '-'
                             );

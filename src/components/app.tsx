@@ -7,10 +7,12 @@ import { dealerStandingScore } from '../logic/constants';
 import { getOptimalActions } from '../logic/optimal-actions';
 import { AggregatedScoresTable } from './aggregated-scores-table';
 import { BustingRisk } from './busting-risk';
+import { Decimals } from './decimals';
 import { HandsTable } from './hands-table';
 import { OptimalActionsGrid } from './optimal-actions-grid';
 
 export const App: React.FC = () => {
+    const [decimals, setDecimals] = useState(1);
     const [playerStandingScore, setPlayerStandingScore] = useState(15);
 
     const {
@@ -72,15 +74,18 @@ export const App: React.FC = () => {
             <h3>Settings</h3>
             <BustingRisk
                 allAggregatedScores={allAggregatedScores}
+                decimals={decimals}
                 nextCardPlayerProbabilities={nextCardPlayerProbabilities}
                 onChange={setPlayerStandingScore}
                 selectedStandingScore={playerStandingScore}
             />
+            <Decimals onChange={setDecimals} selectedValue={decimals} />
 
             <h3>Optimal actions</h3>
             <OptimalActionsGrid
                 cardOutcomes={cardOutcomes}
                 dealerProbabilities={dealerProbabilities}
+                decimals={decimals}
                 optimalActions={optimalActions}
                 playerProbabilities={nextCardPlayerProbabilities}
             />
@@ -88,6 +93,7 @@ export const App: React.FC = () => {
             <h3>Scores table</h3>
             <AggregatedScoresTable
                 aggregatedScores={allAggregatedScores}
+                decimals={decimals}
                 longRunPlayerProbabilities={longRunPlayerProbabilities}
                 nextCardPlayerProbabilities={nextCardPlayerProbabilities}
                 outcomesWeight={outcomesWeight}
@@ -95,6 +101,7 @@ export const App: React.FC = () => {
 
             <h3>Hands table</h3>
             <HandsTable
+                decimals={decimals}
                 longRunPlayerProbabilities={longRunPlayerProbabilities}
                 nextCardPlayerProbabilities={nextCardPlayerProbabilities}
                 outcomesWeight={outcomesWeight}

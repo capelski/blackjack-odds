@@ -1,10 +1,11 @@
 import React from 'react';
 import { getAggregatedScoreProbabilities } from '../logic/all-hands-probabilities';
 import { AllAggregatedScores, AllHandsProbabilities } from '../types';
-import { getRoundedValue } from './rounded-float';
+import { getRoundedFloat } from './rounded-float';
 
 interface BustingRiskProps {
     allAggregatedScores: AllAggregatedScores;
+    decimals: number;
     nextCardPlayerProbabilities: AllHandsProbabilities;
     onChange: (playerStandingScore: number) => void;
     selectedStandingScore: number;
@@ -40,7 +41,7 @@ export const BustingRisk: React.FC<BustingRiskProps> = (props) => {
                 {riskOptions.map((riskOption) => {
                     return (
                         <option key={riskOption.standingScore} value={riskOption.standingScore}>
-                            {getRoundedValue(riskOption.bustingRisk)} (standing on{' '}
+                            {getRoundedFloat(riskOption.bustingRisk, props.decimals)} (standing on{' '}
                             {riskOption.standingScore})
                         </option>
                     );
