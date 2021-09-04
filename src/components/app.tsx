@@ -15,7 +15,7 @@ export const App: React.FC = () => {
     const outcomesWeight = getCardOutcomesWeight(cardOutcomes);
 
     const aggregatedScores = getAllAggregatedScores(allHands);
-    const playerNextCardProbabilities = getAllHandsProbabilities(
+    const nextCardPlayerProbabilities = getAllHandsProbabilities(
         aggregatedScores,
         allHands,
         outcomesWeight,
@@ -31,7 +31,7 @@ export const App: React.FC = () => {
         aggregatedScores,
         cardOutcomes,
         dealerProbabilities,
-        playerProbabilities: playerNextCardProbabilities
+        playerProbabilities: nextCardPlayerProbabilities
     });
 
     return (
@@ -41,19 +41,19 @@ export const App: React.FC = () => {
                 cardOutcomes={cardOutcomes}
                 dealerProbabilities={dealerProbabilities}
                 optimalActions={optimalActions}
-                playerProbabilities={playerNextCardProbabilities}
+                playerProbabilities={nextCardPlayerProbabilities}
             />
 
             <h3>Scores table</h3>
             <AggregatedScoresTable
                 aggregatedScores={aggregatedScores}
-                handsNextCardProbabilities={playerNextCardProbabilities}
+                nextCardPlayerProbabilities={nextCardPlayerProbabilities}
                 outcomesWeight={outcomesWeight}
             />
 
             <h3>Hands table</h3>
             <HandsTable
-                handsNextCardProbabilities={playerNextCardProbabilities}
+                nextCardPlayerProbabilities={nextCardPlayerProbabilities}
                 outcomesWeight={outcomesWeight}
                 rootHands={getRootHands(allHands, cardOutcomes)}
             />

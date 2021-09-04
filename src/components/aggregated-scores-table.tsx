@@ -18,7 +18,7 @@ import { RoundedFloat } from './rounded-float';
 
 interface AggregatedScoresTableProps {
     aggregatedScores: AllAggregatedScores;
-    handsNextCardProbabilities: AllHandsProbabilities;
+    nextCardPlayerProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
 }
 
@@ -84,7 +84,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
                             const scoreProbabilities = getAggregatedScoreProbabilities(
                                 cellProps.row.original,
-                                props.handsNextCardProbabilities
+                                props.nextCardPlayerProbabilities
                             );
                             return (
                                 <RoundedFloat
@@ -102,7 +102,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
                             const scoreProbabilities = getAggregatedScoreProbabilities(
                                 cellProps.row.original,
-                                props.handsNextCardProbabilities
+                                props.nextCardPlayerProbabilities
                             );
                             return (
                                 <RoundedFloat
@@ -126,7 +126,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
                             const scoreProbabilities = getAggregatedScoreProbabilities(
                                 cellProps.row.original,
-                                props.handsNextCardProbabilities
+                                props.nextCardPlayerProbabilities
                             );
                             return <RoundedFloat value={scoreProbabilities.overMaximum} />;
                         },
@@ -138,12 +138,12 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                 id: 'next-card-probabilities'
             }
         ],
-        [expandedRows, props.handsNextCardProbabilities, props.aggregatedScores]
+        [expandedRows, props.nextCardPlayerProbabilities, props.aggregatedScores]
     );
 
     const data = useMemo(() => {
         return Object.values(props.aggregatedScores).sort((a, b) => a.score - b.score);
-    }, [expandedRows, props.handsNextCardProbabilities, props.aggregatedScores]);
+    }, [expandedRows, props.nextCardPlayerProbabilities, props.aggregatedScores]);
 
     return <CustomTable columns={columns} data={data} />;
 };

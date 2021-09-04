@@ -13,7 +13,7 @@ import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface HandsTableProps {
-    handsNextCardProbabilities: AllHandsProbabilities;
+    nextCardPlayerProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
     rootHands: Hand[];
 }
@@ -107,7 +107,7 @@ export const HandsTable = (props: HandsTableProps) => {
                         Cell: (cellProps: CellProps<Hand>) => {
                             const handProbabilities = getHandProbabilities(
                                 cellProps.row.original,
-                                props.handsNextCardProbabilities
+                                props.nextCardPlayerProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
@@ -127,7 +127,7 @@ export const HandsTable = (props: HandsTableProps) => {
                         Cell: (cellProps: CellProps<Hand>) => {
                             const handProbabilities = getHandProbabilities(
                                 cellProps.row.original,
-                                props.handsNextCardProbabilities
+                                props.nextCardPlayerProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
@@ -153,7 +153,7 @@ export const HandsTable = (props: HandsTableProps) => {
                         Cell: (cellProps: CellProps<Hand>) => {
                             const handProbabilities = getHandProbabilities(
                                 cellProps.row.original,
-                                props.handsNextCardProbabilities
+                                props.nextCardPlayerProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat value={handProbabilities.overMaximum} />
