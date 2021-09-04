@@ -27,8 +27,8 @@ interface AggregatedScoresTableProps {
 export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
-    const columns = useMemo(
-        (): Column<AggregatedScore>[] => [
+    const { columns, data } = useMemo(() => {
+        const columns: Column<AggregatedScore>[] = [
             {
                 accessor: 'scores',
                 Cell: (cellProps: CellProps<AggregatedScore, AggregatedScore['scores']>) => {
@@ -213,18 +213,11 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                 Header: 'Long run',
                 id: 'long-run-probabilities'
             }
-        ],
-        [
-            expandedRows,
-            props.decimals,
-            props.longRunPlayerProbabilities,
-            props.nextCardPlayerProbabilities,
-            props.aggregatedScores
-        ]
-    );
+        ];
 
-    const data = useMemo(() => {
-        return Object.values(props.aggregatedScores).sort((a, b) => a.score - b.score);
+        const data = Object.values(props.aggregatedScores).sort((a, b) => a.score - b.score);
+
+        return { columns, data };
     }, [
         expandedRows,
         props.decimals,
