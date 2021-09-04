@@ -11,11 +11,7 @@ import {
     getAggregatedScoreProbabilities,
     getCardOutcomeProbabilities
 } from './all-hands-probabilities';
-import {
-    getEqualToScoreProbability,
-    getHigherThanScoreProbability,
-    getLowerThanScoreProbability
-} from './hand-probabilities';
+import { getHigherThanScoreProbability, getLowerThanScoreProbability } from './hand-probabilities';
 
 export const getOptimalActions = ({
     aggregatedScores,
@@ -65,15 +61,13 @@ export const getOptimalActions = ({
     return optimalActions;
 };
 
-// TODO Make it optional to consider the lower/equal probabilities
 export const getAggregatedScoreHittingLoss = (
     aggregatedScore: AggregatedScore,
     playerScoreProbabilities: HandProbabilities
 ) => {
     return (
         playerScoreProbabilities.overMaximum +
-        getLowerThanScoreProbability(playerScoreProbabilities, aggregatedScore) +
-        getEqualToScoreProbability(playerScoreProbabilities, aggregatedScore)
+        getLowerThanScoreProbability(playerScoreProbabilities, aggregatedScore)
     );
 };
 export const getAggregatedScoreStandingLoss = (
