@@ -5,16 +5,18 @@ interface RoundedFloatProps {
     value: number;
 }
 
+export const getRoundedValue = (value: number, isPercentage = true): string => {
+    const scale = Math.pow(10, 2);
+    const roundedValue = Math.round(value * scale * (isPercentage ? 100 : 1)) / scale;
+    const prefix = value > 0 && roundedValue === 0 ? '~' : '';
+    const suffix = isPercentage ? '%' : '';
+
+    return prefix + roundedValue + suffix;
+};
+
 export const RoundedFloat: React.FC<RoundedFloatProps> = (props) => {
     const isPercentage = props.isPercentage === undefined || props.isPercentage;
-    const multiplier = isPercentage ? 10000 : 100;
-    const value = Math.round(props.value * multiplier) / 100;
+    const roundedValue = getRoundedValue(props.value, isPercentage);
 
-    return (
-        <React.Fragment>
-            {props.value > 0 && value === 0 && '~'}
-            {value}
-            {isPercentage && '%'}
-        </React.Fragment>
-    );
+    return <React.Fragment>{roundedValue}</React.Fragment>;
 };

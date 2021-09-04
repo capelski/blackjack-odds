@@ -13,6 +13,7 @@ import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface HandsTableProps {
+    longRunPlayerProbabilities: AllHandsProbabilities;
     nextCardPlayerProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
     rootHands: Hand[];
@@ -121,7 +122,7 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                         },
                         Header: `<${dealerStandingScore}`,
-                        id: 'lower'
+                        id: 'next-card-lower'
                     },
                     {
                         Cell: (cellProps: CellProps<Hand>) => {
@@ -147,7 +148,7 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                         },
                         Header: `>=${dealerStandingScore}`,
-                        id: 'equal-or-higher'
+                        id: 'next-card-equal-or-higher'
                     },
                     {
                         Cell: (cellProps: CellProps<Hand>) => {
@@ -162,11 +163,78 @@ export const HandsTable = (props: HandsTableProps) => {
                             );
                         },
                         Header: `>${maximumScore}`,
-                        id: 'over-maximum'
+                        id: 'next-card-over-maximum'
                     }
                 ],
                 Header: 'Next card',
                 id: 'next-card-probabilities'
+            },
+            {
+                columns: [
+                    {
+                        Cell: (cellProps: CellProps<Hand>) => {
+                            const handProbabilities = getHandProbabilities(
+                                cellProps.row.original,
+                                props.longRunPlayerProbabilities
+                            );
+                            return cellProps.row.original.score < maximumScore ? (
+                                <RoundedFloat
+                                    value={getLowerThanScoreProbability(
+                                        handProbabilities,
+                                        dealerStandingScore
+                                    )}
+                                />
+                            ) : (
+                                '-'
+                            );
+                        },
+                        Header: `<${dealerStandingScore}`,
+                        id: 'long-run-lower'
+                    },
+                    {
+                        Cell: (cellProps: CellProps<Hand>) => {
+                            const handProbabilities = getHandProbabilities(
+                                cellProps.row.original,
+                                props.longRunPlayerProbabilities
+                            );
+                            return cellProps.row.original.score < maximumScore ? (
+                                <RoundedFloat
+                                    value={
+                                        getEqualToScoreProbability(
+                                            handProbabilities,
+                                            dealerStandingScore
+                                        ) +
+                                        getHigherThanScoreProbability(
+                                            handProbabilities,
+                                            dealerStandingScore
+                                        )
+                                    }
+                                />
+                            ) : (
+                                '-'
+                            );
+                        },
+                        Header: `>=${dealerStandingScore}`,
+                        id: 'long-run-equal-or-higher'
+                    },
+                    {
+                        Cell: (cellProps: CellProps<Hand>) => {
+                            const handProbabilities = getHandProbabilities(
+                                cellProps.row.original,
+                                props.longRunPlayerProbabilities
+                            );
+                            return cellProps.row.original.score < maximumScore ? (
+                                <RoundedFloat value={handProbabilities.overMaximum} />
+                            ) : (
+                                '-'
+                            );
+                        },
+                        Header: `>${maximumScore}`,
+                        id: 'long-run-over-maximum'
+                    }
+                ],
+                Header: 'Long run',
+                id: 'long-run-probabilities'
             }
         ];
 
@@ -175,7 +243,12 @@ export const HandsTable = (props: HandsTableProps) => {
             .reduce((reduced, row) => reduced.concat(row), []);
 
         return { columns, data };
-    }, [expandedRows, props.rootHands]);
+    }, [
+        expandedRows,
+        props.longRunPlayerProbabilities,
+        props.nextCardPlayerProbabilities,
+        props.rootHands
+    ]);
 
     return (
         <CustomTable

@@ -18,6 +18,7 @@ import { RoundedFloat } from './rounded-float';
 
 interface AggregatedScoresTableProps {
     aggregatedScores: AllAggregatedScores;
+    longRunPlayerProbabilities: AllHandsProbabilities;
     nextCardPlayerProbabilities: AllHandsProbabilities;
     outcomesWeight: number;
 }
@@ -96,7 +97,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                         },
                         Header: `<${dealerStandingScore}`,
-                        id: 'lower'
+                        id: 'next-card-lower'
                     },
                     {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
@@ -120,7 +121,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             );
                         },
                         Header: `>=${dealerStandingScore}`,
-                        id: 'equal-or-higher'
+                        id: 'next-card-equal-or-higher'
                     },
                     {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
@@ -131,19 +132,88 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                             return <RoundedFloat value={scoreProbabilities.overMaximum} />;
                         },
                         Header: `>${maximumScore}`,
-                        id: 'over-maximum'
+                        id: 'next-card-over-maximum'
                     }
                 ],
                 Header: 'Next card',
                 id: 'next-card-probabilities'
+            },
+            {
+                columns: [
+                    {
+                        Cell: (cellProps: CellProps<AggregatedScore>) => {
+                            const scoreProbabilities = getAggregatedScoreProbabilities(
+                                cellProps.row.original,
+                                props.longRunPlayerProbabilities
+                            );
+                            return (
+                                <RoundedFloat
+                                    value={getLowerThanScoreProbability(
+                                        scoreProbabilities,
+                                        dealerStandingScore
+                                    )}
+                                />
+                            );
+                        },
+                        Header: `<${dealerStandingScore}`,
+                        id: 'long-run-lower'
+                    },
+                    {
+                        Cell: (cellProps: CellProps<AggregatedScore>) => {
+                            const scoreProbabilities = getAggregatedScoreProbabilities(
+                                cellProps.row.original,
+                                props.longRunPlayerProbabilities
+                            );
+                            return (
+                                <RoundedFloat
+                                    value={
+                                        getEqualToScoreProbability(
+                                            scoreProbabilities,
+                                            dealerStandingScore
+                                        ) +
+                                        getHigherThanScoreProbability(
+                                            scoreProbabilities,
+                                            dealerStandingScore
+                                        )
+                                    }
+                                />
+                            );
+                        },
+                        Header: `>=${dealerStandingScore}`,
+                        id: 'long-run-equal-or-higher'
+                    },
+                    {
+                        Cell: (cellProps: CellProps<AggregatedScore>) => {
+                            const scoreProbabilities = getAggregatedScoreProbabilities(
+                                cellProps.row.original,
+                                props.longRunPlayerProbabilities
+                            );
+                            return <RoundedFloat value={scoreProbabilities.overMaximum} />;
+                        },
+                        Header: `>${maximumScore}`,
+                        id: 'long-run-over-maximum'
+                    }
+                ],
+                Header: 'Long run',
+                id: 'long-run-probabilities'
             }
         ],
-        [expandedRows, props.nextCardPlayerProbabilities, props.aggregatedScores]
+        [
+            expandedRows,
+            props.longRunPlayerProbabilities,
+            props.nextCardPlayerProbabilities,
+            props.aggregatedScores
+        ]
     );
 
     const data = useMemo(() => {
         return Object.values(props.aggregatedScores).sort((a, b) => a.score - b.score);
-    }, [expandedRows, props.nextCardPlayerProbabilities, props.aggregatedScores]);
+    }, [
+        expandedRows,
+        props.longRunPlayerProbabilities,
+        props.nextCardPlayerProbabilities,
+        props.aggregatedScores
+    ]);
 
     return <CustomTable columns={columns} data={data} />;
 };
