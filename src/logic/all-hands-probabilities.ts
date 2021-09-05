@@ -12,7 +12,6 @@ import { getHandScores, isHandBelowStandingScore } from './hand';
 import {
     createEmptyHandProbabilities,
     createHandProbabilities,
-    createPartialHandProbabilities,
     mergeHandProbabilities,
     weightHandProbabilities
 } from './hand-probabilities';
@@ -45,7 +44,7 @@ export const getLongRunHandsProbabilities = (
     const allHandsProbabilities: AllHandsProbabilities = {};
 
     Object.values(hands).forEach((hand) => {
-        setHandProbabilities(
+        setLongRunHandProbabilities(
             aggregatedScores,
             hand,
             allHandsProbabilities,
@@ -67,13 +66,59 @@ export const getNextCardHandsProbabilities = (
     Object.values(hands).forEach((hand) => {
         if (getHandProbabilities(hand, nextCardProbabilities) === undefined) {
             const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
-                const weight = followingHand.lastCard.weight / outcomesWeight;
                 return {
                     probabilities: createHandProbabilities({
                         aggregatedScores,
                         handScore: followingHand.score
                     }),
-                    weight
+                    weight: followingHand.lastCard.weight / outcomesWeight
+                };
+            });
+
+            const nextHandProbabilities: HandProbabilities =
+                followingHandsProbabilities.reduce<HandProbabilities>(
+                    (reduced, next) => {
+                        return mergeHandProbabilities(
+                            reduced,
+                            weightHandProbabilities({
+                                handProbabilities: next.probabilities,
+                                weight: next.weight
+                            })
+                        );
+                    },
+                    createEmptyHandProbabilities({
+                        aggregatedScores
+                    })
+                );
+
+            nextCardProbabilities[getHandScores(hand)] = nextHandProbabilities;
+        }
+    });
+
+    return nextCardProbabilities;
+};
+
+const setLongRunHandProbabilities = (
+    aggregatedScores: AllAggregatedScores,
+    hand: Hand,
+    allHandsProbabilities: AllHandsProbabilities,
+    outcomesWeight: number,
+    standingScore: number
+) => {
+    if (getHandProbabilities(hand, allHandsProbabilities) === undefined) {
+        if (isHandBelowStandingScore(hand, standingScore)) {
+            const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
+                setLongRunHandProbabilities(
+                    aggregatedScores,
+                    followingHand,
+                    allHandsProbabilities,
+                    outcomesWeight,
+                    standingScore
+                );
+
+                return {
+                    probabilities: allHandsProbabilities[getHandScores(followingHand)],
+                    weight: followingHand.lastCard.weight / outcomesWeight
                 };
             });
 
@@ -93,55 +138,12 @@ export const getNextCardHandsProbabilities = (
                     })
                 );
 
-            nextCardProbabilities[getHandScores(hand)] = handProbabilities;
-        }
-    });
-
-    return nextCardProbabilities;
-};
-
-const setHandProbabilities = (
-    aggregatedScores: AllAggregatedScores,
-    hand: Hand,
-    allHandsProbabilities: AllHandsProbabilities,
-    outcomesWeight: number,
-    standingScore: number
-) => {
-    if (getHandProbabilities(hand, allHandsProbabilities) === undefined) {
-        hand.followingHands
-            .filter((followingHand) => isHandBelowStandingScore(followingHand, standingScore))
-            .forEach((followingHand) => {
-                setHandProbabilities(
-                    aggregatedScores,
-                    followingHand,
-                    allHandsProbabilities,
-                    outcomesWeight,
-                    standingScore
-                );
-            });
-
-        const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
-            return createPartialHandProbabilities({
+            allHandsProbabilities[getHandScores(hand)] = handProbabilities;
+        } else {
+            allHandsProbabilities[getHandScores(hand)] = createHandProbabilities({
                 aggregatedScores,
-                followingHand,
-                followingHandProbabilities: getHandProbabilities(
-                    followingHand,
-                    allHandsProbabilities
-                ),
-                outcomesWeight,
-                standingScore
+                handScore: hand.score
             });
-        });
-
-        const handProbabilities = followingHandsProbabilities.reduce<HandProbabilities>(
-            (reduced, next) => {
-                return mergeHandProbabilities(reduced, next);
-            },
-            createEmptyHandProbabilities({
-                aggregatedScores
-            })
-        );
-
-        allHandsProbabilities[getHandScores(hand)] = handProbabilities;
+        }
     }
 };

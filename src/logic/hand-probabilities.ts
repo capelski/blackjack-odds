@@ -1,6 +1,5 @@
-import { AggregatedScore, AllAggregatedScores, Hand, HandProbabilities } from '../types';
+import { AggregatedScore, AllAggregatedScores, HandProbabilities } from '../types';
 import { maximumScore } from './constants';
-import { isHandBelowStandingScore } from './hand';
 import {
     createRelativeProbabilities,
     getScoreRelativeProbabilities,
@@ -39,64 +38,6 @@ export const createHandProbabilities = ({
             handScore < aggregatedScore.score ? 1 : 0
         ),
         overMaximum: handScore > maximumScore ? 1 : 0
-    };
-};
-
-export const createPartialHandProbabilities = ({
-    aggregatedScores,
-    followingHand,
-    followingHandProbabilities,
-    outcomesWeight,
-    standingScore
-}: {
-    aggregatedScores: AllAggregatedScores;
-    followingHand: Hand;
-    followingHandProbabilities: HandProbabilities;
-    outcomesWeight: number;
-    standingScore: number;
-}): HandProbabilities => {
-    const nextCardWeight = followingHand.lastCard.weight / outcomesWeight;
-    const isBelowStandingScore = isHandBelowStandingScore(followingHand, standingScore);
-
-    return {
-        equal: createRelativeProbabilities(
-            aggregatedScores,
-            (aggregatedScore) =>
-                nextCardWeight! *
-                (isBelowStandingScore
-                    ? getEqualToScoreProbability(followingHandProbabilities, aggregatedScore)
-                    : followingHand.score === aggregatedScore.score
-                    ? 1
-                    : 0)
-        ),
-        higher: createRelativeProbabilities(
-            aggregatedScores,
-            (aggregatedScore) =>
-                nextCardWeight! *
-                (isBelowStandingScore
-                    ? getHigherThanScoreProbability(followingHandProbabilities, aggregatedScore)
-                    : followingHand.score <= maximumScore &&
-                      followingHand.score > aggregatedScore.score
-                    ? 1
-                    : 0)
-        ),
-        lower: createRelativeProbabilities(
-            aggregatedScores,
-            (aggregatedScore) =>
-                nextCardWeight! *
-                (isBelowStandingScore
-                    ? getLowerThanScoreProbability(followingHandProbabilities, aggregatedScore)
-                    : followingHand.score < aggregatedScore.score
-                    ? 1
-                    : 0)
-        ),
-        overMaximum:
-            nextCardWeight! *
-            (isBelowStandingScore
-                ? followingHandProbabilities.overMaximum
-                : followingHand.score > maximumScore
-                ? 1
-                : 0)
     };
 };
 
