@@ -66,36 +66,37 @@ export const getNextCardHandsProbabilities = (
     Object.values(hands).forEach((hand) => {
         if (getHandProbabilities(hand, nextCardProbabilities) === undefined) {
             const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
-                return {
-                    probabilities: createHandProbabilities({
+                return weightHandProbabilities({
+                    handProbabilities: createHandProbabilities({
                         aggregatedScores,
                         handScore: followingHand.score
                     }),
                     weight: followingHand.lastCard.weight / outcomesWeight
-                };
+                });
             });
 
-            const nextHandProbabilities: HandProbabilities =
-                followingHandsProbabilities.reduce<HandProbabilities>(
-                    (reduced, next) => {
-                        return mergeHandProbabilities(
-                            reduced,
-                            weightHandProbabilities({
-                                handProbabilities: next.probabilities,
-                                weight: next.weight
-                            })
-                        );
-                    },
-                    createEmptyHandProbabilities({
-                        aggregatedScores
-                    })
-                );
-
-            nextCardProbabilities[getHandScores(hand)] = nextHandProbabilities;
+            nextCardProbabilities[getHandScores(hand)] = mergeFollowingHandsProbabilities(
+                aggregatedScores,
+                followingHandsProbabilities
+            );
         }
     });
 
     return nextCardProbabilities;
+};
+
+const mergeFollowingHandsProbabilities = (
+    aggregatedScores: AllAggregatedScores,
+    followingHandsProbabilities: HandProbabilities[]
+) => {
+    return followingHandsProbabilities.reduce<HandProbabilities>(
+        (reduced, next) => {
+            return mergeHandProbabilities(reduced, next);
+        },
+        createEmptyHandProbabilities({
+            aggregatedScores
+        })
+    );
 };
 
 const setLongRunHandProbabilities = (
@@ -116,29 +117,16 @@ const setLongRunHandProbabilities = (
                     standingScore
                 );
 
-                return {
-                    probabilities: allHandsProbabilities[getHandScores(followingHand)],
+                return weightHandProbabilities({
+                    handProbabilities: allHandsProbabilities[getHandScores(followingHand)],
                     weight: followingHand.lastCard.weight / outcomesWeight
-                };
+                });
             });
 
-            const handProbabilities: HandProbabilities =
-                followingHandsProbabilities.reduce<HandProbabilities>(
-                    (reduced, next) => {
-                        return mergeHandProbabilities(
-                            reduced,
-                            weightHandProbabilities({
-                                handProbabilities: next.probabilities,
-                                weight: next.weight
-                            })
-                        );
-                    },
-                    createEmptyHandProbabilities({
-                        aggregatedScores
-                    })
-                );
-
-            allHandsProbabilities[getHandScores(hand)] = handProbabilities;
+            allHandsProbabilities[getHandScores(hand)] = mergeFollowingHandsProbabilities(
+                aggregatedScores,
+                followingHandsProbabilities
+            );
         } else {
             allHandsProbabilities[getHandScores(hand)] = createHandProbabilities({
                 aggregatedScores,
