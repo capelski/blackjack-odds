@@ -90,9 +90,7 @@ const mergeFollowingHandsProbabilities = (
     followingHandsProbabilities: HandProbabilities[]
 ) => {
     return followingHandsProbabilities.reduce<HandProbabilities>(
-        (reduced, next) => {
-            return mergeHandProbabilities(reduced, next);
-        },
+        mergeHandProbabilities,
         createEmptyHandProbabilities({
             aggregatedScores
         })
