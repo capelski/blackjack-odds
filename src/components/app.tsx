@@ -65,7 +65,8 @@ export const App: React.FC = () => {
             aggregatedScores: allAggregatedScores,
             cardOutcomes,
             dealerProbabilities,
-            playerProbabilities: longRunPlayerProbabilities
+            playerProbabilities: longRunPlayerProbabilities,
+            playerStandingScore
         });
 
         return { longRunPlayerProbabilities, optimalActions };
@@ -89,7 +90,7 @@ export const App: React.FC = () => {
                 dealerProbabilities={dealerProbabilities}
                 decimals={decimals}
                 optimalActions={optimalActions}
-                playerProbabilities={nextCardPlayerProbabilities}
+                playerProbabilities={longRunPlayerProbabilities}
             />
 
             <h3>Scores table</h3>
