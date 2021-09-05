@@ -30,3 +30,15 @@ export const mergeRelativeProbabilities = (
         };
     }, {});
 };
+
+export const weightRelativeProbabilities = (
+    relativeProbabilities: RelativeProbabilities,
+    weight: number
+): RelativeProbabilities => {
+    return Object.keys(relativeProbabilities).reduce<RelativeProbabilities>((reduced, nextKey) => {
+        return {
+            ...reduced,
+            [nextKey]: relativeProbabilities[nextKey] * weight
+        };
+    }, {});
+};

@@ -45,6 +45,6 @@ export const getHandScores = (hand: Hand) => {
     return hand.scores.join('/');
 };
 
-export const isHandBelowStandingScore = (hand: Hand, standingScore: number | undefined) => {
-    return standingScore !== undefined && hand.score < standingScore;
+export const isHandBelowStandingScore = (hand: Hand, standingScore: number) => {
+    return hand.score < standingScore;
 };

@@ -1,7 +1,10 @@
 import React, { useMemo, useState } from 'react';
 import { getAllAggregatedScores } from '../logic/all-aggregated-scores';
 import { getAllHands, getRootHands } from '../logic/all-hands';
-import { getAllHandsProbabilities } from '../logic/all-hands-probabilities';
+import {
+    getLongRunHandsProbabilities,
+    getNextCardHandsProbabilities
+} from '../logic/all-hands-probabilities';
 import { getAllCardOutcomes, getCardOutcomesWeight } from '../logic/card-outcome';
 import { dealerStandingScore } from '../logic/constants';
 import { getOptimalActions } from '../logic/optimal-actions';
@@ -28,17 +31,16 @@ export const App: React.FC = () => {
         const outcomesWeight = getCardOutcomesWeight(cardOutcomes);
         const allAggregatedScores = getAllAggregatedScores(allHands);
 
-        const dealerProbabilities = getAllHandsProbabilities(
+        const dealerProbabilities = getLongRunHandsProbabilities(
             allAggregatedScores,
             allHands,
             outcomesWeight,
             dealerStandingScore
         );
-        const nextCardPlayerProbabilities = getAllHandsProbabilities(
+        const nextCardPlayerProbabilities = getNextCardHandsProbabilities(
             allAggregatedScores,
             allHands,
-            outcomesWeight,
-            undefined
+            outcomesWeight
         );
 
         return {
@@ -52,7 +54,7 @@ export const App: React.FC = () => {
     }, []);
 
     const { longRunPlayerProbabilities, optimalActions } = useMemo(() => {
-        const longRunPlayerProbabilities = getAllHandsProbabilities(
+        const longRunPlayerProbabilities = getLongRunHandsProbabilities(
             allAggregatedScores,
             allHands,
             outcomesWeight,

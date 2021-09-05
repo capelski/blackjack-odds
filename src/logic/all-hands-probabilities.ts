@@ -11,8 +11,10 @@ import { getCardOutcomeScores } from './card-outcome';
 import { getHandScores, isHandBelowStandingScore } from './hand';
 import {
     createEmptyHandProbabilities,
+    createHandProbabilities,
     createPartialHandProbabilities,
-    mergeHandProbabilities
+    mergeHandProbabilities,
+    weightHandProbabilities
 } from './hand-probabilities';
 
 export const getAggregatedScoreProbabilities = (
@@ -22,11 +24,23 @@ export const getAggregatedScoreProbabilities = (
     return allHandsProbabilities[aggregatedScore.key];
 };
 
-export const getAllHandsProbabilities = (
+export const getCardOutcomeProbabilities = (
+    cardOutcome: CardOutcome,
+    allHandsProbabilities: AllHandsProbabilities
+) => {
+    return allHandsProbabilities[getCardOutcomeScores(cardOutcome)];
+};
+
+export const getHandProbabilities = (hand: Hand, allHandsProbabilities: AllHandsProbabilities) => {
+    const handScores = getHandScores(hand);
+    return allHandsProbabilities[handScores];
+};
+
+export const getLongRunHandsProbabilities = (
     aggregatedScores: AllAggregatedScores,
     hands: AllHands,
     outcomesWeight: number,
-    standingScore: number | undefined
+    standingScore: number
 ): AllHandsProbabilities => {
     const allHandsProbabilities: AllHandsProbabilities = {};
 
@@ -43,16 +57,47 @@ export const getAllHandsProbabilities = (
     return allHandsProbabilities;
 };
 
-export const getCardOutcomeProbabilities = (
-    cardOutcome: CardOutcome,
-    allHandsProbabilities: AllHandsProbabilities
-) => {
-    return allHandsProbabilities[getCardOutcomeScores(cardOutcome)];
-};
+export const getNextCardHandsProbabilities = (
+    aggregatedScores: AllAggregatedScores,
+    hands: AllHands,
+    outcomesWeight: number
+): AllHandsProbabilities => {
+    const nextCardProbabilities: AllHandsProbabilities = {};
 
-export const getHandProbabilities = (hand: Hand, allHandsProbabilities: AllHandsProbabilities) => {
-    const handScores = getHandScores(hand);
-    return allHandsProbabilities[handScores];
+    Object.values(hands).forEach((hand) => {
+        if (getHandProbabilities(hand, nextCardProbabilities) === undefined) {
+            const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
+                const weight = followingHand.lastCard.weight / outcomesWeight;
+                return {
+                    probabilities: createHandProbabilities({
+                        aggregatedScores,
+                        handScore: followingHand.score
+                    }),
+                    weight
+                };
+            });
+
+            const handProbabilities: HandProbabilities =
+                followingHandsProbabilities.reduce<HandProbabilities>(
+                    (reduced, next) => {
+                        return mergeHandProbabilities(
+                            reduced,
+                            weightHandProbabilities({
+                                handProbabilities: next.probabilities,
+                                weight: next.weight
+                            })
+                        );
+                    },
+                    createEmptyHandProbabilities({
+                        aggregatedScores
+                    })
+                );
+
+            nextCardProbabilities[getHandScores(hand)] = handProbabilities;
+        }
+    });
+
+    return nextCardProbabilities;
 };
 
 const setHandProbabilities = (
@@ -60,7 +105,7 @@ const setHandProbabilities = (
     hand: Hand,
     allHandsProbabilities: AllHandsProbabilities,
     outcomesWeight: number,
-    standingScore: number | undefined
+    standingScore: number
 ) => {
     if (getHandProbabilities(hand, allHandsProbabilities) === undefined) {
         hand.followingHands
