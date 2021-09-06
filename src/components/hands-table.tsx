@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
+import { getRootHands } from '../logic/all-hands';
 import { getHandProbabilities } from '../logic/all-hands-probabilities';
 import { dealerStandingScore, maximumScore } from '../logic/constants';
 import { getHandScores, getHandSymbols } from '../logic/hand';
@@ -8,16 +9,16 @@ import {
     getHigherThanScoreProbability,
     getLowerThanScoreProbability
 } from '../logic/hand-probabilities';
-import { AllHandsProbabilities, ExpandedRows, Hand } from '../types';
+import { AllHands, AllHandsProbabilities, ExpandedRows, Hand, OutcomesSet } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface HandsTableProps {
+    allHands: AllHands;
     decimals: number;
     longRunPlayerProbabilities: AllHandsProbabilities;
     nextCardPlayerProbabilities: AllHandsProbabilities;
-    outcomesWeight: number;
-    rootHands: Hand[];
+    outcomesSet: OutcomesSet;
 }
 
 const getHandRows = (hand: Hand, expandedRows: ExpandedRows): Hand[] => {
@@ -97,7 +98,7 @@ export const HandsTable = (props: HandsTableProps) => {
                 Cell: (cellProps: CellProps<Hand, Hand['lastCard']>) => (
                     <RoundedFloat
                         decimals={props.decimals}
-                        value={cellProps.value.weight / props.outcomesWeight}
+                        value={cellProps.value.weight / props.outcomesSet.totalWeight}
                         isPercentage={true}
                     />
                 ),
@@ -250,16 +251,17 @@ export const HandsTable = (props: HandsTableProps) => {
             }
         ];
 
-        const data = props.rootHands
+        const data = getRootHands(props.allHands, props.outcomesSet.allOutcomes)
             .map((hand) => getHandRows(hand, expandedRows))
             .reduce((reduced, row) => reduced.concat(row), []);
 
         return { columns, data };
     }, [
         expandedRows,
+        props.allHands,
         props.longRunPlayerProbabilities,
         props.nextCardPlayerProbabilities,
-        props.rootHands
+        props.outcomesSet
     ]);
 
     return (

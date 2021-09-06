@@ -4,9 +4,9 @@ import {
     AggregatedScoreAction,
     AllAggregatedScores,
     AllHandsProbabilities,
-    CardOutcome,
     HandProbabilities,
-    OptimalActions
+    OptimalActions,
+    OutcomesSet
 } from '../types';
 import {
     getAggregatedScoreProbabilities,
@@ -17,16 +17,14 @@ import { createEmptyTurnover, createTurnover, mergeTurnovers, weightTurnover } f
 
 export const getOptimalActions = ({
     aggregatedScores,
-    cardOutcomes,
     dealerProbabilities,
-    outcomesWeight,
+    outcomesSet,
     playerProbabilities,
     playerStandingScore
 }: {
     aggregatedScores: AllAggregatedScores;
-    cardOutcomes: CardOutcome[];
     dealerProbabilities: AllHandsProbabilities;
-    outcomesWeight: number;
+    outcomesSet: OutcomesSet;
     playerProbabilities: AllHandsProbabilities;
     playerStandingScore: number;
 }): OptimalActions => {
@@ -38,7 +36,7 @@ export const getOptimalActions = ({
             playerProbabilities
         );
 
-        const actions = cardOutcomes.map<AggregatedScoreAction>((cardOutcome) => {
+        const actions = outcomesSet.allOutcomes.map<AggregatedScoreAction>((cardOutcome) => {
             const dealerCardProbabilities = getCardOutcomeProbabilities(
                 cardOutcome,
                 dealerProbabilities
@@ -84,7 +82,7 @@ export const getOptimalActions = ({
             turnover: actions.reduce((reduced, next) => {
                 return mergeTurnovers(
                     reduced,
-                    weightTurnover(next.turnover, next.dealerCard.weight / outcomesWeight)
+                    weightTurnover(next.turnover, next.dealerCard.weight / outcomesSet.totalWeight)
                 );
             }, createEmptyTurnover())
         };

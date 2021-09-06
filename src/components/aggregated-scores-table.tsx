@@ -21,7 +21,6 @@ interface AggregatedScoresTableProps {
     decimals: number;
     longRunPlayerProbabilities: AllHandsProbabilities;
     nextCardPlayerProbabilities: AllHandsProbabilities;
-    outcomesWeight: number;
 }
 
 export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {

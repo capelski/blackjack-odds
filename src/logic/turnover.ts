@@ -1,12 +1,11 @@
 import {
     Action,
     AggregatedScore,
-    CardOutcome,
     HandProbabilities,
     OptimalActions,
+    OutcomesSet,
     Turnover
 } from '../types';
-import { getCardOutcomeScores } from './card-outcome';
 import { dealerStandingScore } from './constants';
 import {
     getEqualToScoreProbability,
@@ -65,15 +64,14 @@ export const createTurnover = (
 };
 
 export const getOverallTurnover = (
-    cardOutcomes: CardOutcome[],
     optimalActions: OptimalActions,
-    outcomesWeight: number
+    outcomesSet: OutcomesSet
 ): Turnover => {
-    return cardOutcomes
+    return outcomesSet.allOutcomes
         .map((cardOutcome) => {
             return weightTurnover(
-                optimalActions[getCardOutcomeScores(cardOutcome)].turnover,
-                cardOutcome.weight / outcomesWeight
+                optimalActions[cardOutcome.key].turnover,
+                cardOutcome.weight / outcomesSet.totalWeight
             );
         })
         .reduce(mergeTurnovers, createEmptyTurnover());

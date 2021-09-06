@@ -7,7 +7,6 @@ import {
     Hand,
     HandProbabilities
 } from '../types';
-import { getCardOutcomeScores } from './card-outcome';
 import { getHandScores, isHandBelowStandingScore } from './hand';
 import {
     createEmptyHandProbabilities,
@@ -27,7 +26,7 @@ export const getCardOutcomeProbabilities = (
     cardOutcome: CardOutcome,
     allHandsProbabilities: AllHandsProbabilities
 ) => {
-    return allHandsProbabilities[getCardOutcomeScores(cardOutcome)];
+    return allHandsProbabilities[cardOutcome.key];
 };
 
 export const getHandProbabilities = (hand: Hand, allHandsProbabilities: AllHandsProbabilities) => {

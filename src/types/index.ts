@@ -11,5 +11,6 @@ export { ExpandedRows } from './expanded-rows';
 export { Hand } from './hand';
 export { HandProbabilities } from './hand-probabilities';
 export { OptimalActions } from './optimal-actions';
+export { OutcomesSet } from './outcomes-set';
 export { RelativeProbabilities } from './relative-probabilities';
 export { Turnover } from './turnover';

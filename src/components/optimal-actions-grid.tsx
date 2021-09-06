@@ -1,15 +1,14 @@
 import React, { CSSProperties, useState } from 'react';
 import { actionColors } from '../logic/constants';
 import { getOverallTurnover } from '../logic/turnover';
-import { AllHandsProbabilities, CardOutcome, ExpandedRows, OptimalActions } from '../types';
+import { AllHandsProbabilities, ExpandedRows, OptimalActions, OutcomesSet } from '../types';
 import { TurnoverComponent } from './turnover-component';
 
 interface OptimalActionsGridProps {
-    cardOutcomes: CardOutcome[];
     dealerProbabilities: AllHandsProbabilities;
     decimals: number;
     optimalActions: OptimalActions;
-    outcomesWeight: number;
+    outcomesSet: OutcomesSet;
     playerProbabilities: AllHandsProbabilities;
 }
 
@@ -20,14 +19,10 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
         borderBottom: '1px solid black',
         borderRight: '1px solid black',
         textAlign: 'center',
-        width: `${100 / props.cardOutcomes.length + 1}%`
+        width: `${100 / props.outcomesSet.allOutcomes.length + 1}%`
     };
 
-    const overallTurnover = getOverallTurnover(
-        props.cardOutcomes,
-        props.optimalActions,
-        props.outcomesWeight
-    );
+    const overallTurnover = getOverallTurnover(props.optimalActions, props.outcomesSet);
 
     return (
         <div>
@@ -44,7 +39,7 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                 >
                     -
                 </span>
-                {props.cardOutcomes.map((cardOutcome) => (
+                {props.outcomesSet.allOutcomes.map((cardOutcome) => (
                     <span
                         style={{
                             ...spanStyle,
