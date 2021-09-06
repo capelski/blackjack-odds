@@ -1,5 +1,7 @@
 export { Action } from './action';
 export { AggregatedScore } from './aggregated-score';
+export { AggregatedScoreAction } from './aggregated-score-action';
+export { AggregatedScoreAllActions } from './aggregated-score-all-actions';
 export { AllAggregatedScores } from './all-aggregated-scores';
 export { AllHands } from './all-hands';
 export { AllHandsProbabilities } from './all-hands-probabilities';
@@ -10,3 +12,4 @@ export { Hand } from './hand';
 export { HandProbabilities } from './hand-probabilities';
 export { OptimalActions } from './optimal-actions';
 export { RelativeProbabilities } from './relative-probabilities';
+export { Turnover } from './turnover';

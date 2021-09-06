@@ -1,25 +1,15 @@
 import React, { CSSProperties, useState } from 'react';
-import {
-    getAggregatedScoreProbabilities,
-    getCardOutcomeProbabilities
-} from '../logic/all-hands-probabilities';
 import { actionColors } from '../logic/constants';
-import {
-    getEqualToScoreProbability,
-    getLowerThanScoreProbability
-} from '../logic/hand-probabilities';
-import {
-    getAggregatedScoreHittingLoss,
-    getAggregatedScoreStandingLoss
-} from '../logic/optimal-actions';
+import { getOverallTurnover } from '../logic/turnover';
 import { AllHandsProbabilities, CardOutcome, ExpandedRows, OptimalActions } from '../types';
-import { RoundedFloat } from './rounded-float';
+import { TurnoverComponent } from './turnover-component';
 
 interface OptimalActionsGridProps {
     cardOutcomes: CardOutcome[];
     dealerProbabilities: AllHandsProbabilities;
     decimals: number;
     optimalActions: OptimalActions;
+    outcomesWeight: number;
     playerProbabilities: AllHandsProbabilities;
 }
 
@@ -33,8 +23,17 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
         width: `${100 / props.cardOutcomes.length + 1}%`
     };
 
+    const overallTurnover = getOverallTurnover(
+        props.cardOutcomes,
+        props.optimalActions,
+        props.outcomesWeight
+    );
+
     return (
         <div>
+            <TurnoverComponent decimals={props.decimals} turnover={overallTurnover} />
+            <br />
+            <br />
             <div style={{ display: 'flex', width: '100%' }}>
                 <span
                     style={{
@@ -57,12 +56,8 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                     </span>
                 ))}
             </div>
-            {Object.values(props.optimalActions).map((scoreOptimalActions) => {
-                const displayScores = scoreOptimalActions.aggregatedScore.key;
-                const aggregatedScoreProbabilities = getAggregatedScoreProbabilities(
-                    scoreOptimalActions.aggregatedScore,
-                    props.playerProbabilities
-                );
+            {Object.values(props.optimalActions).map((scoreAllActions) => {
+                const displayScores = scoreAllActions.aggregatedScore.key;
                 const isRowExpanded = expandedRows[displayScores];
 
                 return (
@@ -85,63 +80,34 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                             >
                                 {isRowExpanded ? '✖️' : '👁️'}
                             </span>
+                            {isRowExpanded && (
+                                <React.Fragment>
+                                    <br />
+                                    <br />
+                                    <TurnoverComponent
+                                        decimals={props.decimals}
+                                        turnover={scoreAllActions.turnover}
+                                    />
+                                </React.Fragment>
+                            )}
                         </span>
-                        {Object.values(scoreOptimalActions.actions).map((optimalAction) => {
-                            const cardProbabilities = getCardOutcomeProbabilities(
-                                optimalAction.dealerCard,
-                                props.dealerProbabilities
-                            );
-
+                        {Object.values(scoreAllActions.allActions).map((scoreAction) => {
                             return (
                                 <span
                                     style={{
                                         ...spanStyle,
-                                        backgroundColor: actionColors[optimalAction.playerAction]
+                                        backgroundColor: actionColors[scoreAction.action]
                                     }}
-                                    key={optimalAction.dealerCard.symbol}
+                                    key={scoreAction.dealerCard.symbol}
                                 >
-                                    {optimalAction.playerAction.substring(0, 1)}
+                                    {scoreAction.action.substring(0, 1)}
                                     {isRowExpanded && (
                                         <React.Fragment>
                                             <br />
                                             <br />
-                                            H. loss:
-                                            <RoundedFloat
+                                            <TurnoverComponent
                                                 decimals={props.decimals}
-                                                value={aggregatedScoreProbabilities.overMaximum}
-                                            />
-                                            <br />
-                                            H. less:
-                                            <RoundedFloat
-                                                decimals={props.decimals}
-                                                value={
-                                                    getLowerThanScoreProbability(
-                                                        aggregatedScoreProbabilities,
-                                                        scoreOptimalActions.aggregatedScore
-                                                    ) +
-                                                    getEqualToScoreProbability(
-                                                        aggregatedScoreProbabilities,
-                                                        scoreOptimalActions.aggregatedScore
-                                                    )
-                                                }
-                                            />
-                                            <br />
-                                            H. worst:
-                                            <RoundedFloat
-                                                decimals={props.decimals}
-                                                value={getAggregatedScoreHittingLoss(
-                                                    scoreOptimalActions.aggregatedScore,
-                                                    aggregatedScoreProbabilities
-                                                )}
-                                            />
-                                            <br />
-                                            S. loss:
-                                            <RoundedFloat
-                                                decimals={props.decimals}
-                                                value={getAggregatedScoreStandingLoss(
-                                                    scoreOptimalActions.aggregatedScore,
-                                                    cardProbabilities
-                                                )}
+                                                turnover={scoreAction.turnover}
                                             />
                                         </React.Fragment>
                                     )}

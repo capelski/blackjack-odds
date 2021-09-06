@@ -1,6 +1,7 @@
 import {
     Action,
     AggregatedScore,
+    AggregatedScoreAction,
     AllAggregatedScores,
     AllHandsProbabilities,
     CardOutcome,
@@ -12,17 +13,20 @@ import {
     getCardOutcomeProbabilities
 } from './all-hands-probabilities';
 import { getHigherThanScoreProbability, getLowerThanScoreProbability } from './hand-probabilities';
+import { createEmptyTurnover, createTurnover, mergeTurnovers, weightTurnover } from './turnover';
 
 export const getOptimalActions = ({
     aggregatedScores,
     cardOutcomes,
     dealerProbabilities,
+    outcomesWeight,
     playerProbabilities,
     playerStandingScore
 }: {
     aggregatedScores: AllAggregatedScores;
     cardOutcomes: CardOutcome[];
     dealerProbabilities: AllHandsProbabilities;
+    outcomesWeight: number;
     playerProbabilities: AllHandsProbabilities;
     playerStandingScore: number;
 }): OptimalActions => {
@@ -33,34 +37,57 @@ export const getOptimalActions = ({
             aggregatedScore,
             playerProbabilities
         );
-        optimalActions[aggregatedScore.key] = {
-            actions: {},
-            aggregatedScore: aggregatedScore
-        };
 
-        cardOutcomes.forEach((cardOutcome) => {
+        const actions = cardOutcomes.map<AggregatedScoreAction>((cardOutcome) => {
             const dealerCardProbabilities = getCardOutcomeProbabilities(
                 cardOutcome,
                 dealerProbabilities
             );
 
-            const hittingLoss =
-                aggregatedScore.score >= playerStandingScore
-                    ? 1
-                    : getAggregatedScoreHittingLoss(aggregatedScore, playerScoreProbabilities);
+            const hittingLoss = getAggregatedScoreHittingLoss(
+                aggregatedScore,
+                playerScoreProbabilities
+            );
+            const effectiveHittingLoss =
+                aggregatedScore.score >= playerStandingScore ? 1 : hittingLoss;
+
             const standingLoss = getAggregatedScoreStandingLoss(
                 aggregatedScore,
                 dealerCardProbabilities
             );
 
             const optimalAction: Action =
-                standingLoss <= hittingLoss ? Action.Standing : Action.Hitting;
+                standingLoss <= effectiveHittingLoss ? Action.Standing : Action.Hitting;
 
-            optimalActions[aggregatedScore.key].actions[cardOutcome.symbol] = {
+            return {
+                action: optimalAction,
                 dealerCard: cardOutcome,
-                playerAction: optimalAction
+                turnover: createTurnover(
+                    aggregatedScore,
+                    dealerCardProbabilities,
+                    hittingLoss,
+                    playerScoreProbabilities,
+                    optimalAction,
+                    standingLoss
+                )
             };
         });
+
+        optimalActions[aggregatedScore.key] = {
+            allActions: actions.reduce((reduced, next) => {
+                return {
+                    ...reduced,
+                    [next.dealerCard.symbol]: next
+                };
+            }, {}),
+            aggregatedScore: aggregatedScore,
+            turnover: actions.reduce((reduced, next) => {
+                return mergeTurnovers(
+                    reduced,
+                    weightTurnover(next.turnover, next.dealerCard.weight / outcomesWeight)
+                );
+            }, createEmptyTurnover())
+        };
     });
 
     return optimalActions;

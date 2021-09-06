@@ -65,6 +65,7 @@ export const App: React.FC = () => {
             aggregatedScores: allAggregatedScores,
             cardOutcomes,
             dealerProbabilities,
+            outcomesWeight,
             playerProbabilities: longRunPlayerProbabilities,
             playerStandingScore
         });
@@ -90,6 +91,7 @@ export const App: React.FC = () => {
                 dealerProbabilities={dealerProbabilities}
                 decimals={decimals}
                 optimalActions={optimalActions}
+                outcomesWeight={outcomesWeight}
                 playerProbabilities={longRunPlayerProbabilities}
             />
 
