@@ -7,7 +7,7 @@ import {
     Hand,
     HandProbabilities
 } from '../types';
-import { getHandScores, isHandBelowStandingScore } from './hand';
+import { getHandScores } from './hand';
 import {
     createEmptyHandProbabilities,
     createHandProbabilities,
@@ -104,7 +104,7 @@ const setLongRunHandProbabilities = (
     standingScore: number
 ) => {
     if (getHandProbabilities(hand, allHandsProbabilities) === undefined) {
-        if (isHandBelowStandingScore(hand, standingScore)) {
+        if (hand.score < standingScore) {
             const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
                 setLongRunHandProbabilities(
                     aggregatedScores,
