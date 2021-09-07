@@ -10,7 +10,12 @@ interface TurnoverComponentProps {
 export const TurnoverComponent: React.FC<TurnoverComponentProps> = (props) => {
     return (
         <React.Fragment>
-            H. loss: <RoundedFloat decimals={props.decimals} value={props.turnover.hittingLoss} />
+            H. loss:{' '}
+            {props.turnover.canHit ? (
+                <RoundedFloat decimals={props.decimals} value={props.turnover.hittingLoss} />
+            ) : (
+                '-'
+            )}
             <br />
             S. loss: <RoundedFloat decimals={props.decimals} value={props.turnover.standingLoss} />
             <br />

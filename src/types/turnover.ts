@@ -1,4 +1,5 @@
 export type Turnover = {
+    canHit: boolean;
     dealerBusting: number;
     hittingLoss: number;
     losses: number;

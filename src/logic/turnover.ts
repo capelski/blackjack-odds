@@ -15,6 +15,7 @@ import {
 
 export const createEmptyTurnover = (): Turnover => {
     return {
+        canHit: true,
         dealerBusting: 0,
         hittingLoss: 0,
         losses: 0,
@@ -53,6 +54,7 @@ export const createTurnover = (
               dealerBusting;
 
     return {
+        canHit: playerProbabilities.canHit,
         dealerBusting,
         hittingLoss,
         losses,
@@ -79,6 +81,7 @@ export const getOverallTurnover = (
 
 export const mergeTurnovers = (a: Turnover, b: Turnover): Turnover => {
     return {
+        canHit: a.canHit && b.canHit,
         dealerBusting: a.dealerBusting + b.dealerBusting,
         hittingLoss: a.hittingLoss + b.hittingLoss,
         losses: a.losses + b.losses,
@@ -91,6 +94,7 @@ export const mergeTurnovers = (a: Turnover, b: Turnover): Turnover => {
 
 export const weightTurnover = (turnover: Turnover, weight: number): Turnover => {
     return {
+        canHit: turnover.canHit,
         dealerBusting: turnover.dealerBusting * weight,
         hittingLoss: turnover.hittingLoss * weight,
         losses: turnover.losses * weight,
