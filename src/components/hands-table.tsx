@@ -17,7 +17,7 @@ interface HandsTableProps {
     allHands: AllHands;
     decimals: number;
     longRunPlayerProbabilities: AllHandsProbabilities;
-    nextCardPlayerProbabilities: AllHandsProbabilities;
+    nextCardProbabilities: AllHandsProbabilities;
     outcomesSet: OutcomesSet;
 }
 
@@ -111,7 +111,7 @@ export const HandsTable = (props: HandsTableProps) => {
                         Cell: (cellProps: CellProps<Hand>) => {
                             const handProbabilities = getHandProbabilities(
                                 cellProps.row.original,
-                                props.nextCardPlayerProbabilities
+                                props.nextCardProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
@@ -132,7 +132,7 @@ export const HandsTable = (props: HandsTableProps) => {
                         Cell: (cellProps: CellProps<Hand>) => {
                             const handProbabilities = getHandProbabilities(
                                 cellProps.row.original,
-                                props.nextCardPlayerProbabilities
+                                props.nextCardProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
@@ -159,7 +159,7 @@ export const HandsTable = (props: HandsTableProps) => {
                         Cell: (cellProps: CellProps<Hand>) => {
                             const handProbabilities = getHandProbabilities(
                                 cellProps.row.original,
-                                props.nextCardPlayerProbabilities
+                                props.nextCardProbabilities
                             );
                             return cellProps.row.original.score < maximumScore ? (
                                 <RoundedFloat
@@ -260,7 +260,7 @@ export const HandsTable = (props: HandsTableProps) => {
         expandedRows,
         props.allHands,
         props.longRunPlayerProbabilities,
-        props.nextCardPlayerProbabilities,
+        props.nextCardProbabilities,
         props.outcomesSet
     ]);
 

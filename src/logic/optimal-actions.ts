@@ -12,28 +12,33 @@ import {
     getAggregatedScoreProbabilities,
     getCardOutcomeProbabilities
 } from './all-hands-probabilities';
+import { dealerStandingScore } from './constants';
 import { getHigherThanScoreProbability, getLowerThanScoreProbability } from './hand-probabilities';
 import { createEmptyTurnover, createTurnover, mergeTurnovers, weightTurnover } from './turnover';
 
 export const getOptimalActions = ({
-    aggregatedScores,
+    allAggregatedScores,
     dealerProbabilities,
+    nextCardProbabilities,
     outcomesSet,
-    playerProbabilities,
-    playerStandingScore
+    playerProbabilities
 }: {
-    aggregatedScores: AllAggregatedScores;
+    allAggregatedScores: AllAggregatedScores;
     dealerProbabilities: AllHandsProbabilities;
+    nextCardProbabilities: AllHandsProbabilities;
     outcomesSet: OutcomesSet;
     playerProbabilities: AllHandsProbabilities;
-    playerStandingScore: number;
 }): OptimalActions => {
     const optimalActions: OptimalActions = {};
 
-    Object.values(aggregatedScores).forEach((aggregatedScore) => {
-        const playerScoreProbabilities = getAggregatedScoreProbabilities(
+    Object.values(allAggregatedScores).forEach((aggregatedScore) => {
+        const longRunScoreProbabilities = getAggregatedScoreProbabilities(
             aggregatedScore,
             playerProbabilities
+        );
+        const nextCardScoreProbabilities = getAggregatedScoreProbabilities(
+            aggregatedScore,
+            nextCardProbabilities
         );
 
         const actions = outcomesSet.allOutcomes.map<AggregatedScoreAction>((cardOutcome) => {
@@ -42,20 +47,24 @@ export const getOptimalActions = ({
                 dealerProbabilities
             );
 
-            const hittingLoss = getAggregatedScoreHittingLoss(
+            const longRunHittingLoss = getScoreHittingLoss(
                 aggregatedScore,
-                playerScoreProbabilities
+                longRunScoreProbabilities
             );
-            const effectiveHittingLoss =
-                aggregatedScore.score >= playerStandingScore ? 1 : hittingLoss;
-
-            const standingLoss = getAggregatedScoreStandingLoss(
+            const longRunStandingLoss = getScoreStandingLoss(
                 aggregatedScore,
                 dealerCardProbabilities
             );
 
+            const isHittingRiskless =
+                nextCardScoreProbabilities.overMaximum === 0 &&
+                aggregatedScore.score < dealerStandingScore;
+
             const optimalAction: Action =
-                standingLoss <= effectiveHittingLoss ? Action.Standing : Action.Hitting;
+                longRunScoreProbabilities.canHit &&
+                (longRunStandingLoss > longRunHittingLoss || isHittingRiskless)
+                    ? Action.Hitting
+                    : Action.Standing;
 
             return {
                 action: optimalAction,
@@ -63,10 +72,10 @@ export const getOptimalActions = ({
                 turnover: createTurnover(
                     aggregatedScore,
                     dealerCardProbabilities,
-                    hittingLoss,
-                    playerScoreProbabilities,
+                    longRunHittingLoss,
+                    longRunScoreProbabilities,
                     optimalAction,
-                    standingLoss
+                    longRunStandingLoss
                 )
             };
         });
@@ -91,18 +100,19 @@ export const getOptimalActions = ({
     return optimalActions;
 };
 
-export const getAggregatedScoreHittingLoss = (
-    aggregatedScore: AggregatedScore,
+export const getScoreHittingLoss = (
+    score: number | AggregatedScore,
     playerScoreProbabilities: HandProbabilities
 ) => {
     return (
         playerScoreProbabilities.overMaximum +
-        getLowerThanScoreProbability(playerScoreProbabilities, aggregatedScore)
+        getLowerThanScoreProbability(playerScoreProbabilities, score)
     );
 };
-export const getAggregatedScoreStandingLoss = (
-    aggregatedScore: AggregatedScore,
+
+export const getScoreStandingLoss = (
+    score: number | AggregatedScore,
     dealerCardProbabilities: HandProbabilities
 ) => {
-    return getHigherThanScoreProbability(dealerCardProbabilities, aggregatedScore);
+    return getHigherThanScoreProbability(dealerCardProbabilities, score);
 };

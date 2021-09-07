@@ -20,7 +20,7 @@ interface AggregatedScoresTableProps {
     aggregatedScores: AllAggregatedScores;
     decimals: number;
     longRunPlayerProbabilities: AllHandsProbabilities;
-    nextCardPlayerProbabilities: AllHandsProbabilities;
+    nextCardProbabilities: AllHandsProbabilities;
 }
 
 export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
@@ -85,7 +85,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
                             const scoreProbabilities = getAggregatedScoreProbabilities(
                                 cellProps.row.original,
-                                props.nextCardPlayerProbabilities
+                                props.nextCardProbabilities
                             );
                             return (
                                 <RoundedFloat
@@ -104,7 +104,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
                             const scoreProbabilities = getAggregatedScoreProbabilities(
                                 cellProps.row.original,
-                                props.nextCardPlayerProbabilities
+                                props.nextCardProbabilities
                             );
                             return (
                                 <RoundedFloat
@@ -129,7 +129,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
                         Cell: (cellProps: CellProps<AggregatedScore>) => {
                             const scoreProbabilities = getAggregatedScoreProbabilities(
                                 cellProps.row.original,
-                                props.nextCardPlayerProbabilities
+                                props.nextCardProbabilities
                             );
 
                             return (
@@ -221,7 +221,7 @@ export const AggregatedScoresTable = (props: AggregatedScoresTableProps) => {
         expandedRows,
         props.decimals,
         props.longRunPlayerProbabilities,
-        props.nextCardPlayerProbabilities,
+        props.nextCardProbabilities,
         props.aggregatedScores
     ]);
 

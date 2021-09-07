@@ -9,75 +9,78 @@ import { dealerStandingScore } from '../logic/constants';
 import { getOptimalActions } from '../logic/optimal-actions';
 import { getOutcomesSet } from '../logic/outcomes-set';
 import { AggregatedScoresTable } from './aggregated-scores-table';
-import { BustingRisk } from './busting-risk';
 import { Decimals } from './decimals';
 import { HandsTable } from './hands-table';
+import { MaximumBustingRisk } from './maximum-busting-risk';
 import { OptimalActionsGrid } from './optimal-actions-grid';
 
 export const App: React.FC = () => {
-    const [decimals, setDecimals] = useState(1);
-    const [playerStandingScore, setPlayerStandingScore] = useState(15);
-
     const {
         allAggregatedScores,
         allHands,
         dealerProbabilities,
-        nextCardPlayerProbabilities,
+        nextCardProbabilities,
         outcomesSet
     } = useMemo(() => {
         const outcomesSet = getOutcomesSet();
         const allHands = getAllHands(outcomesSet.allOutcomes);
         const allAggregatedScores = getAllAggregatedScores(allHands);
-
-        const dealerProbabilities = getLongRunHandsProbabilities(
+        const nextCardProbabilities = getNextCardHandsProbabilities({
             allAggregatedScores,
             allHands,
-            outcomesSet.totalWeight,
-            dealerStandingScore
-        );
-        const nextCardPlayerProbabilities = getNextCardHandsProbabilities(
+            outcomesWeight: outcomesSet.totalWeight
+        });
+        const dealerProbabilities = getLongRunHandsProbabilities({
             allAggregatedScores,
             allHands,
-            outcomesSet.totalWeight
-        );
+            maximumBustingRisk: nextCardProbabilities[String(dealerStandingScore - 1)].overMaximum,
+            nextCardProbabilities,
+            outcomesWeight: outcomesSet.totalWeight
+        });
 
         return {
             allHands,
             allAggregatedScores,
             dealerProbabilities,
-            nextCardPlayerProbabilities,
+            nextCardProbabilities,
             outcomesSet
         };
     }, []);
 
+    const [decimals, setDecimals] = useState(1);
+    const [maximumBustingRisk, setMaximumBustingRisk] = useState(
+        nextCardProbabilities['14'].overMaximum
+    );
+
     const { longRunPlayerProbabilities, optimalActions } = useMemo(() => {
-        const longRunPlayerProbabilities = getLongRunHandsProbabilities(
+        const longRunPlayerProbabilities = getLongRunHandsProbabilities({
             allAggregatedScores,
             allHands,
-            outcomesSet.totalWeight,
-            playerStandingScore
-        );
+            maximumBustingRisk,
+            nextCardProbabilities,
+            outcomesWeight: outcomesSet.totalWeight
+        });
 
         const optimalActions = getOptimalActions({
-            aggregatedScores: allAggregatedScores,
+            allAggregatedScores,
             dealerProbabilities,
+            nextCardProbabilities,
             outcomesSet,
-            playerProbabilities: longRunPlayerProbabilities,
-            playerStandingScore
+            playerProbabilities: longRunPlayerProbabilities
         });
 
         return { longRunPlayerProbabilities, optimalActions };
-    }, [playerStandingScore]);
+    }, [maximumBustingRisk]);
 
     return (
         <div>
             <h3>Settings</h3>
-            <BustingRisk
+            <MaximumBustingRisk
                 allAggregatedScores={allAggregatedScores}
                 decimals={decimals}
-                nextCardPlayerProbabilities={nextCardPlayerProbabilities}
-                onChange={setPlayerStandingScore}
-                selectedStandingScore={playerStandingScore}
+                nextCardProbabilities={nextCardProbabilities}
+                onChange={setMaximumBustingRisk}
+                selectedRisk={maximumBustingRisk}
             />
             <Decimals onChange={setDecimals} selectedValue={decimals} />
 
@@ -95,7 +98,7 @@ export const App: React.FC = () => {
                 aggregatedScores={allAggregatedScores}
                 decimals={decimals}
                 longRunPlayerProbabilities={longRunPlayerProbabilities}
-                nextCardPlayerProbabilities={nextCardPlayerProbabilities}
+                nextCardProbabilities={nextCardProbabilities}
             />
 
             <h3>Hands table</h3>
@@ -103,7 +106,7 @@ export const App: React.FC = () => {
                 allHands={allHands}
                 decimals={decimals}
                 longRunPlayerProbabilities={longRunPlayerProbabilities}
-                nextCardPlayerProbabilities={nextCardPlayerProbabilities}
+                nextCardProbabilities={nextCardProbabilities}
                 outcomesSet={outcomesSet}
             />
         </div>

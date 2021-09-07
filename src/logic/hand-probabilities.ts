@@ -13,6 +13,7 @@ export const createEmptyHandProbabilities = ({
     aggregatedScores: AllAggregatedScores;
 }): HandProbabilities => {
     return {
+        canHit: true,
         equal: createRelativeProbabilities(aggregatedScores, () => 0),
         higher: createRelativeProbabilities(aggregatedScores, () => 0),
         lower: createRelativeProbabilities(aggregatedScores, () => 0),
@@ -21,20 +22,23 @@ export const createEmptyHandProbabilities = ({
 };
 
 export const createHandProbabilities = ({
-    aggregatedScores,
+    allAggregatedScores,
+    canHit,
     handScore
 }: {
-    aggregatedScores: AllAggregatedScores;
+    allAggregatedScores: AllAggregatedScores;
+    canHit: boolean;
     handScore: number;
 }): HandProbabilities => {
     return {
-        equal: createRelativeProbabilities(aggregatedScores, (aggregatedScore) =>
+        canHit,
+        equal: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
             handScore === aggregatedScore.score ? 1 : 0
         ),
-        higher: createRelativeProbabilities(aggregatedScores, (aggregatedScore) =>
+        higher: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
             handScore <= maximumScore && handScore > aggregatedScore.score ? 1 : 0
         ),
-        lower: createRelativeProbabilities(aggregatedScores, (aggregatedScore) =>
+        lower: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
             handScore < aggregatedScore.score ? 1 : 0
         ),
         overMaximum: handScore > maximumScore ? 1 : 0
@@ -67,6 +71,7 @@ export const mergeHandProbabilities = (
     b: HandProbabilities
 ): HandProbabilities => {
     return {
+        canHit: true,
         equal: mergeRelativeProbabilities(a.equal, b.equal),
         higher: mergeRelativeProbabilities(a.higher, b.higher),
         lower: mergeRelativeProbabilities(a.lower, b.lower),
@@ -82,6 +87,7 @@ export const weightHandProbabilities = ({
     weight: number;
 }): HandProbabilities => {
     return {
+        canHit: handProbabilities.canHit,
         equal: weightRelativeProbabilities(handProbabilities.equal, weight),
         higher: weightRelativeProbabilities(handProbabilities.higher, weight),
         lower: weightRelativeProbabilities(handProbabilities.lower, weight),

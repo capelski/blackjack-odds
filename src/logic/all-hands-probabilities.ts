@@ -7,6 +7,7 @@ import {
     Hand,
     HandProbabilities
 } from '../types';
+import { maximumScore } from './constants';
 import { getHandScores } from './hand';
 import {
     createEmptyHandProbabilities,
@@ -14,6 +15,7 @@ import {
     mergeHandProbabilities,
     weightHandProbabilities
 } from './hand-probabilities';
+import { getScoreHittingLoss } from './optimal-actions';
 
 export const getAggregatedScoreProbabilities = (
     aggregatedScore: AggregatedScore,
@@ -34,40 +36,53 @@ export const getHandProbabilities = (hand: Hand, allHandsProbabilities: AllHands
     return allHandsProbabilities[handScores];
 };
 
-export const getLongRunHandsProbabilities = (
-    aggregatedScores: AllAggregatedScores,
-    hands: AllHands,
-    outcomesWeight: number,
-    standingScore: number
-): AllHandsProbabilities => {
-    const allHandsProbabilities: AllHandsProbabilities = {};
+export const getLongRunHandsProbabilities = ({
+    allAggregatedScores,
+    allHands,
+    maximumBustingRisk,
+    nextCardProbabilities,
+    outcomesWeight
+}: {
+    allAggregatedScores: AllAggregatedScores;
+    allHands: AllHands;
+    maximumBustingRisk: number;
+    nextCardProbabilities: AllHandsProbabilities;
+    outcomesWeight: number;
+}): AllHandsProbabilities => {
+    const longRunProbabilities: AllHandsProbabilities = {};
 
-    Object.values(hands).forEach((hand) => {
-        setLongRunHandProbabilities(
-            aggregatedScores,
+    Object.values(allHands).forEach((hand) => {
+        setLongRunHandProbabilities({
+            allAggregatedScores,
             hand,
-            allHandsProbabilities,
-            outcomesWeight,
-            standingScore
-        );
+            longRunProbabilities,
+            maximumBustingRisk,
+            nextCardProbabilities,
+            outcomesWeight
+        });
     });
 
-    return allHandsProbabilities;
+    return longRunProbabilities;
 };
 
-export const getNextCardHandsProbabilities = (
-    aggregatedScores: AllAggregatedScores,
-    hands: AllHands,
-    outcomesWeight: number
-): AllHandsProbabilities => {
+export const getNextCardHandsProbabilities = ({
+    allAggregatedScores,
+    allHands,
+    outcomesWeight
+}: {
+    allAggregatedScores: AllAggregatedScores;
+    allHands: AllHands;
+    outcomesWeight: number;
+}): AllHandsProbabilities => {
     const nextCardProbabilities: AllHandsProbabilities = {};
 
-    Object.values(hands).forEach((hand) => {
+    Object.values(allHands).forEach((hand) => {
         if (getHandProbabilities(hand, nextCardProbabilities) === undefined) {
             const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
                 return weightHandProbabilities({
                     handProbabilities: createHandProbabilities({
-                        aggregatedScores,
+                        allAggregatedScores,
+                        canHit: true,
                         handScore: followingHand.score
                     }),
                     weight: followingHand.lastCard.weight / outcomesWeight
@@ -75,13 +90,24 @@ export const getNextCardHandsProbabilities = (
             });
 
             nextCardProbabilities[getHandScores(hand)] = mergeFollowingHandsProbabilities(
-                aggregatedScores,
+                allAggregatedScores,
                 followingHandsProbabilities
             );
         }
     });
 
     return nextCardProbabilities;
+};
+
+const isHandBelowMaximumBustingRisk = (
+    hand: Hand,
+    maximumBustingRisk: number,
+    nextCardProbabilities: AllHandsProbabilities
+) => {
+    const handNextCardProbabilities = getHandProbabilities(hand, nextCardProbabilities);
+    const hittingLoss = getScoreHittingLoss(hand.score, handNextCardProbabilities);
+
+    return hittingLoss <= maximumBustingRisk;
 };
 
 const mergeFollowingHandsProbabilities = (
@@ -96,39 +122,57 @@ const mergeFollowingHandsProbabilities = (
     );
 };
 
-const setLongRunHandProbabilities = (
-    aggregatedScores: AllAggregatedScores,
-    hand: Hand,
-    allHandsProbabilities: AllHandsProbabilities,
-    outcomesWeight: number,
-    standingScore: number
-) => {
-    if (getHandProbabilities(hand, allHandsProbabilities) === undefined) {
-        if (hand.score < standingScore) {
+const setLongRunHandProbabilities = ({
+    allAggregatedScores,
+    hand,
+    longRunProbabilities,
+    maximumBustingRisk,
+    nextCardProbabilities,
+    outcomesWeight
+}: {
+    allAggregatedScores: AllAggregatedScores;
+    hand: Hand;
+    longRunProbabilities: AllHandsProbabilities;
+    maximumBustingRisk: number;
+    nextCardProbabilities: AllHandsProbabilities;
+    outcomesWeight: number;
+}) => {
+    if (getHandProbabilities(hand, longRunProbabilities) === undefined) {
+        let handProbabilities: HandProbabilities;
+
+        if (
+            hand.score < maximumScore &&
+            isHandBelowMaximumBustingRisk(hand, maximumBustingRisk, nextCardProbabilities)
+        ) {
             const followingHandsProbabilities = hand.followingHands.map((followingHand) => {
-                setLongRunHandProbabilities(
-                    aggregatedScores,
-                    followingHand,
-                    allHandsProbabilities,
-                    outcomesWeight,
-                    standingScore
-                );
+                setLongRunHandProbabilities({
+                    allAggregatedScores,
+                    hand: followingHand,
+                    longRunProbabilities,
+                    maximumBustingRisk,
+                    nextCardProbabilities,
+                    outcomesWeight
+                });
 
                 return weightHandProbabilities({
-                    handProbabilities: allHandsProbabilities[getHandScores(followingHand)],
+                    handProbabilities: longRunProbabilities[getHandScores(followingHand)],
                     weight: followingHand.lastCard.weight / outcomesWeight
                 });
             });
 
-            allHandsProbabilities[getHandScores(hand)] = mergeFollowingHandsProbabilities(
-                aggregatedScores,
+            handProbabilities = mergeFollowingHandsProbabilities(
+                allAggregatedScores,
                 followingHandsProbabilities
             );
+            handProbabilities.canHit = true;
         } else {
-            allHandsProbabilities[getHandScores(hand)] = createHandProbabilities({
-                aggregatedScores,
+            handProbabilities = createHandProbabilities({
+                allAggregatedScores,
+                canHit: false,
                 handScore: hand.score
             });
         }
+
+        longRunProbabilities[getHandScores(hand)] = handProbabilities;
     }
 };
