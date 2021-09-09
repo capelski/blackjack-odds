@@ -1,5 +1,4 @@
 import { CardOutcome, Hand } from '../types';
-import { maximumScore } from './constants';
 import { cartesianProduct, getValidScores, removeDuplicates } from './utils';
 
 export const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): Hand => {
@@ -38,7 +37,7 @@ export const getHandSymbols = (hand: Hand) => {
 };
 
 const getHandScore = (scores: number[]) => {
-    return [...scores].reverse().find((x) => x <= maximumScore) || scores[0];
+    return getValidScores(scores).reverse()[0];
 };
 
 export const getHandScores = (hand: Hand) => {
