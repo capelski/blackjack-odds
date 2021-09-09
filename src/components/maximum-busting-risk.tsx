@@ -1,5 +1,6 @@
 import React from 'react';
 import { getAggregatedScoreProbabilities } from '../logic/all-hands-probabilities';
+import { isBustScore } from '../logic/utils';
 import { AllAggregatedScores, AllHandsProbabilities } from '../types';
 import { getRoundedFloat } from './rounded-float';
 
@@ -14,7 +15,10 @@ interface MaximumBustingRiskProps {
 export const MaximumBustingRisk: React.FC<MaximumBustingRiskProps> = (props) => {
     const riskOptions = Object.values(props.allAggregatedScores)
         .filter(
-            (aggregatedScore) => aggregatedScore.scores.length === 1 && aggregatedScore.score > 10
+            (aggregatedScore) =>
+                aggregatedScore.scores.length === 1 &&
+                aggregatedScore.score > 10 && // The last score with 0% risk
+                !isBustScore(aggregatedScore.score)
         )
         .map((aggregatedScore) => {
             const scoreProbabilities = getAggregatedScoreProbabilities(
