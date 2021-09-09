@@ -40,17 +40,13 @@ export const TurnoverComponent: React.FC<TurnoverComponentProps> = (props) => {
                 decimals={props.decimals}
                 value={props.turnover.wins - props.turnover.losses}
             />
-            {props.displayActionsLoss && (
-                <React.Fragment>
-                    <br />
-                    <br />
-                    P. Busting:{' '}
-                    <RoundedFloat decimals={props.decimals} value={props.turnover.playerBusting} />
-                    <br />
-                    D. Busting:{' '}
-                    <RoundedFloat decimals={props.decimals} value={props.turnover.dealerBusting} />
-                </React.Fragment>
-            )}{' '}
+            <br />
+            <br />
+            P. Busting:{' '}
+            <RoundedFloat decimals={props.decimals} value={props.turnover.playerBusting} />
+            <br />
+            D. Busting:{' '}
+            <RoundedFloat decimals={props.decimals} value={props.turnover.dealerBusting} />
         </React.Fragment>
     );
 };
