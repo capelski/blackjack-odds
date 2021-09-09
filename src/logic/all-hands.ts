@@ -1,6 +1,6 @@
 import { AllHands, CardOutcome, Hand } from '../types';
-import { maximumScore } from './constants';
 import { createHand, getHandKey } from './hand';
+import { isBustScore } from './utils';
 
 export const getAllHands = (cardOutcomes: CardOutcome[]): AllHands => {
     const allHands: AllHands = {};
@@ -18,7 +18,7 @@ export const getAllHands = (cardOutcomes: CardOutcome[]): AllHands => {
 
                 hand.followingHands.push(followingHand);
 
-                if (followingHand.score < maximumScore) {
+                if (!isBustScore(followingHand.score)) {
                     handsQueue.push(followingHand);
                 }
             });

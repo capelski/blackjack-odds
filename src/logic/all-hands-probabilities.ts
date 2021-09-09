@@ -7,7 +7,6 @@ import {
     Hand,
     HandProbabilities
 } from '../types';
-import { maximumScore } from './constants';
 import { getHandScores } from './hand';
 import {
     createEmptyHandProbabilities,
@@ -16,6 +15,7 @@ import {
     weightHandProbabilities
 } from './hand-probabilities';
 import { getScoreHittingLoss } from './optimal-actions';
+import { isBustScore } from './utils';
 
 export const getAggregatedScoreProbabilities = (
     aggregatedScore: AggregatedScore,
@@ -141,7 +141,7 @@ const setLongRunHandProbabilities = ({
         let handProbabilities: HandProbabilities;
 
         if (
-            hand.score < maximumScore &&
+            !isBustScore(hand.score) &&
             isHandBelowMaximumBustingRisk(hand, maximumBustingRisk, nextCardProbabilities)
         ) {
             const followingHandsProbabilities = hand.followingHands.map((followingHand) => {

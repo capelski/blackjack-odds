@@ -11,8 +11,12 @@ export const cartesianProduct = <T, U, R>(
 };
 
 export const getValidScores = (scores: number[]) => {
-    const validScores = scores.filter((x) => x <= maximumScore);
+    const validScores = scores.filter((x) => !isBustScore(x));
     return validScores.length > 0 ? validScores : [scores[0]];
+};
+
+export const isBustScore = (score: number) => {
+    return score > maximumScore;
 };
 
 export const removeDuplicates = <T>(items: T[]) => {

@@ -1,11 +1,11 @@
 import { AggregatedScore, AllAggregatedScores, HandProbabilities } from '../types';
-import { maximumScore } from './constants';
 import {
     createRelativeProbabilities,
     getScoreRelativeProbabilities,
     mergeRelativeProbabilities,
     weightRelativeProbabilities
 } from './relative-probabilities';
+import { isBustScore } from './utils';
 
 export const createEmptyHandProbabilities = ({
     aggregatedScores
@@ -36,12 +36,12 @@ export const createHandProbabilities = ({
             handScore === aggregatedScore.score ? 1 : 0
         ),
         higher: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
-            handScore <= maximumScore && handScore > aggregatedScore.score ? 1 : 0
+            !isBustScore(handScore) && handScore > aggregatedScore.score ? 1 : 0
         ),
         lower: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
             handScore < aggregatedScore.score ? 1 : 0
         ),
-        overMaximum: handScore > maximumScore ? 1 : 0
+        overMaximum: isBustScore(handScore) ? 1 : 0
     };
 };
 
