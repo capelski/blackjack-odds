@@ -6,12 +6,13 @@ import {
     OutcomesSet,
     Turnover
 } from '../types';
-import { dealerStandingScore } from './constants';
+import { maximumScore } from './constants';
 import {
     getEqualToScoreProbability,
     getHigherThanScoreProbability,
     getLowerThanScoreProbability
 } from './hand-probabilities';
+import { getDealerScores } from './utils';
 
 export const createEmptyTurnover = (): Turnover => {
     return {
@@ -37,21 +38,46 @@ export const createTurnover = (
     const playerBusting = optimalAction === Action.Hitting ? playerProbabilities.overMaximum : 0;
     const dealerBusting = (1 - playerBusting) * dealerCardProbabilities.overMaximum;
 
-    const losses =
-        optimalAction === Action.Hitting
-            ? playerBusting + getLowerThanScoreProbability(playerProbabilities, dealerStandingScore)
-            : getHigherThanScoreProbability(dealerCardProbabilities, aggregatedScore.score);
+    let losses, ties, wins: number;
+    const dealerScores = getDealerScores();
 
-    const ties =
-        optimalAction === Action.Hitting
-            ? getEqualToScoreProbability(playerProbabilities, dealerStandingScore)
-            : getEqualToScoreProbability(dealerCardProbabilities, aggregatedScore.score);
+    if (optimalAction === Action.Standing) {
+        losses = getHigherThanScoreProbability(dealerCardProbabilities, aggregatedScore.score);
+        ties = getEqualToScoreProbability(dealerCardProbabilities, aggregatedScore.score);
+        wins =
+            getLowerThanScoreProbability(dealerCardProbabilities, aggregatedScore.score) +
+            dealerBusting;
+    } else {
+        losses =
+            playerBusting +
+            dealerScores.reduce((reduced, next) => {
+                return (
+                    reduced +
+                    getEqualToScoreProbability(dealerCardProbabilities, next) *
+                        getLowerThanScoreProbability(playerProbabilities, next)
+                );
+            }, 0);
 
-    const wins =
-        optimalAction === Action.Hitting
-            ? getHigherThanScoreProbability(playerProbabilities, dealerStandingScore)
-            : getLowerThanScoreProbability(dealerCardProbabilities, aggregatedScore.score) +
-              dealerBusting;
+        ties = dealerScores.reduce((reduced, next) => {
+            return (
+                reduced +
+                getEqualToScoreProbability(dealerCardProbabilities, next) *
+                    getEqualToScoreProbability(playerProbabilities, next)
+            );
+        }, 0);
+
+        wins =
+            dealerBusting +
+            dealerScores
+                .filter((x) => x < maximumScore)
+                .reduce((reduced, next) => {
+                    return (
+                        reduced +
+                        getEqualToScoreProbability(dealerCardProbabilities, next) *
+                            getHigherThanScoreProbability(playerProbabilities, next)
+                    );
+                }, 0);
+    }
 
     return {
         canHit: playerProbabilities.canHit,

@@ -26,7 +26,11 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
 
     return (
         <div>
-            <TurnoverComponent decimals={props.decimals} turnover={overallTurnover} />
+            <TurnoverComponent
+                decimals={props.decimals}
+                displayActionsLoss={false}
+                turnover={overallTurnover}
+            />
             <br />
             <br />
             <div style={{ display: 'flex', width: '100%' }}>
@@ -81,6 +85,7 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                     <br />
                                     <TurnoverComponent
                                         decimals={props.decimals}
+                                        displayActionsLoss={true}
                                         turnover={scoreAllActions.turnover}
                                     />
                                 </React.Fragment>
@@ -102,6 +107,7 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                             <br />
                                             <TurnoverComponent
                                                 decimals={props.decimals}
+                                                displayActionsLoss={true}
                                                 turnover={scoreAction.turnover}
                                             />
                                         </React.Fragment>

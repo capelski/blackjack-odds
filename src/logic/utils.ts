@@ -1,4 +1,4 @@
-import { maximumScore } from './constants';
+import { dealerStandingScore, maximumScore } from './constants';
 
 export const cartesianProduct = <T, U, R>(
     firstArray: T[],
@@ -8,6 +8,16 @@ export const cartesianProduct = <T, U, R>(
     return firstArray.reduce<R[]>((product, x) => {
         return product.concat(secondArray.map((y) => elementBuilder(x, y)));
     }, []);
+};
+
+export const getDealerScores = () => {
+    const scores: number[] = [];
+
+    for (let i = dealerStandingScore; i <= maximumScore; ++i) {
+        scores.push(i);
+    }
+
+    return scores;
 };
 
 export const getValidScores = (scores: number[]) => {
