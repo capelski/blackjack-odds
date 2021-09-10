@@ -1,4 +1,4 @@
-export enum Action {
+export enum PlayerAction {
     Hitting = 'Hitting',
     Standing = 'Standing'
 }

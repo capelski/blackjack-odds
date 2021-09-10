@@ -1,18 +1,24 @@
 import React, { CSSProperties, useState } from 'react';
 import { actionColors } from '../logic/constants';
-import { getOverallTurnover } from '../logic/turnover';
-import { AllHandsProbabilities, ExpandedRows, OptimalActions, OutcomesSet } from '../types';
+import {
+    AllDecisionsData,
+    AllPlayerActions,
+    AllTurnovers,
+    ExpandedRows,
+    OutcomesSet,
+    PlayerAction
+} from '../types';
 import { TurnoverComponent } from './turnover-component';
 
-interface OptimalActionsGridProps {
-    dealerProbabilities: AllHandsProbabilities;
+interface PlayerActionsGridProps {
+    allDecisionsData: AllDecisionsData;
+    allPlayerActions: AllPlayerActions;
+    allTurnovers: AllTurnovers;
     decimals: number;
-    optimalActions: OptimalActions;
     outcomesSet: OutcomesSet;
-    playerProbabilities: AllHandsProbabilities;
 }
 
-export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => {
+export const PlayerActionsGrid: React.FC<PlayerActionsGridProps> = (props) => {
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
     const spanStyle: CSSProperties = {
@@ -22,15 +28,9 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
         width: `${100 / props.outcomesSet.allOutcomes.length + 1}%`
     };
 
-    const overallTurnover = getOverallTurnover(props.optimalActions, props.outcomesSet);
-
     return (
         <div>
-            <TurnoverComponent
-                decimals={props.decimals}
-                displayActionsLoss={false}
-                turnover={overallTurnover}
-            />
+            <TurnoverComponent decimals={props.decimals} turnover={props.allTurnovers.overall} />
             <br />
             <br />
             <div style={{ display: 'flex', width: '100%' }}>
@@ -55,24 +55,24 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                     </span>
                 ))}
             </div>
-            {Object.values(props.optimalActions).map((scoreAllActions) => {
-                const displayScores = scoreAllActions.aggregatedScore.key;
-                const isRowExpanded = expandedRows[displayScores];
+            {Object.keys(props.allPlayerActions).map((scoreKey) => {
+                const scorePlayerActions = props.allPlayerActions[scoreKey];
+                const isRowExpanded = expandedRows[scoreKey];
 
                 return (
-                    <div key={displayScores} style={{ display: 'flex', width: '100%' }}>
+                    <div key={scoreKey} style={{ display: 'flex', width: '100%' }}>
                         <span
                             style={{
                                 ...spanStyle,
                                 borderLeft: '1px solid black'
                             }}
                         >
-                            {displayScores}{' '}
+                            {scoreKey}{' '}
                             <span
                                 onClick={() => {
                                     setExpandedRows({
                                         ...expandedRows,
-                                        [displayScores]: !isRowExpanded
+                                        [scoreKey]: !isRowExpanded
                                     });
                                 }}
                                 style={{ cursor: 'pointer' }}
@@ -85,30 +85,36 @@ export const OptimalActionsGrid: React.FC<OptimalActionsGridProps> = (props) => 
                                     <br />
                                     <TurnoverComponent
                                         decimals={props.decimals}
-                                        displayActionsLoss={true}
-                                        turnover={scoreAllActions.turnover}
+                                        turnover={props.allTurnovers.scores[scoreKey].individual}
                                     />
                                 </React.Fragment>
                             )}
                         </span>
-                        {Object.values(scoreAllActions.allActions).map((scoreAction) => {
+                        {Object.keys(scorePlayerActions).map((cardKey) => {
+                            const playerAction: PlayerAction = scorePlayerActions[cardKey];
                             return (
                                 <span
                                     style={{
                                         ...spanStyle,
-                                        backgroundColor: actionColors[scoreAction.action]
+                                        backgroundColor: actionColors[playerAction]
                                     }}
-                                    key={scoreAction.dealerCard.symbol}
+                                    key={cardKey}
                                 >
-                                    {scoreAction.action.substring(0, 1)}
+                                    {playerAction.substring(0, 1)}
                                     {isRowExpanded && (
                                         <React.Fragment>
                                             <br />
                                             <br />
                                             <TurnoverComponent
                                                 decimals={props.decimals}
-                                                displayActionsLoss={true}
-                                                turnover={scoreAction.turnover}
+                                                decisionData={
+                                                    props.allDecisionsData[scoreKey][cardKey]
+                                                }
+                                                turnover={
+                                                    props.allTurnovers.scores[scoreKey].dealerCards[
+                                                        cardKey
+                                                    ]
+                                                }
                                             />
                                         </React.Fragment>
                                     )}

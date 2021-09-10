@@ -1,18 +1,20 @@
 import React, { useMemo, useState } from 'react';
 import { getAllAggregatedScores } from '../logic/all-aggregated-scores';
+import { getAllDecisionsData } from '../logic/all-decisions-data';
 import { getAllHands } from '../logic/all-hands';
 import {
     getLongRunHandsProbabilities,
     getNextCardHandsProbabilities
 } from '../logic/all-hands-probabilities';
+import { getAllPlayerActions } from '../logic/all-player-actions';
+import { getAllTurnovers } from '../logic/all-turnovers';
 import { dealerStandingScore } from '../logic/constants';
-import { getOptimalActions } from '../logic/optimal-actions';
 import { getOutcomesSet } from '../logic/outcomes-set';
 import { AggregatedScoresTable } from './aggregated-scores-table';
 import { Decimals } from './decimals';
 import { HandsTable } from './hands-table';
 import { MaximumBustingRisk } from './maximum-busting-risk';
-import { OptimalActionsGrid } from './optimal-actions-grid';
+import { PlayerActionsGrid } from './player-actions-grid';
 
 export const App: React.FC = () => {
     const {
@@ -52,25 +54,41 @@ export const App: React.FC = () => {
         nextCardProbabilities['14'].overMaximum
     );
 
-    const { longRunPlayerProbabilities, optimalActions } = useMemo(() => {
-        const longRunPlayerProbabilities = getLongRunHandsProbabilities({
-            allAggregatedScores,
-            allHands,
-            maximumBustingRisk,
-            nextCardProbabilities,
-            outcomesWeight: outcomesSet.totalWeight
-        });
+    const { allDecisionsData, allPlayerActions, allTurnovers, longRunPlayerProbabilities } =
+        useMemo(() => {
+            const longRunPlayerProbabilities = getLongRunHandsProbabilities({
+                allAggregatedScores,
+                allHands,
+                maximumBustingRisk,
+                nextCardProbabilities,
+                outcomesWeight: outcomesSet.totalWeight
+            });
 
-        const optimalActions = getOptimalActions({
-            allAggregatedScores,
-            dealerProbabilities,
-            nextCardProbabilities,
-            outcomesSet,
-            playerProbabilities: longRunPlayerProbabilities
-        });
+            const allDecisionsData = getAllDecisionsData({
+                allAggregatedScores,
+                dealerProbabilities,
+                nextCardProbabilities,
+                outcomesSet,
+                playerProbabilities: longRunPlayerProbabilities
+            });
 
-        return { longRunPlayerProbabilities, optimalActions };
-    }, [maximumBustingRisk]);
+            const allPlayerActions = getAllPlayerActions({ allDecisionsData });
+
+            const allTurnovers = getAllTurnovers({
+                allDecisionsData,
+                allPlayerActions,
+                dealerProbabilities,
+                outcomesSet,
+                playerProbabilities: longRunPlayerProbabilities
+            });
+
+            return {
+                allDecisionsData,
+                allPlayerActions,
+                allTurnovers,
+                longRunPlayerProbabilities
+            };
+        }, [maximumBustingRisk]);
 
     return (
         <div>
@@ -84,13 +102,13 @@ export const App: React.FC = () => {
             />
             <Decimals onChange={setDecimals} selectedValue={decimals} />
 
-            <h3>Optimal actions</h3>
-            <OptimalActionsGrid
-                dealerProbabilities={dealerProbabilities}
+            <h3>Player actions</h3>
+            <PlayerActionsGrid
+                allDecisionsData={allDecisionsData}
+                allPlayerActions={allPlayerActions}
+                allTurnovers={allTurnovers}
                 decimals={decimals}
-                optimalActions={optimalActions}
                 outcomesSet={outcomesSet}
-                playerProbabilities={longRunPlayerProbabilities}
             />
 
             <h3>Scores table</h3>

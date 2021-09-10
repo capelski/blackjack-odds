@@ -1,11 +1,4 @@
-import {
-    Action,
-    AggregatedScore,
-    HandProbabilities,
-    OptimalActions,
-    OutcomesSet,
-    Turnover
-} from '../types';
+import { AggregatedScore, HandProbabilities, PlayerAction, Turnover } from '../types';
 import { maximumScore } from './constants';
 import {
     getEqualToScoreProbability,
@@ -16,32 +9,34 @@ import { getDealerScores } from './utils';
 
 export const createEmptyTurnover = (): Turnover => {
     return {
-        canHit: true,
         dealerBusting: 0,
-        hittingLoss: 0,
+        isHittingBelowMaximumRisk: true,
         losses: 0,
         playerBusting: 0,
-        standingLoss: 0,
         ties: 0,
         wins: 0
     };
 };
 
-export const createTurnover = (
-    aggregatedScore: AggregatedScore,
-    dealerCardProbabilities: HandProbabilities,
-    hittingLoss: number,
-    playerProbabilities: HandProbabilities,
-    optimalAction: Action,
-    standingLoss: number
-): Turnover => {
-    const playerBusting = optimalAction === Action.Hitting ? playerProbabilities.overMaximum : 0;
+export const createTurnover = ({
+    aggregatedScore,
+    dealerCardProbabilities,
+    playerAction,
+    scoreProbabilities
+}: {
+    aggregatedScore: AggregatedScore;
+    dealerCardProbabilities: HandProbabilities;
+    playerAction: PlayerAction;
+    scoreProbabilities: HandProbabilities;
+}): Turnover => {
+    const playerBusting =
+        playerAction === PlayerAction.Hitting ? scoreProbabilities.overMaximum : 0;
     const dealerBusting = (1 - playerBusting) * dealerCardProbabilities.overMaximum;
 
     let losses, ties, wins: number;
     const dealerScores = getDealerScores();
 
-    if (optimalAction === Action.Standing) {
+    if (playerAction === PlayerAction.Standing) {
         losses = getHigherThanScoreProbability(dealerCardProbabilities, aggregatedScore.score);
         ties = getEqualToScoreProbability(dealerCardProbabilities, aggregatedScore.score);
         wins =
@@ -54,7 +49,7 @@ export const createTurnover = (
                 return (
                     reduced +
                     getEqualToScoreProbability(dealerCardProbabilities, next) *
-                        getLowerThanScoreProbability(playerProbabilities, next)
+                        getLowerThanScoreProbability(scoreProbabilities, next)
                 );
             }, 0);
 
@@ -62,7 +57,7 @@ export const createTurnover = (
             return (
                 reduced +
                 getEqualToScoreProbability(dealerCardProbabilities, next) *
-                    getEqualToScoreProbability(playerProbabilities, next)
+                    getEqualToScoreProbability(scoreProbabilities, next)
             );
         }, 0);
 
@@ -74,45 +69,27 @@ export const createTurnover = (
                     return (
                         reduced +
                         getEqualToScoreProbability(dealerCardProbabilities, next) *
-                            getHigherThanScoreProbability(playerProbabilities, next)
+                            getHigherThanScoreProbability(scoreProbabilities, next)
                     );
                 }, 0);
     }
 
     return {
-        canHit: playerProbabilities.canHit,
         dealerBusting,
-        hittingLoss,
+        isHittingBelowMaximumRisk: scoreProbabilities.isHittingBelowMaximumRisk,
         losses,
         playerBusting,
-        standingLoss,
         ties,
         wins
     };
 };
 
-export const getOverallTurnover = (
-    optimalActions: OptimalActions,
-    outcomesSet: OutcomesSet
-): Turnover => {
-    return outcomesSet.allOutcomes
-        .map((cardOutcome) => {
-            return weightTurnover(
-                optimalActions[cardOutcome.key].turnover,
-                cardOutcome.weight / outcomesSet.totalWeight
-            );
-        })
-        .reduce(mergeTurnovers, createEmptyTurnover());
-};
-
 export const mergeTurnovers = (a: Turnover, b: Turnover): Turnover => {
     return {
-        canHit: a.canHit && b.canHit,
         dealerBusting: a.dealerBusting + b.dealerBusting,
-        hittingLoss: a.hittingLoss + b.hittingLoss,
+        isHittingBelowMaximumRisk: a.isHittingBelowMaximumRisk && b.isHittingBelowMaximumRisk,
         losses: a.losses + b.losses,
         playerBusting: a.playerBusting + b.playerBusting,
-        standingLoss: a.standingLoss + b.standingLoss,
         ties: a.ties + b.ties,
         wins: a.wins + b.wins
     };
@@ -120,12 +97,10 @@ export const mergeTurnovers = (a: Turnover, b: Turnover): Turnover => {
 
 export const weightTurnover = (turnover: Turnover, weight: number): Turnover => {
     return {
-        canHit: turnover.canHit,
         dealerBusting: turnover.dealerBusting * weight,
-        hittingLoss: turnover.hittingLoss * weight,
+        isHittingBelowMaximumRisk: turnover.isHittingBelowMaximumRisk,
         losses: turnover.losses * weight,
         playerBusting: turnover.playerBusting * weight,
-        standingLoss: turnover.standingLoss * weight,
         ties: turnover.ties * weight,
         wins: turnover.wins * weight
     };

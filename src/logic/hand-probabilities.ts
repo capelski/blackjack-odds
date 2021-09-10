@@ -13,9 +13,9 @@ export const createEmptyHandProbabilities = ({
     aggregatedScores: AllAggregatedScores;
 }): HandProbabilities => {
     return {
-        canHit: true,
         equal: createRelativeProbabilities(aggregatedScores, () => 0),
         higher: createRelativeProbabilities(aggregatedScores, () => 0),
+        isHittingBelowMaximumRisk: true,
         lower: createRelativeProbabilities(aggregatedScores, () => 0),
         overMaximum: 0
     };
@@ -23,21 +23,21 @@ export const createEmptyHandProbabilities = ({
 
 export const createHandProbabilities = ({
     allAggregatedScores,
-    canHit,
-    handScore
+    handScore,
+    isHittingBelowMaximumRisk
 }: {
     allAggregatedScores: AllAggregatedScores;
-    canHit: boolean;
     handScore: number;
+    isHittingBelowMaximumRisk: boolean;
 }): HandProbabilities => {
     return {
-        canHit,
         equal: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
             handScore === aggregatedScore.score ? 1 : 0
         ),
         higher: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
             !isBustScore(handScore) && handScore > aggregatedScore.score ? 1 : 0
         ),
+        isHittingBelowMaximumRisk,
         lower: createRelativeProbabilities(allAggregatedScores, (aggregatedScore) =>
             handScore < aggregatedScore.score ? 1 : 0
         ),
@@ -66,14 +66,31 @@ export const getLowerThanScoreProbability = (
     return getScoreRelativeProbabilities(handProbabilities.lower, score);
 };
 
+export const getScoreHittingLoss = (
+    score: number | AggregatedScore,
+    playerScoreProbabilities: HandProbabilities
+) => {
+    return (
+        playerScoreProbabilities.overMaximum +
+        getLowerThanScoreProbability(playerScoreProbabilities, score)
+    );
+};
+
+export const getScoreStandingLoss = (
+    score: number | AggregatedScore,
+    dealerCardProbabilities: HandProbabilities
+) => {
+    return getHigherThanScoreProbability(dealerCardProbabilities, score);
+};
+
 export const mergeHandProbabilities = (
     a: HandProbabilities,
     b: HandProbabilities
 ): HandProbabilities => {
     return {
-        canHit: true,
         equal: mergeRelativeProbabilities(a.equal, b.equal),
         higher: mergeRelativeProbabilities(a.higher, b.higher),
+        isHittingBelowMaximumRisk: true,
         lower: mergeRelativeProbabilities(a.lower, b.lower),
         overMaximum: a.overMaximum + b.overMaximum
     };
@@ -87,9 +104,9 @@ export const weightHandProbabilities = ({
     weight: number;
 }): HandProbabilities => {
     return {
-        canHit: handProbabilities.canHit,
         equal: weightRelativeProbabilities(handProbabilities.equal, weight),
         higher: weightRelativeProbabilities(handProbabilities.higher, weight),
+        isHittingBelowMaximumRisk: handProbabilities.isHittingBelowMaximumRisk,
         lower: weightRelativeProbabilities(handProbabilities.lower, weight),
         overMaximum: handProbabilities.overMaximum * weight
     };

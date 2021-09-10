@@ -11,10 +11,10 @@ import { getHandScores } from './hand';
 import {
     createEmptyHandProbabilities,
     createHandProbabilities,
+    getScoreHittingLoss,
     mergeHandProbabilities,
     weightHandProbabilities
 } from './hand-probabilities';
-import { getScoreHittingLoss } from './optimal-actions';
 import { isBustScore } from './utils';
 
 export const getAggregatedScoreProbabilities = (
@@ -82,8 +82,8 @@ export const getNextCardHandsProbabilities = ({
                 return weightHandProbabilities({
                     handProbabilities: createHandProbabilities({
                         allAggregatedScores,
-                        canHit: true,
-                        handScore: followingHand.score
+                        handScore: followingHand.score,
+                        isHittingBelowMaximumRisk: true
                     }),
                     weight: followingHand.lastCard.weight / outcomesWeight
                 });
@@ -164,12 +164,12 @@ const setLongRunHandProbabilities = ({
                 allAggregatedScores,
                 followingHandsProbabilities
             );
-            handProbabilities.canHit = true;
+            handProbabilities.isHittingBelowMaximumRisk = true;
         } else {
             handProbabilities = createHandProbabilities({
                 allAggregatedScores,
-                canHit: false,
-                handScore: hand.score
+                handScore: hand.score,
+                isHittingBelowMaximumRisk: false
             });
         }
 
