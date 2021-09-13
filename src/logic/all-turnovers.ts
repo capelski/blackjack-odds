@@ -39,7 +39,7 @@ export const getAllTurnovers = ({
         overall: outcomesSet.allOutcomes
             .map((cardOutcome) => {
                 return weightTurnover(
-                    scoresTurnover[cardOutcome.key].dealerCards[cardOutcome.key],
+                    scoresTurnover[cardOutcome.key].individual,
                     cardOutcome.weight / outcomesSet.totalWeight
                 );
             })
