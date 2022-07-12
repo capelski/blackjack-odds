@@ -1,3 +1,6 @@
 {
-    "cSpell.words": ["riskless"]
+    "cSpell.words": [
+        "riskless"
+    ],
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
 }
