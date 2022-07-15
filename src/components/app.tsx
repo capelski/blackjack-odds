@@ -21,11 +21,15 @@ import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-tab
 // TODO P(< D) on hit
 // TODO Compute turnover
 
+const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
+    parseInt(hitMinimalProbabilityGain) / 100 || 0;
+
 export const App: React.FC = () => {
-    const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.includeLowerScore);
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [dealerProbabilities, setDealerProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
+    const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
+    const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.includeLowerScore);
     const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
@@ -47,8 +51,9 @@ export const App: React.FC = () => {
         });
         const nextPlayerProbabilities = getDealerCardBasedProbabilities({
             allScoreStats: nextAllScoreStats,
-            hitStrategy,
             dealerProbabilities: nextDealerProbabilities,
+            hitMinimalProbabilityGain: parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
+            hitStrategy,
             outcomesSet: nextOutcomesSet
         });
 
@@ -67,13 +72,15 @@ export const App: React.FC = () => {
         ) {
             const nextPlayerProbabilities = getDealerCardBasedProbabilities({
                 allScoreStats,
-                hitStrategy,
                 dealerProbabilities,
+                hitMinimalProbabilityGain:
+                    parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
+                hitStrategy,
                 outcomesSet
             });
             setPlayerProbabilities(nextPlayerProbabilities);
         }
-    }, [hitStrategy]);
+    }, [hitMinimalProbabilityGain, hitStrategy]);
 
     return (
         <div>
@@ -92,6 +99,17 @@ export const App: React.FC = () => {
                 </React.Fragment>
             ))}
             <br />
+            <input
+                max={100}
+                min={0}
+                onChange={(event) => setHitMinimalProbabilityGain(event.target.value)}
+                style={{ textAlign: 'right' }}
+                type="number"
+                value={hitMinimalProbabilityGain}
+            />
+            % Minimal probability gain of Hitting over Standing
+            <br />
+            <br />
             {allScoreStats !== undefined &&
             outcomesSet !== undefined &&
             playerProbabilities !== undefined ? (
@@ -103,7 +121,6 @@ export const App: React.FC = () => {
             ) : (
                 'Loading...'
             )}
-
             <h3>Scores table</h3>
             {allScoreStats !== undefined &&
             dealerProbabilities !== undefined &&

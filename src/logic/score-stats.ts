@@ -49,14 +49,16 @@ export const getAllScoreStats = (allHands: Hand[]): ScoreStats[] => {
  */
 export const getDealerCardBasedProbabilities = ({
     allScoreStats,
+    dealerProbabilities,
+    hitMinimalProbabilityGain,
     hitStrategy,
-    outcomesSet,
-    dealerProbabilities
+    outcomesSet
 }: {
     allScoreStats: ScoreStats[];
+    dealerProbabilities: AllEffectiveScoreProbabilities;
+    hitMinimalProbabilityGain: number;
     hitStrategy: HitStrategy;
     outcomesSet: OutcomesSet;
-    dealerProbabilities: AllEffectiveScoreProbabilities;
 }) => {
     return allScoreStats.reduce((reduced, scoreStats) => {
         return {
@@ -99,10 +101,9 @@ export const getDealerCardBasedProbabilities = ({
                             ? bustingProbability
                             : bustingProbability + lowerScoreProbability;
 
-                    // TODO Config item to demand minimal margin of gain for hitting?
-
                     const decision: PlayerDecision =
-                        hitStrategyProbability - lessThanDealerProbability < 0
+                        lessThanDealerProbability - hitStrategyProbability >
+                        hitMinimalProbabilityGain
                             ? PlayerDecision.hit
                             : PlayerDecision.stand;
 
