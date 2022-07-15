@@ -1,18 +1,15 @@
-export { AggregatedScore } from './aggregated-score';
-export { AggregatedScoreTurnover } from './aggregated-score-turnover';
-export { AllAggregatedScores } from './all-aggregated-scores';
-export { AllDecisionsData } from './all-decisions-data';
-export { AllHands } from './all-hands';
-export { AllHandsProbabilities } from './all-hands-probabilities';
-export { AllPlayerActions } from './all-player-actions';
-export { AllTurnovers } from './all-turnovers';
 export { CardOutcome } from './card-outcome';
-export { DecisionData } from './decision-data';
+export {
+    AllScoreDealerCardBasedProbabilities,
+    DealerCardBasedProbabilities,
+    ScoreDealerCardBasedProbabilities as ScoreDealerCardBasedProbabilities
+} from './dealer-card-based-probabilities';
 export { Dictionary } from './dictionary';
+export {
+    AllEffectiveScoreProbabilities,
+    EffectiveScoreProbabilities
+} from './effective-score-probabilities';
 export { ExpandedRows } from './expanded-rows';
 export { Hand } from './hand';
-export { HandProbabilities } from './hand-probabilities';
 export { OutcomesSet } from './outcomes-set';
-export { PlayerAction } from './player-action';
-export { RelativeProbabilities } from './relative-probabilities';
-export { Turnover } from './turnover';
+export { ScoreStats } from './score-stats';

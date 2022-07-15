@@ -1,9 +1,12 @@
+import { ScoreKey } from '../models';
 import { CardOutcome } from './card-outcome';
 
 export type Hand = {
+    allScores: number[];
     cardSymbols: string[];
-    followingHands: Hand[];
+    descendants: Hand[];
+    effectiveScore: number;
+    key: string;
     lastCard: CardOutcome;
-    score: number;
-    scores: number[];
+    scoreKey: ScoreKey;
 };
