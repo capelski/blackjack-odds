@@ -1,5 +1,5 @@
 import { maximumScore } from '../constants';
-import { PlayerDecision } from '../models';
+import { HitStrategy, PlayerDecision } from '../models';
 import {
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
@@ -49,10 +49,12 @@ export const getAllScoreStats = (allHands: Hand[]): ScoreStats[] => {
  */
 export const getDealerCardBasedProbabilities = ({
     allScoreStats,
+    hitStrategy,
     outcomesSet,
     dealerProbabilities
 }: {
     allScoreStats: ScoreStats[];
+    hitStrategy: HitStrategy;
     outcomesSet: OutcomesSet;
     dealerProbabilities: AllEffectiveScoreProbabilities;
 }) => {
@@ -92,11 +94,15 @@ export const getDealerCardBasedProbabilities = ({
                         scoreStats.representativeHand.effectiveScore - 1
                     );
 
-                    // TODO Config item to include/exclude probability of lower score
+                    const hitStrategyProbability =
+                        hitStrategy === HitStrategy.bustingProbabilityOnly
+                            ? bustingProbability
+                            : bustingProbability + lowerScoreProbability;
+
                     // TODO Config item to demand minimal margin of gain for hitting?
 
                     const decision: PlayerDecision =
-                        bustingProbability + lowerScoreProbability - lessThanDealerProbability < 0
+                        hitStrategyProbability - lessThanDealerProbability < 0
                             ? PlayerDecision.hit
                             : PlayerDecision.stand;
 

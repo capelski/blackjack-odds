@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { dealerStandThreshold } from '../constants';
 import {
     getOutcomesSet,
     getAllHands,
@@ -7,7 +8,7 @@ import {
     getStandThresholdProbabilities,
     getDealerCardBasedProbabilities
 } from '../logic';
-import { dealerStandThreshold } from '../constants';
+import { HitStrategy } from '../models';
 import {
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
@@ -21,6 +22,7 @@ import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-tab
 // TODO Compute turnover
 
 export const App: React.FC = () => {
+    const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.includeLowerScore);
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [dealerProbabilities, setDealerProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
@@ -45,6 +47,7 @@ export const App: React.FC = () => {
         });
         const nextPlayerProbabilities = getDealerCardBasedProbabilities({
             allScoreStats: nextAllScoreStats,
+            hitStrategy,
             dealerProbabilities: nextDealerProbabilities,
             outcomesSet: nextOutcomesSet
         });
@@ -56,9 +59,39 @@ export const App: React.FC = () => {
         setPlayerProbabilities(nextPlayerProbabilities);
     }, []);
 
+    useEffect(() => {
+        if (
+            allScoreStats !== undefined &&
+            outcomesSet !== undefined &&
+            dealerProbabilities !== undefined
+        ) {
+            const nextPlayerProbabilities = getDealerCardBasedProbabilities({
+                allScoreStats,
+                hitStrategy,
+                dealerProbabilities,
+                outcomesSet
+            });
+            setPlayerProbabilities(nextPlayerProbabilities);
+        }
+    }, [hitStrategy]);
+
     return (
         <div>
             <h3>Dealer card based decisions table</h3>
+            {Object.values(HitStrategy).map((hitStrategyOption) => (
+                <React.Fragment key={hitStrategyOption}>
+                    <input
+                        checked={hitStrategy === hitStrategyOption}
+                        name="hit-strategy"
+                        onChange={(option) => setHitStrategy(option.target.value as HitStrategy)}
+                        type="radio"
+                        value={hitStrategyOption}
+                    />
+                    {hitStrategyOption}
+                    <br />
+                </React.Fragment>
+            ))}
+            <br />
             {allScoreStats !== undefined &&
             outcomesSet !== undefined &&
             playerProbabilities !== undefined ? (

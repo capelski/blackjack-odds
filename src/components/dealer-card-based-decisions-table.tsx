@@ -152,8 +152,8 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 );
             })}
             <p>P({'<'} D) = probability of dealer getting a higher score</p>
-            <p>P({'>'} 21) = probability of busting</p>
-            <p>P({'<'} X) = probability of getting a lower score than current (only soft hands)</p>
+            <p>P({'>'}21) = probability of busting</p>
+            <p>P({'<'} X) = probability of getting a score lower than X (only soft hands)</p>
         </div>
     );
 };
