@@ -12,6 +12,7 @@ import { RoundedFloat } from './rounded-float';
 
 interface DealerCardBasedDecisionsTableProps {
     allScoreStats: ScoreStats[];
+    displayAdditionalProbabilities: boolean;
     outcomesSet: OutcomesSet;
     playerProbabilities: AllScoreDealerCardBasedProbabilities;
 }
@@ -117,6 +118,28 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 ].standLessThanDealerProbability
                                             }
                                         />
+                                        {props.displayAdditionalProbabilities && (
+                                            <React.Fragment>
+                                                <br />
+                                                {`P(≥ D): `}
+                                                <RoundedFloat
+                                                    value={
+                                                        props.playerProbabilities[scoreStats.key][
+                                                            cardOutcome.key
+                                                        ].standEqualOrMoreThanDealerProbability
+                                                    }
+                                                />
+                                                <br />
+                                                {`D(>${maximumScore}): `}
+                                                <RoundedFloat
+                                                    value={
+                                                        props.playerProbabilities[scoreStats.key][
+                                                            cardOutcome.key
+                                                        ].standDealerBustingProbability
+                                                    }
+                                                />
+                                            </React.Fragment>
+                                        )}
                                         <br />
                                         <br />
                                         Hit -------
@@ -129,8 +152,40 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 ].hitBustingProbability
                                             }
                                         />
+                                        <br />
+                                        {`P(< D): `}
+                                        <RoundedFloat
+                                            value={
+                                                props.playerProbabilities[scoreStats.key][
+                                                    cardOutcome.key
+                                                ].hitLessThanDealerProbability
+                                            }
+                                        />
+                                        {props.displayAdditionalProbabilities && (
+                                            <React.Fragment>
+                                                <br />
+                                                {`P(≥ D): `}
+                                                <RoundedFloat
+                                                    value={
+                                                        props.playerProbabilities[scoreStats.key][
+                                                            cardOutcome.key
+                                                        ].hitEqualOrMoreThanDealerProbability
+                                                    }
+                                                />
+                                                <br />
+                                                {`D(>21): `}
+                                                <RoundedFloat
+                                                    value={
+                                                        props.playerProbabilities[scoreStats.key][
+                                                            cardOutcome.key
+                                                        ].hitDealerBustingProbability
+                                                    }
+                                                />
+                                            </React.Fragment>
+                                        )}
                                         {scoreStats.representativeHand.allScores.length > 1 && (
                                             <React.Fragment>
+                                                <br />
                                                 <br />
                                                 {`P(<${scoreStats.representativeHand.effectiveScore}): `}
                                                 <RoundedFloat
@@ -142,16 +197,6 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 />
                                             </React.Fragment>
                                         )}
-                                        <br />
-                                        {`P(< D): `}
-                                        <RoundedFloat
-                                            value={
-                                                props.playerProbabilities[scoreStats.key][
-                                                    cardOutcome.key
-                                                ].hitLessThanDealerProbability
-                                            }
-                                        />
-                                        <br />
                                     </div>
                                 )}
                             </div>
@@ -159,8 +204,14 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                     </div>
                 );
             })}
-            <p>P({'<'} D) = probability of dealer getting a higher score</p>
+            <p>P({'<'} D) = probability of getting a score lower than dealer's</p>
             <p>P({'>'}21) = probability of busting</p>
+            {props.displayAdditionalProbabilities && (
+                <React.Fragment>
+                    <p>P({'≥'} D) = probability of getting a score equal or higher than dealer's</p>
+                    <p>D({'>'}21) = probability of dealer busting</p>
+                </React.Fragment>
+            )}
             <p>P({'<'} X) = probability of getting a score lower than X (only soft hands)</p>
         </div>
     );

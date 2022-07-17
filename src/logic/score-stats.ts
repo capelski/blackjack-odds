@@ -69,11 +69,19 @@ export const getDealerCardBasedProbabilities = ({
                     const standProbabilities = {
                         [scoreStats.representativeHand.effectiveScore]: 1
                     };
-                    const standLessThanDealerProbability = getRangeProbability(
-                        dealerProbabilities[dealerCardKey],
-                        scoreStats.representativeHand.effectiveScore + 1,
-                        maximumScore
-                    );
+                    const standDealerProbabilities = {
+                        dealerBusting: getBustingProbability(dealerProbabilities[dealerCardKey]),
+                        equalOrMoreThanDealer: getRangeProbability(
+                            dealerProbabilities[dealerCardKey],
+                            0,
+                            scoreStats.representativeHand.effectiveScore
+                        ),
+                        lessThanDealer: getRangeProbability(
+                            dealerProbabilities[dealerCardKey],
+                            scoreStats.representativeHand.effectiveScore + 1,
+                            maximumScore
+                        )
+                    };
 
                     const hitProbabilities = scoreStats.representativeHand.descendants
                         .map((descendant) => {
@@ -95,7 +103,7 @@ export const getDealerCardBasedProbabilities = ({
                         0,
                         scoreStats.representativeHand.effectiveScore - 1
                     );
-                    const hitNonBustProbabilities = Object.keys(hitProbabilities)
+                    const hitDealerProbabilities = Object.keys(hitProbabilities)
                         .map((key) => parseInt(key))
                         .filter((key) => !isBustScore(key))
                         .reduce(
@@ -104,10 +112,8 @@ export const getDealerCardBasedProbabilities = ({
                                     dealerBusting:
                                         reduced.dealerBusting +
                                         hitProbabilities[key] *
-                                            getRangeProbability(
-                                                dealerProbabilities[dealerCardKey],
-                                                maximumScore + 1,
-                                                40
+                                            getBustingProbability(
+                                                dealerProbabilities[dealerCardKey]
                                             ),
                                     equalOrMoreThanDealer:
                                         reduced.equalOrMoreThanDealer +
@@ -135,10 +141,10 @@ export const getDealerCardBasedProbabilities = ({
                             ? hitBustingProbability
                             : hitStrategy === HitStrategy.lowerThanCurrent
                             ? hitBustingProbability + hitLessThanCurrentProbability
-                            : hitBustingProbability + hitNonBustProbabilities.lessThanDealer;
+                            : hitBustingProbability + hitDealerProbabilities.lessThanDealer;
 
                     const decision: PlayerDecision =
-                        standLessThanDealerProbability - hitStrategyProbability >
+                        standDealerProbabilities.lessThanDealer - hitStrategyProbability >
                         hitMinimalProbabilityGain
                             ? PlayerDecision.hit
                             : PlayerDecision.stand;
@@ -147,10 +153,16 @@ export const getDealerCardBasedProbabilities = ({
                         decision,
                         hit: hitProbabilities,
                         hitBustingProbability,
+                        hitDealerBustingProbability: hitDealerProbabilities.dealerBusting,
+                        hitEqualOrMoreThanDealerProbability:
+                            hitDealerProbabilities.equalOrMoreThanDealer,
                         hitLessThanCurrentProbability,
-                        hitLessThanDealerProbability: hitNonBustProbabilities.lessThanDealer,
+                        hitLessThanDealerProbability: hitDealerProbabilities.lessThanDealer,
                         stand: standProbabilities,
-                        standLessThanDealerProbability
+                        standDealerBustingProbability: standDealerProbabilities.dealerBusting,
+                        standEqualOrMoreThanDealerProbability:
+                            standDealerProbabilities.equalOrMoreThanDealer,
+                        standLessThanDealerProbability: standDealerProbabilities.lessThanDealer
                     };
 
                     return {

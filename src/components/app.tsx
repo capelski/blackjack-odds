@@ -27,6 +27,7 @@ export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [dealerProbabilities, setDealerProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
+    const [displayAdditionalProbabilities, setDisplayAdditionalProbabilities] = useState(false);
     const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
     const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.lowerThanDealer);
     const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
@@ -109,11 +110,20 @@ export const App: React.FC = () => {
             % Minimal probability gain of Hitting over Standing
             <br />
             <br />
+            <input
+                type="checkbox"
+                checked={displayAdditionalProbabilities}
+                onChange={(event) => setDisplayAdditionalProbabilities(event.target.checked)}
+            />
+            Display additional probabilities (i.e. P({'≥'} D) and D({'>'}21) )
+            <br />
+            <br />
             {allScoreStats !== undefined &&
             outcomesSet !== undefined &&
             playerProbabilities !== undefined ? (
                 <DealerCardBasedDecisionsTable
                     allScoreStats={allScoreStats}
+                    displayAdditionalProbabilities={displayAdditionalProbabilities}
                     outcomesSet={outcomesSet}
                     playerProbabilities={playerProbabilities}
                 />

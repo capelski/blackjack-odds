@@ -11,9 +11,13 @@ export type DealerCardBasedProbabilities = {
     decision: PlayerDecision;
     hit: EffectiveScoreProbabilities;
     hitBustingProbability: number;
+    hitDealerBustingProbability: number;
+    hitEqualOrMoreThanDealerProbability: number;
     hitLessThanCurrentProbability: number;
     hitLessThanDealerProbability: number;
     stand: EffectiveScoreProbabilities;
+    standDealerBustingProbability: number;
+    standEqualOrMoreThanDealerProbability: number;
     standLessThanDealerProbability: number;
 };
 
