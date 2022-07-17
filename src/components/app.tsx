@@ -18,7 +18,6 @@ import {
 import { AllScoreStatsTable } from './all-score-stats-table';
 import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
 
-// TODO P(< D) on hit
 // TODO Compute turnover
 
 const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
@@ -29,7 +28,7 @@ export const App: React.FC = () => {
     const [dealerProbabilities, setDealerProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
     const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
-    const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.includeLowerScore);
+    const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.lowerThanDealer);
     const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();

@@ -114,7 +114,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                             value={
                                                 props.playerProbabilities[scoreStats.key][
                                                     cardOutcome.key
-                                                ].lessThanDealerProbability
+                                                ].standLessThanDealerProbability
                                             }
                                         />
                                         <br />
@@ -126,23 +126,31 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                             value={
                                                 props.playerProbabilities[scoreStats.key][
                                                     cardOutcome.key
-                                                ].bustingProbability
+                                                ].hitBustingProbability
                                             }
                                         />
                                         {scoreStats.representativeHand.allScores.length > 1 && (
                                             <React.Fragment>
-                                                {' '}
                                                 <br />
                                                 {`P(<${scoreStats.representativeHand.effectiveScore}): `}
                                                 <RoundedFloat
                                                     value={
                                                         props.playerProbabilities[scoreStats.key][
                                                             cardOutcome.key
-                                                        ].lowerScoreProbability
+                                                        ].hitLessThanCurrentProbability
                                                     }
                                                 />
                                             </React.Fragment>
                                         )}
+                                        <br />
+                                        {`P(< D): `}
+                                        <RoundedFloat
+                                            value={
+                                                props.playerProbabilities[scoreStats.key][
+                                                    cardOutcome.key
+                                                ].hitLessThanDealerProbability
+                                            }
+                                        />
                                         <br />
                                     </div>
                                 )}

@@ -8,12 +8,13 @@ export type AllScoreDealerCardBasedProbabilities = Dictionary<
 >;
 
 export type DealerCardBasedProbabilities = {
-    bustingProbability: number;
     decision: PlayerDecision;
     hit: EffectiveScoreProbabilities;
-    lessThanDealerProbability: number;
-    lowerScoreProbability: number;
+    hitBustingProbability: number;
+    hitLessThanCurrentProbability: number;
+    hitLessThanDealerProbability: number;
     stand: EffectiveScoreProbabilities;
+    standLessThanDealerProbability: number;
 };
 
 export type ScoreDealerCardBasedProbabilities = Dictionary<
