@@ -2,13 +2,16 @@ import { PlayerDecision, ScoreKey } from '../models';
 import { Dictionary } from './dictionary';
 import { EffectiveScoreProbabilities } from './effective-score-probabilities';
 
-export type AllScoreDealerCardBasedProbabilities = Dictionary<
-    ScoreDealerCardBasedProbabilities,
-    ScoreKey
->;
+export type ScoreDealerBasedFacts = {
+    edge: number;
+    facts: ScoreAllDealerCardBasedFacts;
+};
 
-export type DealerCardBasedProbabilities = {
+export type AllScoreDealerCardBasedProbabilities = Dictionary<ScoreDealerBasedFacts, ScoreKey>;
+
+export type DealerCardBasedFacts = {
     decision: PlayerDecision;
+    edge: number;
     hit: EffectiveScoreProbabilities;
     hitBustingProbability: number;
     hitDealerBustingProbability: number;
@@ -21,7 +24,4 @@ export type DealerCardBasedProbabilities = {
     standLessThanDealerProbability: number;
 };
 
-export type ScoreDealerCardBasedProbabilities = Dictionary<
-    DealerCardBasedProbabilities,
-    ScoreKey // Dealer card key
->;
+export type ScoreAllDealerCardBasedFacts = Dictionary<DealerCardBasedFacts, ScoreKey>;

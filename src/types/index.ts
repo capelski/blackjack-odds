@@ -1,8 +1,9 @@
 export { CardOutcome } from './card-outcome';
 export {
     AllScoreDealerCardBasedProbabilities,
-    DealerCardBasedProbabilities,
-    ScoreDealerCardBasedProbabilities as ScoreDealerCardBasedProbabilities
+    DealerCardBasedFacts,
+    ScoreAllDealerCardBasedFacts,
+    ScoreDealerBasedFacts
 } from './dealer-card-based-probabilities';
 export { Dictionary } from './dictionary';
 export {

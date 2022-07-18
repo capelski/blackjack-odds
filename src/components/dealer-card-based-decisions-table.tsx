@@ -77,14 +77,24 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                             >
                                 {isRowExpanded ? '✖️' : '👁️'}
                             </span>
+                            {isRowExpanded && (
+                                <React.Fragment>
+                                    <br />
+                                    Edge:{' '}
+                                    <RoundedFloat
+                                        value={props.playerProbabilities[scoreStats.key].edge}
+                                    />
+                                </React.Fragment>
+                            )}
                         </div>
                         {props.outcomesSet.allOutcomes.map((cardOutcome) => (
                             <div
                                 key={cardOutcome.symbol}
                                 style={{
                                     ...cellStyle,
-                                    ...(props.playerProbabilities[scoreStats.key][cardOutcome.key]
-                                        .decision === PlayerDecision.hit
+                                    ...(props.playerProbabilities[scoreStats.key].facts[
+                                        cardOutcome.key
+                                    ].decision === PlayerDecision.hit
                                         ? {
                                               backgroundColor: 'rgb(66, 139, 202)',
                                               color: 'white'
@@ -96,9 +106,23 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                             >
                                 <div style={{ textTransform: 'capitalize' }}>
                                     {
-                                        props.playerProbabilities[scoreStats.key][cardOutcome.key]
-                                            .decision
+                                        props.playerProbabilities[scoreStats.key].facts[
+                                            cardOutcome.key
+                                        ].decision
                                     }
+                                    {isRowExpanded && (
+                                        <React.Fragment>
+                                            <br />
+                                            Edge:{' '}
+                                            <RoundedFloat
+                                                value={
+                                                    props.playerProbabilities[scoreStats.key].facts[
+                                                        cardOutcome.key
+                                                    ].edge
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    )}
                                 </div>
                                 {isRowExpanded && (
                                     <div
@@ -113,7 +137,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                         {`P(< D): `}
                                         <RoundedFloat
                                             value={
-                                                props.playerProbabilities[scoreStats.key][
+                                                props.playerProbabilities[scoreStats.key].facts[
                                                     cardOutcome.key
                                                 ].standLessThanDealerProbability
                                             }
@@ -124,18 +148,18 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 {`P(≥ D): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key][
-                                                            cardOutcome.key
-                                                        ].standEqualOrMoreThanDealerProbability
+                                                        props.playerProbabilities[scoreStats.key]
+                                                            .facts[cardOutcome.key]
+                                                            .standEqualOrMoreThanDealerProbability
                                                     }
                                                 />
                                                 <br />
                                                 {`D(>${maximumScore}): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key][
-                                                            cardOutcome.key
-                                                        ].standDealerBustingProbability
+                                                        props.playerProbabilities[scoreStats.key]
+                                                            .facts[cardOutcome.key]
+                                                            .standDealerBustingProbability
                                                     }
                                                 />
                                             </React.Fragment>
@@ -147,7 +171,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                         {`P(>${maximumScore}): `}
                                         <RoundedFloat
                                             value={
-                                                props.playerProbabilities[scoreStats.key][
+                                                props.playerProbabilities[scoreStats.key].facts[
                                                     cardOutcome.key
                                                 ].hitBustingProbability
                                             }
@@ -156,7 +180,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                         {`P(< D): `}
                                         <RoundedFloat
                                             value={
-                                                props.playerProbabilities[scoreStats.key][
+                                                props.playerProbabilities[scoreStats.key].facts[
                                                     cardOutcome.key
                                                 ].hitLessThanDealerProbability
                                             }
@@ -167,18 +191,18 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 {`P(≥ D): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key][
-                                                            cardOutcome.key
-                                                        ].hitEqualOrMoreThanDealerProbability
+                                                        props.playerProbabilities[scoreStats.key]
+                                                            .facts[cardOutcome.key]
+                                                            .hitEqualOrMoreThanDealerProbability
                                                     }
                                                 />
                                                 <br />
                                                 {`D(>21): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key][
-                                                            cardOutcome.key
-                                                        ].hitDealerBustingProbability
+                                                        props.playerProbabilities[scoreStats.key]
+                                                            .facts[cardOutcome.key]
+                                                            .hitDealerBustingProbability
                                                     }
                                                 />
                                             </React.Fragment>
@@ -190,9 +214,9 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 {`P(<${scoreStats.representativeHand.effectiveScore}): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key][
-                                                            cardOutcome.key
-                                                        ].hitLessThanCurrentProbability
+                                                        props.playerProbabilities[scoreStats.key]
+                                                            .facts[cardOutcome.key]
+                                                            .hitLessThanCurrentProbability
                                                     }
                                                 />
                                             </React.Fragment>
@@ -213,6 +237,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 </React.Fragment>
             )}
             <p>P({'<'} X) = probability of getting a score lower than X (only soft hands)</p>
+            <p>Edge = Probability of player not losing</p>
         </div>
     );
 };

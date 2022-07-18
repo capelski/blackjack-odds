@@ -18,7 +18,7 @@ import {
 import { AllScoreStatsTable } from './all-score-stats-table';
 import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
 
-// TODO Compute turnover
+// TODO Compute overall edge
 
 const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
     parseInt(hitMinimalProbabilityGain) / 100 || 0;

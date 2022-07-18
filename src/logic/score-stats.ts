@@ -3,13 +3,14 @@ import { HitStrategy, PlayerDecision } from '../models';
 import {
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
-    DealerCardBasedProbabilities,
+    DealerCardBasedFacts,
     Dictionary,
+    EffectiveScoreProbabilities,
     Hand,
     OutcomesSet,
-    ScoreStats,
-    ScoreDealerCardBasedProbabilities,
-    EffectiveScoreProbabilities
+    ScoreAllDealerCardBasedFacts,
+    ScoreDealerBasedFacts,
+    ScoreStats
 } from '../types';
 import {
     weightProbabilities,
@@ -61,115 +62,131 @@ export const getDealerCardBasedProbabilities = ({
     outcomesSet: OutcomesSet;
 }) => {
     return allScoreStats.reduce((reduced, scoreStats) => {
+        const scoreAllFacts = outcomesSet.allOutcomes
+            .map((cardOutcome) => cardOutcome.key)
+            .reduce((dealerCardReduced, dealerCardKey) => {
+                const standProbabilities = {
+                    [scoreStats.representativeHand.effectiveScore]: 1
+                };
+                const standDealerProbabilities = {
+                    dealerBusting: getBustingProbability(dealerProbabilities[dealerCardKey]),
+                    equalOrMoreThanDealer: getRangeProbability(
+                        dealerProbabilities[dealerCardKey],
+                        0,
+                        scoreStats.representativeHand.effectiveScore
+                    ),
+                    lessThanDealer: getRangeProbability(
+                        dealerProbabilities[dealerCardKey],
+                        scoreStats.representativeHand.effectiveScore + 1,
+                        maximumScore
+                    )
+                };
+
+                const hitProbabilities = scoreStats.representativeHand.descendants
+                    .map((descendant) => {
+                        return weightProbabilities(
+                            descendant.effectiveScore >= maximumScore
+                                ? {
+                                      [descendant.effectiveScore]: 1
+                                  }
+                                : reduced[descendant.scoreKey].facts[dealerCardKey][
+                                      reduced[descendant.scoreKey].facts[dealerCardKey].decision
+                                  ],
+                            descendant.lastCard.weight / outcomesSet.totalWeight
+                        );
+                    })
+                    .reduce(mergeProbabilities, <EffectiveScoreProbabilities>{});
+                const hitBustingProbability = getBustingProbability(hitProbabilities);
+                const hitLessThanCurrentProbability = getRangeProbability(
+                    hitProbabilities,
+                    0,
+                    scoreStats.representativeHand.effectiveScore - 1
+                );
+                const hitDealerProbabilities = Object.keys(hitProbabilities)
+                    .map((key) => parseInt(key))
+                    .filter((key) => !isBustScore(key))
+                    .reduce(
+                        (hitReduced, key) => {
+                            return {
+                                dealerBusting:
+                                    hitReduced.dealerBusting +
+                                    hitProbabilities[key] *
+                                        getBustingProbability(dealerProbabilities[dealerCardKey]),
+                                equalOrMoreThanDealer:
+                                    hitReduced.equalOrMoreThanDealer +
+                                    hitProbabilities[key] *
+                                        getRangeProbability(
+                                            dealerProbabilities[dealerCardKey],
+                                            0,
+                                            key
+                                        ),
+                                lessThanDealer:
+                                    hitReduced.lessThanDealer +
+                                    hitProbabilities[key] *
+                                        getRangeProbability(
+                                            dealerProbabilities[dealerCardKey],
+                                            key + 1,
+                                            maximumScore
+                                        )
+                            };
+                        },
+                        { dealerBusting: 0, equalOrMoreThanDealer: 0, lessThanDealer: 0 }
+                    );
+
+                const hitStrategyProbability =
+                    hitStrategy === HitStrategy.busting
+                        ? hitBustingProbability
+                        : hitStrategy === HitStrategy.lowerThanCurrent
+                        ? hitBustingProbability + hitLessThanCurrentProbability
+                        : hitBustingProbability + hitDealerProbabilities.lessThanDealer;
+
+                const decision: PlayerDecision =
+                    standDealerProbabilities.lessThanDealer - hitStrategyProbability >
+                    hitMinimalProbabilityGain
+                        ? PlayerDecision.hit
+                        : PlayerDecision.stand;
+
+                const dealerCardBasedFacts: DealerCardBasedFacts = {
+                    decision,
+                    edge:
+                        2 *
+                        (0.5 -
+                            (decision === PlayerDecision.hit
+                                ? hitBustingProbability + hitDealerProbabilities.lessThanDealer
+                                : standDealerProbabilities.lessThanDealer)),
+                    hit: hitProbabilities,
+                    hitBustingProbability,
+                    hitDealerBustingProbability: hitDealerProbabilities.dealerBusting,
+                    hitEqualOrMoreThanDealerProbability:
+                        hitDealerProbabilities.equalOrMoreThanDealer,
+                    hitLessThanCurrentProbability,
+                    hitLessThanDealerProbability: hitDealerProbabilities.lessThanDealer,
+                    stand: standProbabilities,
+                    standDealerBustingProbability: standDealerProbabilities.dealerBusting,
+                    standEqualOrMoreThanDealerProbability:
+                        standDealerProbabilities.equalOrMoreThanDealer,
+                    standLessThanDealerProbability: standDealerProbabilities.lessThanDealer
+                };
+
+                return {
+                    ...dealerCardReduced,
+                    [dealerCardKey]: dealerCardBasedFacts
+                };
+            }, <ScoreAllDealerCardBasedFacts>{});
+
+        const scoreDealerBasedFacts: ScoreDealerBasedFacts = {
+            edge:
+                outcomesSet.allOutcomes.reduce(
+                    (edgeReduced, cardOutcome) =>
+                        edgeReduced + scoreAllFacts[cardOutcome.key].edge * cardOutcome.weight,
+                    0
+                ) / outcomesSet.totalWeight,
+            facts: scoreAllFacts
+        };
+
         return {
             ...reduced,
-            [scoreStats.key]: outcomesSet.allOutcomes
-                .map((cardOutcome) => cardOutcome.key)
-                .reduce((dealerCardReduced, dealerCardKey) => {
-                    const standProbabilities = {
-                        [scoreStats.representativeHand.effectiveScore]: 1
-                    };
-                    const standDealerProbabilities = {
-                        dealerBusting: getBustingProbability(dealerProbabilities[dealerCardKey]),
-                        equalOrMoreThanDealer: getRangeProbability(
-                            dealerProbabilities[dealerCardKey],
-                            0,
-                            scoreStats.representativeHand.effectiveScore
-                        ),
-                        lessThanDealer: getRangeProbability(
-                            dealerProbabilities[dealerCardKey],
-                            scoreStats.representativeHand.effectiveScore + 1,
-                            maximumScore
-                        )
-                    };
-
-                    const hitProbabilities = scoreStats.representativeHand.descendants
-                        .map((descendant) => {
-                            return weightProbabilities(
-                                descendant.effectiveScore >= maximumScore
-                                    ? {
-                                          [descendant.effectiveScore]: 1
-                                      }
-                                    : reduced[descendant.scoreKey][dealerCardKey][
-                                          reduced[descendant.scoreKey][dealerCardKey].decision
-                                      ],
-                                descendant.lastCard.weight / outcomesSet.totalWeight
-                            );
-                        })
-                        .reduce(mergeProbabilities, <EffectiveScoreProbabilities>{});
-                    const hitBustingProbability = getBustingProbability(hitProbabilities);
-                    const hitLessThanCurrentProbability = getRangeProbability(
-                        hitProbabilities,
-                        0,
-                        scoreStats.representativeHand.effectiveScore - 1
-                    );
-                    const hitDealerProbabilities = Object.keys(hitProbabilities)
-                        .map((key) => parseInt(key))
-                        .filter((key) => !isBustScore(key))
-                        .reduce(
-                            (reduced, key) => {
-                                return {
-                                    dealerBusting:
-                                        reduced.dealerBusting +
-                                        hitProbabilities[key] *
-                                            getBustingProbability(
-                                                dealerProbabilities[dealerCardKey]
-                                            ),
-                                    equalOrMoreThanDealer:
-                                        reduced.equalOrMoreThanDealer +
-                                        hitProbabilities[key] *
-                                            getRangeProbability(
-                                                dealerProbabilities[dealerCardKey],
-                                                0,
-                                                key
-                                            ),
-                                    lessThanDealer:
-                                        reduced.lessThanDealer +
-                                        hitProbabilities[key] *
-                                            getRangeProbability(
-                                                dealerProbabilities[dealerCardKey],
-                                                key + 1,
-                                                maximumScore
-                                            )
-                                };
-                            },
-                            { dealerBusting: 0, equalOrMoreThanDealer: 0, lessThanDealer: 0 }
-                        );
-
-                    const hitStrategyProbability =
-                        hitStrategy === HitStrategy.busting
-                            ? hitBustingProbability
-                            : hitStrategy === HitStrategy.lowerThanCurrent
-                            ? hitBustingProbability + hitLessThanCurrentProbability
-                            : hitBustingProbability + hitDealerProbabilities.lessThanDealer;
-
-                    const decision: PlayerDecision =
-                        standDealerProbabilities.lessThanDealer - hitStrategyProbability >
-                        hitMinimalProbabilityGain
-                            ? PlayerDecision.hit
-                            : PlayerDecision.stand;
-
-                    const dealerCardBasedProbabilities: DealerCardBasedProbabilities = {
-                        decision,
-                        hit: hitProbabilities,
-                        hitBustingProbability,
-                        hitDealerBustingProbability: hitDealerProbabilities.dealerBusting,
-                        hitEqualOrMoreThanDealerProbability:
-                            hitDealerProbabilities.equalOrMoreThanDealer,
-                        hitLessThanCurrentProbability,
-                        hitLessThanDealerProbability: hitDealerProbabilities.lessThanDealer,
-                        stand: standProbabilities,
-                        standDealerBustingProbability: standDealerProbabilities.dealerBusting,
-                        standEqualOrMoreThanDealerProbability:
-                            standDealerProbabilities.equalOrMoreThanDealer,
-                        standLessThanDealerProbability: standDealerProbabilities.lessThanDealer
-                    };
-
-                    return {
-                        ...dealerCardReduced,
-                        [dealerCardKey]: dealerCardBasedProbabilities
-                    };
-                }, <ScoreDealerCardBasedProbabilities>{})
+            [scoreStats.key]: scoreDealerBasedFacts
         };
     }, <AllScoreDealerCardBasedProbabilities>{});
 };
