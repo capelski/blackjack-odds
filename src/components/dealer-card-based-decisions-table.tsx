@@ -80,9 +80,12 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                             {isRowExpanded && (
                                 <React.Fragment>
                                     <br />
-                                    Edge:{' '}
+                                    Loss:{' '}
                                     <RoundedFloat
-                                        value={props.playerProbabilities[scoreStats.key].edge}
+                                        value={
+                                            props.playerProbabilities[scoreStats.key]
+                                                .lossProbability
+                                        }
                                     />
                                 </React.Fragment>
                             )}
@@ -113,12 +116,12 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                     {isRowExpanded && (
                                         <React.Fragment>
                                             <br />
-                                            Edge:{' '}
+                                            Loss:{' '}
                                             <RoundedFloat
                                                 value={
                                                     props.playerProbabilities[scoreStats.key].facts[
                                                         cardOutcome.key
-                                                    ].edge
+                                                    ].lossProbability
                                                 }
                                             />
                                         </React.Fragment>
@@ -237,7 +240,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 </React.Fragment>
             )}
             <p>P({'<'} X) = probability of getting a score lower than X (only soft hands)</p>
-            <p>Edge = Probability of player not losing</p>
+            <p>Loss = Probability of player losing</p>
         </div>
     );
 };

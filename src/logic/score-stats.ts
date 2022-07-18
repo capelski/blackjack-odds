@@ -148,12 +148,6 @@ export const getDealerCardBasedProbabilities = ({
 
                 const dealerCardBasedFacts: DealerCardBasedFacts = {
                     decision,
-                    edge:
-                        2 *
-                        (0.5 -
-                            (decision === PlayerDecision.hit
-                                ? hitBustingProbability + hitDealerProbabilities.lessThanDealer
-                                : standDealerProbabilities.lessThanDealer)),
                     hit: hitProbabilities,
                     hitBustingProbability,
                     hitDealerBustingProbability: hitDealerProbabilities.dealerBusting,
@@ -161,6 +155,10 @@ export const getDealerCardBasedProbabilities = ({
                         hitDealerProbabilities.equalOrMoreThanDealer,
                     hitLessThanCurrentProbability,
                     hitLessThanDealerProbability: hitDealerProbabilities.lessThanDealer,
+                    lossProbability:
+                        decision === PlayerDecision.hit
+                            ? hitBustingProbability + hitDealerProbabilities.lessThanDealer
+                            : standDealerProbabilities.lessThanDealer,
                     stand: standProbabilities,
                     standDealerBustingProbability: standDealerProbabilities.dealerBusting,
                     standEqualOrMoreThanDealerProbability:
@@ -175,13 +173,14 @@ export const getDealerCardBasedProbabilities = ({
             }, <ScoreAllDealerCardBasedFacts>{});
 
         const scoreDealerBasedFacts: ScoreDealerBasedFacts = {
-            edge:
+            facts: scoreAllFacts,
+            lossProbability:
                 outcomesSet.allOutcomes.reduce(
-                    (edgeReduced, cardOutcome) =>
-                        edgeReduced + scoreAllFacts[cardOutcome.key].edge * cardOutcome.weight,
+                    (lossReduced, cardOutcome) =>
+                        lossReduced +
+                        scoreAllFacts[cardOutcome.key].lossProbability * cardOutcome.weight,
                     0
-                ) / outcomesSet.totalWeight,
-            facts: scoreAllFacts
+                ) / outcomesSet.totalWeight
         };
 
         return {

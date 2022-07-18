@@ -18,7 +18,7 @@ import {
 import { AllScoreStatsTable } from './all-score-stats-table';
 import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
 
-// TODO Compute overall edge
+// TODO Compute hands playerWeight as initial hand probability. Compute overall loss
 
 const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
     parseInt(hitMinimalProbabilityGain) / 100 || 0;
