@@ -60,6 +60,14 @@ export const AllScoreStatsTable = (props: AllScoreStatsTableProps) => {
                 id: 'combinations'
             },
             {
+                accessor: 'initialHandProbability',
+                Cell: (cellProps: CellProps<ScoreStats, ScoreStats['initialHandProbability']>) => {
+                    return <RoundedFloat value={cellProps.value} />;
+                },
+                Header: `P(initial hand)`,
+                id: 'initial-hand-probability'
+            },
+            {
                 accessor: 'key',
                 Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
                     return (

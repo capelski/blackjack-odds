@@ -23,7 +23,13 @@ import { isBustScore } from './hand';
 /**
  * Returns a list of all possible valid scores' stats
  */
-export const getAllScoreStats = (allHands: Hand[]): ScoreStats[] => {
+export const getAllScoreStats = ({
+    allHands,
+    outcomesSet
+}: {
+    allHands: Hand[];
+    outcomesSet: OutcomesSet;
+}): ScoreStats[] => {
     const allScoresStatsMap = <Dictionary<ScoreStats>>{};
     const allScoreStats: ScoreStats[] = [];
 
@@ -33,6 +39,7 @@ export const getAllScoreStats = (allHands: Hand[]): ScoreStats[] => {
         if (allScoresStatsMap[hand.scoreKey] === undefined) {
             allScoresStatsMap[hand.scoreKey] = {
                 combinations: [handSymbols],
+                initialHandProbability: 0,
                 key: hand.scoreKey,
                 representativeHand: hand
             };
@@ -40,6 +47,17 @@ export const getAllScoreStats = (allHands: Hand[]): ScoreStats[] => {
         } else {
             allScoresStatsMap[hand.scoreKey].combinations.push(handSymbols);
         }
+
+        allScoresStatsMap[hand.scoreKey].initialHandProbability +=
+            hand.cardSymbols.length === 2
+                ? hand.cardSymbols
+                      .map(
+                          (cardSymbol) =>
+                              outcomesSet.allOutcomes.find((o) => o.symbol === cardSymbol)!.weight /
+                              outcomesSet.totalWeight
+                      )
+                      .reduce((reduced, weight) => reduced * weight, 1)
+                : 0;
     });
 
     return allScoreStats;

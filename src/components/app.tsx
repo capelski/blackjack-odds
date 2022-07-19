@@ -18,7 +18,7 @@ import {
 import { AllScoreStatsTable } from './all-score-stats-table';
 import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
 
-// TODO Compute hands playerWeight as initial hand probability. Compute overall loss
+// TODO Compute overall loss
 
 const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
     parseInt(hitMinimalProbabilityGain) / 100 || 0;
@@ -39,7 +39,10 @@ export const App: React.FC = () => {
     useEffect(() => {
         const nextOutcomesSet = getOutcomesSet();
         const nextAllHands = getAllHands(nextOutcomesSet);
-        const nextAllScoreStats = getAllScoreStats(nextAllHands);
+        const nextAllScoreStats = getAllScoreStats({
+            allHands: nextAllHands,
+            outcomesSet: nextOutcomesSet
+        });
         const nextOneMoreCardProbabilities = getOneMoreCardProbabilities({
             allScoreStats: nextAllScoreStats,
             outcomesSet: nextOutcomesSet
