@@ -1,5 +1,5 @@
 import React, { CSSProperties, useState } from 'react';
-import { maximumScore } from '../constants';
+import { displayProbabilityTotals, maximumScore } from '../constants';
 import { sortScoreStats } from '../logic';
 import { PlayerDecision } from '../models';
 import {
@@ -31,6 +31,28 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
 
     return (
         <div>
+            Loss: <RoundedFloat value={props.playerProbabilities.lossProbability} />
+            <br />
+            Push: <RoundedFloat value={props.playerProbabilities.pushProbability} />
+            <br />
+            Win: <RoundedFloat value={props.playerProbabilities.winProbability} />
+            <br />
+            {displayProbabilityTotals && (
+                <React.Fragment>
+                    Total: <RoundedFloat value={props.playerProbabilities.totalProbability} />
+                    <br />
+                </React.Fragment>
+            )}
+            <br />
+            Player advantage:{' '}
+            <RoundedFloat
+                value={
+                    props.playerProbabilities.winProbability -
+                    props.playerProbabilities.lossProbability
+                }
+            />
+            <br />
+            <br />
             <div style={{ display: 'flex', width: '100%' }}>
                 <div
                     style={{
@@ -38,9 +60,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                         borderLeft: '1px solid black',
                         borderTop: '1px solid black'
                     }}
-                >
-                    -
-                </div>
+                ></div>
                 {props.outcomesSet.allOutcomes.map((cardOutcome) => (
                     <div
                         style={{
@@ -83,10 +103,38 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                     Loss:{' '}
                                     <RoundedFloat
                                         value={
-                                            props.playerProbabilities[scoreStats.key]
+                                            props.playerProbabilities.facts[scoreStats.key]
                                                 .lossProbability
                                         }
                                     />
+                                    <br />
+                                    Push:{' '}
+                                    <RoundedFloat
+                                        value={
+                                            props.playerProbabilities.facts[scoreStats.key]
+                                                .pushProbability
+                                        }
+                                    />
+                                    <br />
+                                    Win:{' '}
+                                    <RoundedFloat
+                                        value={
+                                            props.playerProbabilities.facts[scoreStats.key]
+                                                .winProbability
+                                        }
+                                    />
+                                    {displayProbabilityTotals && (
+                                        <React.Fragment>
+                                            <br />
+                                            Total:{' '}
+                                            <RoundedFloat
+                                                value={
+                                                    props.playerProbabilities.facts[scoreStats.key]
+                                                        .totalProbability
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    )}
                                 </React.Fragment>
                             )}
                         </div>
@@ -95,7 +143,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                 key={cardOutcome.symbol}
                                 style={{
                                     ...cellStyle,
-                                    ...(props.playerProbabilities[scoreStats.key].facts[
+                                    ...(props.playerProbabilities.facts[scoreStats.key].facts[
                                         cardOutcome.key
                                     ].decision === PlayerDecision.hit
                                         ? {
@@ -109,7 +157,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                             >
                                 <div style={{ textTransform: 'capitalize' }}>
                                     {
-                                        props.playerProbabilities[scoreStats.key].facts[
+                                        props.playerProbabilities.facts[scoreStats.key].facts[
                                             cardOutcome.key
                                         ].decision
                                     }
@@ -119,11 +167,40 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                             Loss:{' '}
                                             <RoundedFloat
                                                 value={
-                                                    props.playerProbabilities[scoreStats.key].facts[
-                                                        cardOutcome.key
-                                                    ].lossProbability
+                                                    props.playerProbabilities.facts[scoreStats.key]
+                                                        .facts[cardOutcome.key].lossProbability
                                                 }
                                             />
+                                            <br />
+                                            Push:{' '}
+                                            <RoundedFloat
+                                                value={
+                                                    props.playerProbabilities.facts[scoreStats.key]
+                                                        .facts[cardOutcome.key].pushProbability
+                                                }
+                                            />
+                                            <br />
+                                            Win:{' '}
+                                            <RoundedFloat
+                                                value={
+                                                    props.playerProbabilities.facts[scoreStats.key]
+                                                        .facts[cardOutcome.key].winProbability
+                                                }
+                                            />
+                                            {displayProbabilityTotals && (
+                                                <React.Fragment>
+                                                    <br />
+                                                    Total:{' '}
+                                                    <RoundedFloat
+                                                        value={
+                                                            props.playerProbabilities.facts[
+                                                                scoreStats.key
+                                                            ].facts[cardOutcome.key]
+                                                                .totalProbability
+                                                        }
+                                                    />
+                                                </React.Fragment>
+                                            )}
                                         </React.Fragment>
                                     )}
                                 </div>
@@ -140,31 +217,69 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                         {`P(< D): `}
                                         <RoundedFloat
                                             value={
-                                                props.playerProbabilities[scoreStats.key].facts[
-                                                    cardOutcome.key
-                                                ].standLessThanDealerProbability
+                                                props.playerProbabilities.facts[scoreStats.key]
+                                                    .facts[cardOutcome.key]
+                                                    .standLessThanDealerProbability
                                             }
                                         />
                                         {props.displayAdditionalProbabilities && (
                                             <React.Fragment>
                                                 <br />
-                                                {`P(≥ D): `}
+                                                {`P(= D): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key]
-                                                            .facts[cardOutcome.key]
-                                                            .standEqualOrMoreThanDealerProbability
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key]
+                                                            .standEqualToDealerProbability
+                                                    }
+                                                />
+                                                <br />
+                                                {`P(> D): `}
+                                                <RoundedFloat
+                                                    value={
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key]
+                                                            .standMoreThanDealerProbability
                                                     }
                                                 />
                                                 <br />
                                                 {`D(>${maximumScore}): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key]
-                                                            .facts[cardOutcome.key]
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key]
                                                             .standDealerBustingProbability
                                                     }
                                                 />
+                                                {displayProbabilityTotals && (
+                                                    <React.Fragment>
+                                                        <br />
+                                                        Total:{' '}
+                                                        <RoundedFloat
+                                                            value={
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .standLessThanDealerProbability +
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .standEqualToDealerProbability +
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .standMoreThanDealerProbability +
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .standDealerBustingProbability
+                                                            }
+                                                        />
+                                                    </React.Fragment>
+                                                )}
                                             </React.Fragment>
                                         )}
                                         <br />
@@ -174,40 +289,81 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                         {`P(>${maximumScore}): `}
                                         <RoundedFloat
                                             value={
-                                                props.playerProbabilities[scoreStats.key].facts[
-                                                    cardOutcome.key
-                                                ].hitBustingProbability
+                                                props.playerProbabilities.facts[scoreStats.key]
+                                                    .facts[cardOutcome.key].hitBustingProbability
                                             }
                                         />
                                         <br />
                                         {`P(< D): `}
                                         <RoundedFloat
                                             value={
-                                                props.playerProbabilities[scoreStats.key].facts[
-                                                    cardOutcome.key
-                                                ].hitLessThanDealerProbability
+                                                props.playerProbabilities.facts[scoreStats.key]
+                                                    .facts[cardOutcome.key]
+                                                    .hitLessThanDealerProbability
                                             }
                                         />
                                         {props.displayAdditionalProbabilities && (
                                             <React.Fragment>
                                                 <br />
-                                                {`P(≥ D): `}
+                                                {`P(= D): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key]
-                                                            .facts[cardOutcome.key]
-                                                            .hitEqualOrMoreThanDealerProbability
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key]
+                                                            .hitEqualToDealerProbability
+                                                    }
+                                                />
+                                                <br />
+                                                {`P(> D): `}
+                                                <RoundedFloat
+                                                    value={
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key]
+                                                            .hitMoreThanDealerProbability
                                                     }
                                                 />
                                                 <br />
                                                 {`D(>21): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key]
-                                                            .facts[cardOutcome.key]
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key]
                                                             .hitDealerBustingProbability
                                                     }
                                                 />
+                                                {displayProbabilityTotals && (
+                                                    <React.Fragment>
+                                                        <br />
+                                                        Total:{' '}
+                                                        <RoundedFloat
+                                                            value={
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .hitBustingProbability +
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .hitLessThanDealerProbability +
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .hitEqualToDealerProbability +
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .hitMoreThanDealerProbability +
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key]
+                                                                    .hitDealerBustingProbability
+                                                            }
+                                                        />
+                                                    </React.Fragment>
+                                                )}
                                             </React.Fragment>
                                         )}
                                         {scoreStats.representativeHand.allScores.length > 1 && (
@@ -217,8 +373,9 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 {`P(<${scoreStats.representativeHand.effectiveScore}): `}
                                                 <RoundedFloat
                                                     value={
-                                                        props.playerProbabilities[scoreStats.key]
-                                                            .facts[cardOutcome.key]
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key]
                                                             .hitLessThanCurrentProbability
                                                     }
                                                 />

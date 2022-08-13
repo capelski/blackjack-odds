@@ -18,8 +18,6 @@ import {
 import { AllScoreStatsTable } from './all-score-stats-table';
 import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
 
-// TODO Compute overall loss
-
 const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
     parseInt(hitMinimalProbabilityGain) / 100 || 0;
 
@@ -118,7 +116,7 @@ export const App: React.FC = () => {
                 checked={displayAdditionalProbabilities}
                 onChange={(event) => setDisplayAdditionalProbabilities(event.target.checked)}
             />
-            Display additional probabilities (i.e. P({'≥'} D) and D({'>'}21) )
+            Display additional probabilities (i.e. P({'='} D), P({'>'} D) and D({'>'}21) )
             <br />
             <br />
             {allScoreStats !== undefined &&

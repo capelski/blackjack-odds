@@ -1,5 +1,6 @@
 export { CardOutcome } from './card-outcome';
 export {
+    AllScoreDealerCardBasedFacts,
     AllScoreDealerCardBasedProbabilities,
     DealerCardBasedFacts,
     ScoreAllDealerCardBasedFacts,
