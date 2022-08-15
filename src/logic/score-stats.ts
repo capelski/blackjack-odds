@@ -50,22 +50,25 @@ export const getAllScoreStats = ({
         }
 
         if (hand.cardSymbols.length === 2) {
-            allScoresStatsMap[hand.scoreKey].initialHandProbability += hand.cardSymbols
-                .map(
-                    (cardSymbol) =>
-                        outcomesSet.allOutcomes.find((o) => o.symbol === cardSymbol)!.weight
-                )
-                .reduce((reduced, weight) => reduced * weight, 1);
+            const cardWeights = hand.cardSymbols.map(
+                (cardSymbol) =>
+                    outcomesSet.allOutcomes.find((o) => o.symbol === cardSymbol)!.weight /
+                    outcomesSet.totalWeight
+            );
+
+            // Because equivalent hands are filtered out (e.g. A,2 and 2,A are the same hand)
+            // the initialHandProbability must consider the filtered out hands
+            const initialProbability =
+                hand.cardSymbols[0] === hand.cardSymbols[1]
+                    ? cardWeights[0] * cardWeights[1]
+                    : 2 * (cardWeights[0] * cardWeights[1]);
+
+            allScoresStatsMap[hand.scoreKey].initialHandProbability += initialProbability;
         }
     });
 
-    const totalInitialHandProbability = Object.values(allScoreStats).reduce(
-        (x, y) => x + y.initialHandProbability,
-        0
-    );
-    Object.values(allScoreStats).forEach(
-        (x) => (x.initialHandProbability /= totalInitialHandProbability)
-    );
+    // const totalProbability = allScoreStats.reduce((x, y) => x + y.initialHandProbability, 0);
+    // console.log('totalProbability', totalProbability);
 
     return allScoreStats;
 };
@@ -362,6 +365,7 @@ export const getStandThresholdProbabilities = ({
 
 export const sortScoreStats = (allScoreStats: ScoreStats[]) => {
     return [...allScoreStats].sort((a, b) =>
+        // TODO Blackjack must be sorted after 21 and before 2/12
         a.representativeHand.allScores.length === b.representativeHand.allScores.length
             ? a.representativeHand.effectiveScore - b.representativeHand.effectiveScore
             : a.representativeHand.allScores.length - b.representativeHand.allScores.length
