@@ -68,6 +68,10 @@ export const getAllScoreStats = ({
         }
     });
 
+    allScoreStats.forEach((scoreStats) => {
+        scoreStats.combinations.sort((a, b) => a.split(',').length - b.split(',').length);
+    });
+
     // const totalProbability = allScoreStats.reduce((x, y) => x + y.initialHandProbability, 0);
     // console.log('totalProbability', totalProbability);
 
