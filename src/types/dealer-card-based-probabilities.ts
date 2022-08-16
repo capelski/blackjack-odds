@@ -25,6 +25,7 @@ export type DealerCardBasedFacts = {
     hitMoreThanDealerProbability: number;
     hitLessThanCurrentProbability: number;
     hitLessThanDealerProbability: number;
+    hitTotalProbability: number;
     [PlayerDecision.stand]: {
         actionOutcome: ActionOutcome;
         probabilities: EffectiveScoreProbabilities;
@@ -33,6 +34,7 @@ export type DealerCardBasedFacts = {
     standEqualToDealerProbability: number;
     standMoreThanDealerProbability: number;
     standLessThanDealerProbability: number;
+    standTotalProbability: number;
 };
 
 export type ScoreAllDealerCardBasedFacts = Dictionary<DealerCardBasedFacts, ScoreKey>;

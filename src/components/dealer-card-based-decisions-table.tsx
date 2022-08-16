@@ -278,19 +278,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                                 props.playerProbabilities.facts[
                                                                     scoreStats.key
                                                                 ].facts[cardOutcome.key]
-                                                                    .standLessThanDealerProbability +
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .standEqualToDealerProbability +
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .standMoreThanDealerProbability +
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .standDealerBustingProbability
+                                                                    .standTotalProbability
                                                             }
                                                         />
                                                     </React.Fragment>
@@ -358,23 +346,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                                 props.playerProbabilities.facts[
                                                                     scoreStats.key
                                                                 ].facts[cardOutcome.key]
-                                                                    .hitBustingProbability +
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .hitLessThanDealerProbability +
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .hitEqualToDealerProbability +
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .hitMoreThanDealerProbability +
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .hitDealerBustingProbability
+                                                                    .hitTotalProbability
                                                             }
                                                         />
                                                     </React.Fragment>

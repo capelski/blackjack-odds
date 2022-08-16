@@ -223,17 +223,28 @@ export const getDealerCardBasedProbabilities = ({
                     hitBustingProbability,
                     hitDealerBustingProbability: hitDealerProbabilities.dealerBusting,
                     hitEqualToDealerProbability: hitDealerProbabilities.equalToDealer,
-                    hitMoreThanDealerProbability: hitDealerProbabilities.moreThanDealer,
                     hitLessThanCurrentProbability,
                     hitLessThanDealerProbability: hitDealerProbabilities.lessThanDealer,
+                    hitMoreThanDealerProbability: hitDealerProbabilities.moreThanDealer,
+                    hitTotalProbability:
+                        hitBustingProbability +
+                        hitDealerProbabilities.dealerBusting +
+                        hitDealerProbabilities.equalToDealer +
+                        hitDealerProbabilities.lessThanDealer +
+                        hitDealerProbabilities.moreThanDealer,
                     [PlayerDecision.stand]: {
                         actionOutcome: standActionOutcome,
                         probabilities: standProbabilities
                     },
                     standDealerBustingProbability: standDealerProbabilities.dealerBusting,
                     standEqualToDealerProbability: standDealerProbabilities.equalToDealer,
+                    standLessThanDealerProbability: standDealerProbabilities.lessThanDealer,
                     standMoreThanDealerProbability: standDealerProbabilities.moreThanDealer,
-                    standLessThanDealerProbability: standDealerProbabilities.lessThanDealer
+                    standTotalProbability:
+                        standDealerProbabilities.dealerBusting +
+                        standDealerProbabilities.equalToDealer +
+                        standDealerProbabilities.lessThanDealer +
+                        standDealerProbabilities.moreThanDealer
                 };
 
                 return {
