@@ -168,7 +168,11 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                             <RoundedFloat
                                                 value={
                                                     props.playerProbabilities.facts[scoreStats.key]
-                                                        .facts[cardOutcome.key].lossProbability
+                                                        .facts[cardOutcome.key][
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key].decision
+                                                    ].actionOutcome.lossProbability
                                                 }
                                             />
                                             <br />
@@ -176,7 +180,11 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                             <RoundedFloat
                                                 value={
                                                     props.playerProbabilities.facts[scoreStats.key]
-                                                        .facts[cardOutcome.key].pushProbability
+                                                        .facts[cardOutcome.key][
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key].decision
+                                                    ].actionOutcome.pushProbability
                                                 }
                                             />
                                             <br />
@@ -184,7 +192,11 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                             <RoundedFloat
                                                 value={
                                                     props.playerProbabilities.facts[scoreStats.key]
-                                                        .facts[cardOutcome.key].winProbability
+                                                        .facts[cardOutcome.key][
+                                                        props.playerProbabilities.facts[
+                                                            scoreStats.key
+                                                        ].facts[cardOutcome.key].decision
+                                                    ].actionOutcome.winProbability
                                                 }
                                             />
                                             {displayProbabilityTotals && (
@@ -195,8 +207,11 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                         value={
                                                             props.playerProbabilities.facts[
                                                                 scoreStats.key
-                                                            ].facts[cardOutcome.key]
-                                                                .totalProbability
+                                                            ].facts[cardOutcome.key][
+                                                                props.playerProbabilities.facts[
+                                                                    scoreStats.key
+                                                                ].facts[cardOutcome.key].decision
+                                                            ].actionOutcome.totalProbability
                                                         }
                                                     />
                                                 </React.Fragment>

@@ -1,6 +1,7 @@
 import { maximumScore } from '../constants';
 import { HitStrategy, PlayerDecision } from '../models';
 import {
+    ActionOutcome,
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedFacts,
     AllScoreDealerCardBasedProbabilities,
@@ -114,6 +115,19 @@ export const getDealerCardBasedProbabilities = ({
                         scoreStats.representativeHand.effectiveScore - 1
                     )
                 };
+                const standActionOutcome: ActionOutcome = {
+                    lossProbability: standDealerProbabilities.lessThanDealer,
+                    pushProbability: standDealerProbabilities.equalToDealer,
+                    totalProbability: 0,
+                    winProbability:
+                        standDealerProbabilities.moreThanDealer +
+                        standDealerProbabilities.dealerBusting
+                };
+
+                standActionOutcome.totalProbability =
+                    standActionOutcome.lossProbability +
+                    standActionOutcome.pushProbability +
+                    standActionOutcome.winProbability;
 
                 const hitProbabilities = scoreStats.representativeHand.descendants
                     .map((descendant) => {
@@ -124,7 +138,7 @@ export const getDealerCardBasedProbabilities = ({
                                   }
                                 : reduced[descendant.scoreKey].facts[dealerCardKey][
                                       reduced[descendant.scoreKey].facts[dealerCardKey].decision
-                                  ],
+                                  ].probabilities,
                             descendant.lastCard.weight / outcomesSet.totalWeight
                         );
                     })
@@ -181,6 +195,19 @@ export const getDealerCardBasedProbabilities = ({
                         ? hitBustingProbability + hitLessThanCurrentProbability
                         : hitBustingProbability + hitDealerProbabilities.lessThanDealer;
 
+                const hitActionOutcome: ActionOutcome = {
+                    lossProbability: hitBustingProbability + hitDealerProbabilities.lessThanDealer,
+                    pushProbability: hitDealerProbabilities.equalToDealer,
+                    totalProbability: 0,
+                    winProbability:
+                        hitDealerProbabilities.moreThanDealer + hitDealerProbabilities.dealerBusting
+                };
+
+                hitActionOutcome.totalProbability =
+                    hitActionOutcome.lossProbability +
+                    hitActionOutcome.pushProbability +
+                    hitActionOutcome.winProbability;
+
                 const decision: PlayerDecision =
                     standDealerProbabilities.lessThanDealer - hitStrategyProbability >
                     hitMinimalProbabilityGain
@@ -189,39 +216,25 @@ export const getDealerCardBasedProbabilities = ({
 
                 const dealerCardBasedFacts: DealerCardBasedFacts = {
                     decision,
-                    hit: hitProbabilities,
+                    [PlayerDecision.hit]: {
+                        actionOutcome: hitActionOutcome,
+                        probabilities: hitProbabilities
+                    },
                     hitBustingProbability,
                     hitDealerBustingProbability: hitDealerProbabilities.dealerBusting,
                     hitEqualToDealerProbability: hitDealerProbabilities.equalToDealer,
                     hitMoreThanDealerProbability: hitDealerProbabilities.moreThanDealer,
                     hitLessThanCurrentProbability,
                     hitLessThanDealerProbability: hitDealerProbabilities.lessThanDealer,
-                    lossProbability:
-                        decision === PlayerDecision.hit
-                            ? hitBustingProbability + hitDealerProbabilities.lessThanDealer
-                            : standDealerProbabilities.lessThanDealer,
-                    pushProbability:
-                        decision === PlayerDecision.hit
-                            ? hitDealerProbabilities.equalToDealer
-                            : standDealerProbabilities.equalToDealer,
-                    stand: standProbabilities,
+                    [PlayerDecision.stand]: {
+                        actionOutcome: standActionOutcome,
+                        probabilities: standProbabilities
+                    },
                     standDealerBustingProbability: standDealerProbabilities.dealerBusting,
                     standEqualToDealerProbability: standDealerProbabilities.equalToDealer,
                     standMoreThanDealerProbability: standDealerProbabilities.moreThanDealer,
-                    standLessThanDealerProbability: standDealerProbabilities.lessThanDealer,
-                    totalProbability: 0,
-                    winProbability:
-                        decision === PlayerDecision.hit
-                            ? hitDealerProbabilities.moreThanDealer +
-                              hitDealerProbabilities.dealerBusting
-                            : standDealerProbabilities.moreThanDealer +
-                              standDealerProbabilities.dealerBusting
+                    standLessThanDealerProbability: standDealerProbabilities.lessThanDealer
                 };
-
-                dealerCardBasedFacts.totalProbability =
-                    dealerCardBasedFacts.lossProbability +
-                    dealerCardBasedFacts.pushProbability +
-                    dealerCardBasedFacts.winProbability;
 
                 return {
                     ...dealerCardReduced,
@@ -231,34 +244,32 @@ export const getDealerCardBasedProbabilities = ({
 
         const scoreDealerBasedFacts: ScoreDealerBasedFacts = {
             facts: scoreAllFacts,
-            lossProbability:
-                outcomesSet.allOutcomes.reduce(
-                    (lossReduced, cardOutcome) =>
-                        lossReduced +
-                        scoreAllFacts[cardOutcome.key].lossProbability * cardOutcome.weight,
-                    0
-                ) / outcomesSet.totalWeight,
-            pushProbability:
-                outcomesSet.allOutcomes.reduce(
-                    (pushReduced, cardOutcome) =>
-                        pushReduced +
-                        scoreAllFacts[cardOutcome.key].pushProbability * cardOutcome.weight,
-                    0
-                ) / outcomesSet.totalWeight,
-            totalProbability: 0,
-            winProbability:
-                outcomesSet.allOutcomes.reduce(
-                    (winReduced, cardOutcome) =>
-                        winReduced +
-                        scoreAllFacts[cardOutcome.key].winProbability * cardOutcome.weight,
-                    0
-                ) / outcomesSet.totalWeight
+            ...outcomesSet.allOutcomes.reduce(
+                (outcomeReduce, cardOutcome) => {
+                    const { decision } = scoreAllFacts[cardOutcome.key];
+                    const { actionOutcome } = scoreAllFacts[cardOutcome.key][decision];
+                    return {
+                        lossProbability:
+                            outcomeReduce.lossProbability +
+                            (actionOutcome.lossProbability * cardOutcome.weight) /
+                                outcomesSet.totalWeight,
+                        pushProbability:
+                            outcomeReduce.pushProbability +
+                            (actionOutcome.pushProbability * cardOutcome.weight) /
+                                outcomesSet.totalWeight,
+                        totalProbability:
+                            outcomeReduce.totalProbability +
+                            (actionOutcome.totalProbability * cardOutcome.weight) /
+                                outcomesSet.totalWeight,
+                        winProbability:
+                            outcomeReduce.winProbability +
+                            (actionOutcome.winProbability * cardOutcome.weight) /
+                                outcomesSet.totalWeight
+                    };
+                },
+                { lossProbability: 0, pushProbability: 0, totalProbability: 0, winProbability: 0 }
+            )
         };
-
-        scoreDealerBasedFacts.totalProbability =
-            scoreDealerBasedFacts.lossProbability +
-            scoreDealerBasedFacts.pushProbability +
-            scoreDealerBasedFacts.winProbability;
 
         return {
             ...reduced,

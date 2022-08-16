@@ -1,3 +1,4 @@
+export { ActionOutcome } from './action-outcome';
 export { CardOutcome } from './card-outcome';
 export {
     AllScoreDealerCardBasedFacts,
