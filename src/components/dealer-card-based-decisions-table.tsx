@@ -1,6 +1,6 @@
 import React, { CSSProperties, useState } from 'react';
 import { displayProbabilityTotals, maximumScore } from '../constants';
-import { sortScoreStats } from '../logic';
+import { getPlayerScoreStats } from '../logic';
 import { PlayerDecision } from '../models';
 import {
     AllScoreDealerCardBasedProbabilities,
@@ -73,7 +73,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                     </div>
                 ))}
             </div>
-            {sortScoreStats(props.allScoreStats).map((scoreStats) => {
+            {getPlayerScoreStats(props.allScoreStats).map((scoreStats) => {
                 const isRowExpanded = expandedRows[scoreStats.key];
                 return (
                     <div key={scoreStats.key} style={{ display: 'flex', width: '100%' }}>

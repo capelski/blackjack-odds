@@ -1,6 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
-import { sortScoreStats } from '../logic';
+import { getPlayerScoreStats } from '../logic';
 import { ExpandedRows, ScoreStats } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
@@ -66,15 +66,7 @@ export const PlayerScoreStatsTable = (props: PlayerScoreStatsTableProps) => {
             }
         ];
 
-        const data = sortScoreStats(props.allScoreStats)
-            // Filter out single card hands when displaying player scores
-            .map((scoreStats) => ({
-                ...scoreStats,
-                combinations: scoreStats.combinations.filter((combination) =>
-                    combination.includes(',')
-                )
-            }))
-            .filter((scoreStats) => scoreStats.combinations.length > 0);
+        const data = getPlayerScoreStats(props.allScoreStats);
 
         return { columns, data };
     }, [expandedRows, props.allScoreStats]);

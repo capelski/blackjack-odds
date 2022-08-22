@@ -1,6 +1,6 @@
 import toposort from 'toposort';
-import { maximumScore } from '../constants';
-import { ScoreKey } from '../models';
+import { blackjackScore } from '../constants';
+import { CardSymbol, ScoreKey } from '../models';
 import { CardOutcome, Dictionary, Hand, OutcomesSet } from '../types';
 import { cartesianProduct, removeDuplicates } from '../utils';
 
@@ -11,15 +11,18 @@ const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): H
     const cardSymbols = previousHand
         ? previousHand.cardSymbols.concat([cardOutcome.symbol])
         : [cardOutcome.symbol];
+    const key = getHandKey(cardSymbols);
+    const scoreKey = getHandScoreKey(key, handScores);
+    const effectiveScore = getHandScore(key, handScores);
 
     return {
         allScores: handScores,
         cardSymbols,
         descendants: [],
-        effectiveScore: getHandScore(handScores),
-        key: [...cardSymbols].sort().join(','),
+        effectiveScore,
+        key,
         lastCard: cardOutcome,
-        scoreKey: <ScoreKey>handScores.join('/')
+        scoreKey
     };
 };
 
@@ -61,6 +64,10 @@ export const getAllHands = (outcomesSet: OutcomesSet): Hand[] => {
         .map((key) => allHandsDictionary[key]);
 };
 
+const getHandKey = (cardSymbols: CardSymbol[]) => {
+    return [...cardSymbols].sort().join(',');
+};
+
 const getHandNextScores = (previousScores: number[], nextValues: number[]) => {
     const possibleScores = cartesianProduct(previousScores, nextValues, (x, y) => x + y).sort(
         (a, b) => a - b
@@ -71,8 +78,16 @@ const getHandNextScores = (previousScores: number[], nextValues: number[]) => {
     return getValidScores(possibleScores);
 };
 
-const getHandScore = (scores: number[]) => {
-    return getValidScores(scores).reverse()[0];
+const getHandScore = (handKey: string, scores: number[]) => {
+    return handKey === blackjackKey ? blackjackScore : getValidScores(scores).reverse()[0];
+};
+
+const getHandScoreKey = (handKey: string, handScores: number[]) => {
+    return handKey === blackjackKey
+        ? ScoreKey.blackjack
+        : handKey === ScoreKey.hard10
+        ? ScoreKey.figure
+        : <ScoreKey>handScores.join('/');
 };
 
 const getValidScores = (scores: number[]) => {
@@ -82,5 +97,7 @@ const getValidScores = (scores: number[]) => {
 
 /** Returns true if the score is bust (i.e. bigger than the maximum score) */
 export const isBustScore = (score: number) => {
-    return score > maximumScore;
+    return score > blackjackScore;
 };
+
+const blackjackKey = getHandKey([CardSymbol.figure, CardSymbol.ace]);

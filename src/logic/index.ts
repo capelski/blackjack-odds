@@ -1,4 +1,8 @@
 export {
+    getApplicableDealerProbabilities,
+    getDealerBasedProbabilities
+} from './dealer-card-based-probabilities';
+export {
     getBustingProbability,
     getRangeProbability,
     mergeProbabilities,
@@ -10,6 +14,6 @@ export {
     getAllScoreStats,
     getDealerCardBasedProbabilities,
     // getOneMoreCardProbabilities,
-    getStandThresholdProbabilities,
-    sortScoreStats
+    getPlayerScoreStats,
+    getStandThresholdProbabilities
 } from './score-stats';

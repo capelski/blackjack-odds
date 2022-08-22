@@ -1,5 +1,5 @@
-import { maximumScore } from '../constants';
-import { HitStrategy, PlayerDecision } from '../models';
+import { blackjackScore } from '../constants';
+import { HitStrategy, PlayerDecision, ScoreKey } from '../models';
 import {
     ActionOutcome,
     AllEffectiveScoreProbabilities,
@@ -15,10 +15,15 @@ import {
     ScoreStats
 } from '../types';
 import {
+    getApplicableDealerProbabilities,
+    getDealerBasedProbabilities
+} from './dealer-card-based-probabilities';
+import {
     weightProbabilities,
     mergeProbabilities,
     getBustingProbability,
-    getRangeProbability
+    getRangeProbability,
+    getPossibleFinalScores
 } from './effective-score-probabilities';
 import { isBustScore } from './hand';
 
@@ -98,25 +103,19 @@ export const getDealerCardBasedProbabilities = ({
         const scoreAllFacts = outcomesSet.allOutcomes
             .map((cardOutcome) => cardOutcome.key)
             .reduce((dealerCardReduced, dealerCardKey) => {
+                const applicableDealerProbabilities = getApplicableDealerProbabilities(
+                    dealerProbabilities,
+                    dealerCardKey
+                );
+
                 const standProbabilities = {
                     [scoreStats.representativeHand.effectiveScore]: 1
                 };
                 const standDealerProbabilities = {
-                    dealerBusting: getBustingProbability(dealerProbabilities[dealerCardKey]),
-                    equalToDealer: getRangeProbability(
-                        dealerProbabilities[dealerCardKey],
+                    dealerBusting: getBustingProbability(applicableDealerProbabilities),
+                    ...getDealerBasedProbabilities(
                         scoreStats.representativeHand.effectiveScore,
-                        scoreStats.representativeHand.effectiveScore
-                    ),
-                    lessThanDealer: getRangeProbability(
-                        dealerProbabilities[dealerCardKey],
-                        scoreStats.representativeHand.effectiveScore + 1,
-                        maximumScore
-                    ),
-                    moreThanDealer: getRangeProbability(
-                        dealerProbabilities[dealerCardKey],
-                        0,
-                        scoreStats.representativeHand.effectiveScore - 1
+                        applicableDealerProbabilities
                     )
                 };
                 const standActionOutcome: ActionOutcome = {
@@ -136,7 +135,7 @@ export const getDealerCardBasedProbabilities = ({
                 const hitProbabilities = scoreStats.representativeHand.descendants
                     .map((descendant) => {
                         return weightProbabilities(
-                            descendant.effectiveScore >= maximumScore
+                            descendant.effectiveScore >= blackjackScore
                                 ? {
                                       [descendant.effectiveScore]: 1
                                   }
@@ -153,40 +152,31 @@ export const getDealerCardBasedProbabilities = ({
                     0,
                     scoreStats.representativeHand.effectiveScore - 1
                 );
-                const hitDealerProbabilities = Object.keys(hitProbabilities)
-                    .map((key) => parseInt(key))
-                    .filter((key) => !isBustScore(key))
+                const hitDealerProbabilities = getPossibleFinalScores(hitProbabilities)
+                    .filter((finalScore) => !isBustScore(finalScore))
                     .reduce(
-                        (hitReduced, key) => {
+                        (hitReduced, finalScore) => {
+                            const dealerBasedProbabilities = getDealerBasedProbabilities(
+                                finalScore,
+                                applicableDealerProbabilities
+                            );
                             return {
                                 dealerBusting:
                                     hitReduced.dealerBusting +
-                                    hitProbabilities[key] *
-                                        getBustingProbability(dealerProbabilities[dealerCardKey]),
+                                    hitProbabilities[finalScore] *
+                                        getBustingProbability(applicableDealerProbabilities),
                                 equalToDealer:
                                     hitReduced.equalToDealer +
-                                    hitProbabilities[key] *
-                                        getRangeProbability(
-                                            dealerProbabilities[dealerCardKey],
-                                            key,
-                                            key
-                                        ),
+                                    hitProbabilities[finalScore] *
+                                        dealerBasedProbabilities.equalToDealer,
                                 lessThanDealer:
                                     hitReduced.lessThanDealer +
-                                    hitProbabilities[key] *
-                                        getRangeProbability(
-                                            dealerProbabilities[dealerCardKey],
-                                            key + 1,
-                                            maximumScore
-                                        ),
+                                    hitProbabilities[finalScore] *
+                                        dealerBasedProbabilities.lessThanDealer,
                                 moreThanDealer:
                                     hitReduced.moreThanDealer +
-                                    hitProbabilities[key] *
-                                        getRangeProbability(
-                                            dealerProbabilities[dealerCardKey],
-                                            0,
-                                            key - 1
-                                        )
+                                    hitProbabilities[finalScore] *
+                                        dealerBasedProbabilities.moreThanDealer
                             };
                         },
                         { dealerBusting: 0, equalToDealer: 0, lessThanDealer: 0, moreThanDealer: 0 }
@@ -353,6 +343,20 @@ export const getDealerCardBasedProbabilities = ({
 //     }, <AllEffectiveScoreProbabilities>{});
 // };
 
+export const getPlayerScoreStats = (allScoreStats: ScoreStats[]) => {
+    return (
+        sortScoreStats(allScoreStats)
+            // Filter out single card hands when displaying player scores
+            .map((scoreStats) => ({
+                ...scoreStats,
+                combinations: scoreStats.combinations.filter((combination) =>
+                    combination.includes(',')
+                )
+            }))
+            .filter((scoreStats) => scoreStats.combinations.length > 0)
+    );
+};
+
 /**
  * Returns a dictionary with the effective score probabilities when hitting WHILE below a threshold for each score
  */
@@ -390,10 +394,16 @@ export const getStandThresholdProbabilities = ({
 };
 
 export const sortScoreStats = (allScoreStats: ScoreStats[]) => {
-    return [...allScoreStats].sort((a, b) =>
-        // TODO Blackjack must be sorted after 21 and before 2/12
-        a.representativeHand.allScores.length === b.representativeHand.allScores.length
-            ? a.representativeHand.effectiveScore - b.representativeHand.effectiveScore
-            : a.representativeHand.allScores.length - b.representativeHand.allScores.length
-    );
+    return [...allScoreStats].sort((a, b) => {
+        const isBlackjackA = a.key === ScoreKey.blackjack;
+        const isBlackjackB = b.key === ScoreKey.blackjack;
+
+        return a.representativeHand.allScores.length === b.representativeHand.allScores.length
+            ? isBlackjackA
+                ? -1
+                : isBlackjackB
+                ? 1
+                : a.representativeHand.effectiveScore - b.representativeHand.effectiveScore
+            : a.representativeHand.allScores.length - b.representativeHand.allScores.length;
+    });
 };

@@ -19,6 +19,9 @@ export enum ScoreKey {
     hard19 = '19',
     hard20 = '20',
     hard21 = '21',
+    // Required to compute correct dealer's blackjack probabilities
+    figure = 'F',
+    blackjack = 'BJ',
     soft11 = '1/11',
     soft12 = '2/12',
     soft13 = '3/13',

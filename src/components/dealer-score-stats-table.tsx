@@ -1,7 +1,11 @@
 import React, { useMemo } from 'react';
 import { CellProps, Column } from 'react-table';
-import { dealerStandThreshold, maximumScore } from '../constants';
-import { getBustingProbability, getRangeProbability } from '../logic';
+import { blackjackScore, dealerStandThreshold, maximumScore } from '../constants';
+import {
+    getApplicableDealerProbabilities,
+    getBustingProbability,
+    getRangeProbability
+} from '../logic';
 import { ScoreStats, AllEffectiveScoreProbabilities, OutcomesSet, CardOutcome } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
@@ -27,7 +31,10 @@ export const DealerScoreStatsTable = (props: DealerScoreStatsTableProps) => {
                             return (
                                 <RoundedFloat
                                     value={getRangeProbability(
-                                        props.dealerProbabilities[cellProps.value],
+                                        getApplicableDealerProbabilities(
+                                            props.dealerProbabilities,
+                                            cellProps.value
+                                        ),
                                         dealerStandThreshold,
                                         maximumScore
                                     )}
@@ -42,8 +49,30 @@ export const DealerScoreStatsTable = (props: DealerScoreStatsTableProps) => {
                         Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
                             return (
                                 <RoundedFloat
+                                    value={getRangeProbability(
+                                        getApplicableDealerProbabilities(
+                                            props.dealerProbabilities,
+                                            cellProps.value
+                                        ),
+                                        blackjackScore,
+                                        blackjackScore
+                                    )}
+                                />
+                            );
+                        },
+                        Header: `P(BJ)`,
+                        id: 'dealer-nth-card-blackjack'
+                    },
+                    {
+                        accessor: 'key',
+                        Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
+                            return (
+                                <RoundedFloat
                                     value={getBustingProbability(
-                                        props.dealerProbabilities[cellProps.value]
+                                        getApplicableDealerProbabilities(
+                                            props.dealerProbabilities,
+                                            cellProps.value
+                                        )
                                     )}
                                 />
                             );
