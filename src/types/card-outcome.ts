@@ -1,3 +1,3 @@
-import { ScoreKey } from '../models';
+import { CardSymbol, ScoreKey } from '../models';
 
-export type CardOutcome = { key: ScoreKey; symbol: string; values: number[]; weight: number };
+export type CardOutcome = { key: ScoreKey; symbol: CardSymbol; values: number[]; weight: number };
