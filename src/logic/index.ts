@@ -9,7 +9,7 @@ export { getOutcomesSet } from './outcomes-set';
 export {
     getAllScoreStats,
     getDealerCardBasedProbabilities,
-    getOneMoreCardProbabilities,
+    // getOneMoreCardProbabilities,
     getStandThresholdProbabilities,
     sortScoreStats
 } from './score-stats';

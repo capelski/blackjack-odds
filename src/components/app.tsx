@@ -4,7 +4,6 @@ import {
     getOutcomesSet,
     getAllHands,
     getAllScoreStats,
-    getOneMoreCardProbabilities,
     getStandThresholdProbabilities,
     getDealerCardBasedProbabilities
 } from '../logic';
@@ -15,8 +14,9 @@ import {
     OutcomesSet,
     ScoreStats
 } from '../types';
-import { AllScoreStatsTable } from './all-score-stats-table';
 import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
+import { DealerScoreStatsTable } from './dealer-score-stats-table';
+import { PlayerScoreStatsTable } from './player-score-stats-table';
 
 const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
     parseInt(hitMinimalProbabilityGain) / 100 || 0;
@@ -28,8 +28,8 @@ export const App: React.FC = () => {
     const [displayAdditionalProbabilities, setDisplayAdditionalProbabilities] = useState(false);
     const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
     const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.lowerThanDealer);
-    const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
-        useState<AllEffectiveScoreProbabilities>();
+    // const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
+    //     useState<AllEffectiveScoreProbabilities>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
     const [playerProbabilities, setPlayerProbabilities] =
         useState<AllScoreDealerCardBasedProbabilities>();
@@ -41,10 +41,10 @@ export const App: React.FC = () => {
             allHands: nextAllHands,
             outcomesSet: nextOutcomesSet
         });
-        const nextOneMoreCardProbabilities = getOneMoreCardProbabilities({
-            allScoreStats: nextAllScoreStats,
-            outcomesSet: nextOutcomesSet
-        });
+        // const nextOneMoreCardProbabilities = getOneMoreCardProbabilities({
+        //     allScoreStats: nextAllScoreStats,
+        //     outcomesSet: nextOutcomesSet
+        // });
         const nextDealerProbabilities = getStandThresholdProbabilities({
             allScoreStats: nextAllScoreStats,
             outcomesSet: nextOutcomesSet,
@@ -60,7 +60,7 @@ export const App: React.FC = () => {
 
         setOutcomesSet(nextOutcomesSet);
         setAllScoreStats(nextAllScoreStats);
-        setOneMoreCardProbabilities(nextOneMoreCardProbabilities);
+        // setOneMoreCardProbabilities(nextOneMoreCardProbabilities);
         setDealerProbabilities(nextDealerProbabilities);
         setPlayerProbabilities(nextPlayerProbabilities);
     }, []);
@@ -131,15 +131,18 @@ export const App: React.FC = () => {
             ) : (
                 'Loading...'
             )}
-            <h3>Scores table</h3>
-            {allScoreStats !== undefined &&
-            dealerProbabilities !== undefined &&
-            oneMoreCardProbabilities !== undefined ? (
-                <AllScoreStatsTable
-                    allScoreStats={allScoreStats}
+            <h3>Dealer cards</h3>
+            {dealerProbabilities !== undefined && outcomesSet !== undefined ? (
+                <DealerScoreStatsTable
                     dealerProbabilities={dealerProbabilities}
-                    oneMoreCardProbabilities={oneMoreCardProbabilities}
+                    outcomeSet={outcomesSet}
                 />
+            ) : (
+                'Loading...'
+            )}
+            <h3>Player scores</h3>
+            {allScoreStats !== undefined ? (
+                <PlayerScoreStatsTable allScoreStats={allScoreStats} />
             ) : (
                 'Loading...'
             )}

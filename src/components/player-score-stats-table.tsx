@@ -1,18 +1,15 @@
 import React, { useMemo, useState } from 'react';
 import { CellProps, Column } from 'react-table';
-import { dealerStandThreshold, maximumScore } from '../constants';
-import { getBustingProbability, getRangeProbability, sortScoreStats } from '../logic';
-import { ExpandedRows, ScoreStats, AllEffectiveScoreProbabilities } from '../types';
+import { sortScoreStats } from '../logic';
+import { ExpandedRows, ScoreStats } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
-interface AllScoreStatsTableProps {
+interface PlayerScoreStatsTableProps {
     allScoreStats: ScoreStats[];
-    dealerProbabilities: AllEffectiveScoreProbabilities;
-    oneMoreCardProbabilities: AllEffectiveScoreProbabilities;
 }
 
-export const AllScoreStatsTable = (props: AllScoreStatsTableProps) => {
+export const PlayerScoreStatsTable = (props: PlayerScoreStatsTableProps) => {
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
     const { columns, data } = useMemo(() => {
@@ -66,48 +63,21 @@ export const AllScoreStatsTable = (props: AllScoreStatsTableProps) => {
                 },
                 Header: `P(initial hand)`,
                 id: 'initial-hand-probability'
-            },
-            {
-                accessor: 'key',
-                Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
-                    return (
-                        <RoundedFloat
-                            value={getBustingProbability(
-                                props.oneMoreCardProbabilities[cellProps.value]
-                            )}
-                        />
-                    );
-                },
-                Header: `P(>${maximumScore}) on next card`,
-                id: 'one-more-card-busting-risk'
-            },
-            {
-                accessor: 'key',
-                Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
-                    return (
-                        <RoundedFloat
-                            value={getRangeProbability(
-                                props.dealerProbabilities[cellProps.value],
-                                dealerStandThreshold,
-                                maximumScore
-                            )}
-                        />
-                    );
-                },
-                Header: `Dealer P(${dealerStandThreshold}-${maximumScore}) on nth card`,
-                id: 'dealer-stand-threshold'
             }
         ];
 
-        const data = sortScoreStats(props.allScoreStats);
+        const data = sortScoreStats(props.allScoreStats)
+            // Filter out single card hands when displaying player scores
+            .map((scoreStats) => ({
+                ...scoreStats,
+                combinations: scoreStats.combinations.filter((combination) =>
+                    combination.includes(',')
+                )
+            }))
+            .filter((scoreStats) => scoreStats.combinations.length > 0);
 
         return { columns, data };
-    }, [
-        expandedRows,
-        props.allScoreStats,
-        props.dealerProbabilities,
-        props.oneMoreCardProbabilities
-    ]);
+    }, [expandedRows, props.allScoreStats]);
 
     return <CustomTable columns={columns} data={data} />;
 };

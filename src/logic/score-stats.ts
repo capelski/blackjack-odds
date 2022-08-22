@@ -326,32 +326,32 @@ export const getDealerCardBasedProbabilities = ({
     return probabilities;
 };
 
-/**
- * Returns a dictionary with the effective score probabilities when hitting ONCE for each score
- */
-export const getOneMoreCardProbabilities = ({
-    allScoreStats,
-    outcomesSet
-}: {
-    allScoreStats: ScoreStats[];
-    outcomesSet: OutcomesSet;
-}) => {
-    return allScoreStats.reduce((reduced, scoreStats) => {
-        return {
-            ...reduced,
-            [scoreStats.key]: scoreStats.representativeHand.descendants.reduce(
-                (handReduced, descendant) => {
-                    return {
-                        ...handReduced,
-                        [descendant.effectiveScore]:
-                            descendant.lastCard.weight / outcomesSet.totalWeight
-                    };
-                },
-                <EffectiveScoreProbabilities>{}
-            )
-        };
-    }, <AllEffectiveScoreProbabilities>{});
-};
+// /**
+//  * Returns a dictionary with the effective score probabilities when hitting ONCE for each score
+//  */
+// export const getOneMoreCardProbabilities = ({
+//     allScoreStats,
+//     outcomesSet
+// }: {
+//     allScoreStats: ScoreStats[];
+//     outcomesSet: OutcomesSet;
+// }) => {
+//     return allScoreStats.reduce((reduced, scoreStats) => {
+//         return {
+//             ...reduced,
+//             [scoreStats.key]: scoreStats.representativeHand.descendants.reduce(
+//                 (handReduced, descendant) => {
+//                     return {
+//                         ...handReduced,
+//                         [descendant.effectiveScore]:
+//                             descendant.lastCard.weight / outcomesSet.totalWeight
+//                     };
+//                 },
+//                 <EffectiveScoreProbabilities>{}
+//             )
+//         };
+//     }, <AllEffectiveScoreProbabilities>{});
+// };
 
 /**
  * Returns a dictionary with the effective score probabilities when hitting WHILE below a threshold for each score
