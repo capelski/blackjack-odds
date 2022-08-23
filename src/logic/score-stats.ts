@@ -25,7 +25,7 @@ import {
     getRangeProbability,
     getPossibleFinalScores
 } from './effective-score-probabilities';
-import { isBustScore } from './hand';
+import { isBlackjack, isBustScore } from './hand';
 
 /**
  * Returns a list of all possible valid scores' stats
@@ -249,6 +249,7 @@ export const getDealerCardBasedProbabilities = ({
 
         const scoreDealerBasedFacts: ScoreDealerBasedFacts = {
             facts: scoreAllFacts,
+            payoutRatio: 0,
             ...outcomesSet.allOutcomes.reduce(
                 (outcomeReduce, cardOutcome) => {
                     const { decision } = scoreAllFacts[cardOutcome.key];
@@ -276,19 +277,30 @@ export const getDealerCardBasedProbabilities = ({
             )
         };
 
+        scoreDealerBasedFacts.payoutRatio =
+            scoreDealerBasedFacts.pushProbability +
+            scoreDealerBasedFacts.winProbability *
+                (isBlackjack(scoreStats.representativeHand.cardSymbols) ? 2.5 : 2);
+
         return {
             ...reduced,
             [scoreStats.key]: scoreDealerBasedFacts
         };
     }, <AllScoreDealerCardBasedFacts>{});
 
-    const probabilities = {
+    const probabilities: AllScoreDealerCardBasedProbabilities = {
         facts: allScoreStatsFacts,
         lossProbability: Object.values(allScoreStats).reduce(
             (reduced, scoreStats) =>
                 reduced +
                 scoreStats.initialHandProbability *
                     allScoreStatsFacts[scoreStats.key].lossProbability,
+            0
+        ),
+        payoutRatio: Object.values(allScoreStats).reduce(
+            (reduced, scoreStats) =>
+                reduced +
+                scoreStats.initialHandProbability * allScoreStatsFacts[scoreStats.key].payoutRatio,
             0
         ),
         pushProbability: Object.values(allScoreStats).reduce(

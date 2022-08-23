@@ -5,10 +5,12 @@ import { EffectiveScoreProbabilities } from './effective-score-probabilities';
 
 export type ScoreDealerBasedFacts = ActionOutcome & {
     facts: ScoreAllDealerCardBasedFacts;
+    payoutRatio: number;
 };
 
 export type AllScoreDealerCardBasedProbabilities = ActionOutcome & {
     facts: AllScoreDealerCardBasedFacts;
+    payoutRatio: number;
 };
 
 export type AllScoreDealerCardBasedFacts = Dictionary<ScoreDealerBasedFacts, ScoreKey>;

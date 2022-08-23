@@ -12,8 +12,8 @@ const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): H
         ? previousHand.cardSymbols.concat([cardOutcome.symbol])
         : [cardOutcome.symbol];
     const key = getHandKey(cardSymbols);
-    const scoreKey = getHandScoreKey(key, handScores);
-    const effectiveScore = getHandScore(key, handScores);
+    const scoreKey = getHandScoreKey(cardSymbols, handScores);
+    const effectiveScore = getHandScore(cardSymbols, handScores);
 
     return {
         allScores: handScores,
@@ -78,14 +78,14 @@ const getHandNextScores = (previousScores: number[], nextValues: number[]) => {
     return getValidScores(possibleScores);
 };
 
-const getHandScore = (handKey: string, scores: number[]) => {
-    return handKey === blackjackKey ? blackjackScore : getValidScores(scores).reverse()[0];
+const getHandScore = (cardSymbols: CardSymbol[], scores: number[]) => {
+    return isBlackjack(cardSymbols) ? blackjackScore : getValidScores(scores).reverse()[0];
 };
 
-const getHandScoreKey = (handKey: string, handScores: number[]) => {
-    return handKey === blackjackKey
+const getHandScoreKey = (cardSymbols: CardSymbol[], handScores: number[]) => {
+    return isBlackjack(cardSymbols)
         ? ScoreKey.blackjack
-        : handKey === ScoreKey.hard10
+        : cardSymbols.length === 1 && cardSymbols[0] === CardSymbol.figure
         ? ScoreKey.figure
         : <ScoreKey>handScores.join('/');
 };
@@ -95,9 +95,11 @@ const getValidScores = (scores: number[]) => {
     return validScores.length > 0 ? validScores : [scores[0]];
 };
 
+/** Returns true if the card symbols correspond to a Blackjack (i.e. A,10) */
+export const isBlackjack = (cardSymbols: CardSymbol[]) =>
+    getHandKey(cardSymbols) === getHandKey([CardSymbol.figure, CardSymbol.ace]);
+
 /** Returns true if the score is bust (i.e. bigger than the maximum score) */
 export const isBustScore = (score: number) => {
     return score > blackjackScore;
 };
-
-const blackjackKey = getHandKey([CardSymbol.figure, CardSymbol.ace]);

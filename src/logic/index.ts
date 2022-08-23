@@ -8,7 +8,7 @@ export {
     mergeProbabilities,
     weightProbabilities
 } from './effective-score-probabilities';
-export { getAllHands } from './hand';
+export { getAllHands, isBlackjack, isBustScore } from './hand';
 export { getOutcomesSet } from './outcomes-set';
 export {
     getAllScoreStats,

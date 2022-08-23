@@ -52,6 +52,9 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 }
             />
             <br />
+            Player advantage (payout):{' '}
+            <RoundedFloat value={props.playerProbabilities.payoutRatio - 1} />
+            <br />
             <br />
             <div style={{ display: 'flex', width: '100%' }}>
                 <div
