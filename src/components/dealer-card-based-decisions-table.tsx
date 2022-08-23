@@ -1,13 +1,15 @@
-import React, { CSSProperties, useState } from 'react';
+import React, { CSSProperties, useMemo, useState } from 'react';
+import { Column, CellProps } from 'react-table';
 import { displayProbabilityTotals, maximumScore } from '../constants';
 import { getPlayerScoreStats } from '../logic';
-import { PlayerDecision } from '../models';
+import { PlayerDecision, ScoreKey } from '../models';
 import {
     AllScoreDealerCardBasedProbabilities,
     ExpandedRows,
     OutcomesSet,
     ScoreStats
 } from '../types';
+import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface DealerCardBasedDecisionsTableProps {
@@ -20,14 +22,216 @@ interface DealerCardBasedDecisionsTableProps {
 export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTableProps> = (
     props
 ) => {
-    const cellStyle: CSSProperties = {
-        borderBottom: '1px solid black',
-        borderRight: '1px solid black',
-        textAlign: 'center',
-        width: `${100 / props.outcomesSet.allOutcomes.length + 1}%`
-    };
-
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+
+    const { columns, data } = useMemo(() => {
+        const columns: Column<ScoreStats>[] = [
+            {
+                Cell: (cellProps: CellProps<ScoreStats>) => {
+                    const { key } = cellProps.row.original;
+                    const facts = props.playerProbabilities.facts[key];
+                    const isRowExpanded = expandedRows[key];
+                    return (
+                        <div>
+                            {key}{' '}
+                            <span
+                                onClick={() => {
+                                    setExpandedRows({
+                                        ...expandedRows,
+                                        [key]: !isRowExpanded
+                                    });
+                                }}
+                                style={{
+                                    cursor: 'pointer'
+                                }}
+                            >
+                                {isRowExpanded ? '✖️' : '👁️'}
+                            </span>
+                            {isRowExpanded && (
+                                <React.Fragment>
+                                    <br />
+                                    Loss: <RoundedFloat value={facts.lossProbability} />
+                                    <br />
+                                    Push: <RoundedFloat value={facts.pushProbability} />
+                                    <br />
+                                    Win: <RoundedFloat value={facts.winProbability} />
+                                    {displayProbabilityTotals && (
+                                        <React.Fragment>
+                                            <br />
+                                            Total: <RoundedFloat value={facts.totalProbability} />
+                                        </React.Fragment>
+                                    )}
+                                </React.Fragment>
+                            )}
+                        </div>
+                    );
+                },
+                Header: 'Score',
+                id: 'score'
+            },
+            ...props.outcomesSet.allOutcomes.map((cardOutcome) => ({
+                Cell: (cellProps: CellProps<ScoreStats>) => {
+                    const { key: scoreKey, representativeHand } = cellProps.row.original;
+                    const scoreFacts = props.playerProbabilities.facts[scoreKey];
+                    const dealerCardFacts = scoreFacts.facts[cardOutcome.key];
+                    const { actionOutcome: dealerCardActionOutcome } =
+                        dealerCardFacts[dealerCardFacts.decision];
+                    const isRowExpanded = expandedRows[scoreKey];
+
+                    return (
+                        <div key={cardOutcome.symbol}>
+                            <div style={{ textTransform: 'capitalize' }}>
+                                {dealerCardFacts.decision}
+                                {isRowExpanded && (
+                                    <React.Fragment>
+                                        <br />
+                                        Loss:{' '}
+                                        <RoundedFloat
+                                            value={dealerCardActionOutcome.lossProbability}
+                                        />
+                                        <br />
+                                        Push:{' '}
+                                        <RoundedFloat
+                                            value={dealerCardActionOutcome.pushProbability}
+                                        />
+                                        <br />
+                                        Win:{' '}
+                                        <RoundedFloat
+                                            value={dealerCardActionOutcome.winProbability}
+                                        />
+                                        {displayProbabilityTotals && (
+                                            <React.Fragment>
+                                                <br />
+                                                Total:{' '}
+                                                <RoundedFloat
+                                                    value={dealerCardActionOutcome.totalProbability}
+                                                />
+                                            </React.Fragment>
+                                        )}
+                                    </React.Fragment>
+                                )}
+                            </div>
+                            {isRowExpanded && (
+                                <div
+                                    style={{
+                                        paddingLeft: 4,
+                                        paddingTop: 16,
+                                        textAlign: 'left'
+                                    }}
+                                >
+                                    Stand -----
+                                    <br />
+                                    {`P(< D): `}
+                                    <RoundedFloat
+                                        value={dealerCardFacts.standLessThanDealerProbability}
+                                    />
+                                    {props.displayAdditionalProbabilities && (
+                                        <React.Fragment>
+                                            <br />
+                                            {`P(= D): `}
+                                            <RoundedFloat
+                                                value={
+                                                    dealerCardFacts.standEqualToDealerProbability
+                                                }
+                                            />
+                                            <br />
+                                            {`P(> D): `}
+                                            <RoundedFloat
+                                                value={
+                                                    dealerCardFacts.standMoreThanDealerProbability
+                                                }
+                                            />
+                                            <br />
+                                            {`D(>${maximumScore}): `}
+                                            <RoundedFloat
+                                                value={
+                                                    dealerCardFacts.standDealerBustingProbability
+                                                }
+                                            />
+                                            {displayProbabilityTotals && (
+                                                <React.Fragment>
+                                                    <br />
+                                                    Total:{' '}
+                                                    <RoundedFloat
+                                                        value={
+                                                            dealerCardFacts.standTotalProbability
+                                                        }
+                                                    />
+                                                </React.Fragment>
+                                            )}
+                                        </React.Fragment>
+                                    )}
+                                    <br />
+                                    <br />
+                                    Hit -------
+                                    <br />
+                                    {`P(>${maximumScore}): `}
+                                    <RoundedFloat value={dealerCardFacts.hitBustingProbability} />
+                                    <br />
+                                    {`P(< D): `}
+                                    <RoundedFloat
+                                        value={dealerCardFacts.hitLessThanDealerProbability}
+                                    />
+                                    {props.displayAdditionalProbabilities && (
+                                        <React.Fragment>
+                                            <br />
+                                            {`P(= D): `}
+                                            <RoundedFloat
+                                                value={dealerCardFacts.hitEqualToDealerProbability}
+                                            />
+                                            <br />
+                                            {`P(> D): `}
+                                            <RoundedFloat
+                                                value={dealerCardFacts.hitMoreThanDealerProbability}
+                                            />
+                                            <br />
+                                            {`D(>21): `}
+                                            <RoundedFloat
+                                                value={dealerCardFacts.hitDealerBustingProbability}
+                                            />
+                                            {displayProbabilityTotals && (
+                                                <React.Fragment>
+                                                    <br />
+                                                    Total:{' '}
+                                                    <RoundedFloat
+                                                        value={dealerCardFacts.hitTotalProbability}
+                                                    />
+                                                </React.Fragment>
+                                            )}
+                                        </React.Fragment>
+                                    )}
+                                    {representativeHand.allScores.length > 1 && (
+                                        <React.Fragment>
+                                            <br />
+                                            <br />
+                                            {`P(<${representativeHand.effectiveScore}): `}
+                                            <RoundedFloat
+                                                value={
+                                                    dealerCardFacts.hitLessThanCurrentProbability
+                                                }
+                                            />
+                                        </React.Fragment>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    );
+                },
+                Header: cardOutcome.symbol,
+                id: cardOutcome.key // The column id must be the dealer card key for columnStyle to have access to it below
+            }))
+        ];
+
+        const data = getPlayerScoreStats(props.allScoreStats);
+
+        return { columns, data };
+    }, [
+        expandedRows,
+        props.allScoreStats,
+        props.displayAdditionalProbabilities,
+        props.outcomesSet,
+        props.playerProbabilities
+    ]);
 
     return (
         <div>
@@ -56,328 +260,35 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
             <RoundedFloat value={props.playerProbabilities.payoutRatio - 1} />
             <br />
             <br />
-            <div style={{ display: 'flex', width: '100%' }}>
-                <div
-                    style={{
-                        ...cellStyle,
-                        borderLeft: '1px solid black',
-                        borderTop: '1px solid black'
-                    }}
-                ></div>
-                {props.outcomesSet.allOutcomes.map((cardOutcome) => (
-                    <div
-                        style={{
-                            ...cellStyle,
-                            borderTop: '1px solid black'
-                        }}
-                        key={cardOutcome.symbol}
-                    >
-                        {cardOutcome.symbol}
-                    </div>
-                ))}
-            </div>
-            {getPlayerScoreStats(props.allScoreStats).map((scoreStats) => {
-                const isRowExpanded = expandedRows[scoreStats.key];
-                return (
-                    <div key={scoreStats.key} style={{ display: 'flex', width: '100%' }}>
-                        <div
-                            style={{
-                                ...cellStyle,
-                                borderLeft: '1px solid black'
-                            }}
-                        >
-                            {scoreStats.key}{' '}
-                            <span
-                                onClick={() => {
-                                    setExpandedRows({
-                                        ...expandedRows,
-                                        [scoreStats.key]: !isRowExpanded
-                                    });
-                                }}
-                                style={{
-                                    cursor: 'pointer'
-                                }}
-                            >
-                                {isRowExpanded ? '✖️' : '👁️'}
-                            </span>
-                            {isRowExpanded && (
-                                <React.Fragment>
-                                    <br />
-                                    Loss:{' '}
-                                    <RoundedFloat
-                                        value={
-                                            props.playerProbabilities.facts[scoreStats.key]
-                                                .lossProbability
-                                        }
-                                    />
-                                    <br />
-                                    Push:{' '}
-                                    <RoundedFloat
-                                        value={
-                                            props.playerProbabilities.facts[scoreStats.key]
-                                                .pushProbability
-                                        }
-                                    />
-                                    <br />
-                                    Win:{' '}
-                                    <RoundedFloat
-                                        value={
-                                            props.playerProbabilities.facts[scoreStats.key]
-                                                .winProbability
-                                        }
-                                    />
-                                    {displayProbabilityTotals && (
-                                        <React.Fragment>
-                                            <br />
-                                            Total:{' '}
-                                            <RoundedFloat
-                                                value={
-                                                    props.playerProbabilities.facts[scoreStats.key]
-                                                        .totalProbability
-                                                }
-                                            />
-                                        </React.Fragment>
-                                    )}
-                                </React.Fragment>
-                            )}
-                        </div>
-                        {props.outcomesSet.allOutcomes.map((cardOutcome) => (
-                            <div
-                                key={cardOutcome.symbol}
-                                style={{
-                                    ...cellStyle,
-                                    ...(props.playerProbabilities.facts[scoreStats.key].facts[
-                                        cardOutcome.key
-                                    ].decision === PlayerDecision.hit
-                                        ? {
-                                              backgroundColor: 'rgb(66, 139, 202)',
-                                              color: 'white'
-                                          }
-                                        : {
-                                              backgroundColor: 'rgb(92, 184, 92)'
-                                          })
-                                }}
-                            >
-                                <div style={{ textTransform: 'capitalize' }}>
-                                    {
-                                        props.playerProbabilities.facts[scoreStats.key].facts[
-                                            cardOutcome.key
-                                        ].decision
-                                    }
-                                    {isRowExpanded && (
-                                        <React.Fragment>
-                                            <br />
-                                            Loss:{' '}
-                                            <RoundedFloat
-                                                value={
-                                                    props.playerProbabilities.facts[scoreStats.key]
-                                                        .facts[cardOutcome.key][
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key].decision
-                                                    ].actionOutcome.lossProbability
-                                                }
-                                            />
-                                            <br />
-                                            Push:{' '}
-                                            <RoundedFloat
-                                                value={
-                                                    props.playerProbabilities.facts[scoreStats.key]
-                                                        .facts[cardOutcome.key][
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key].decision
-                                                    ].actionOutcome.pushProbability
-                                                }
-                                            />
-                                            <br />
-                                            Win:{' '}
-                                            <RoundedFloat
-                                                value={
-                                                    props.playerProbabilities.facts[scoreStats.key]
-                                                        .facts[cardOutcome.key][
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key].decision
-                                                    ].actionOutcome.winProbability
-                                                }
-                                            />
-                                            {displayProbabilityTotals && (
-                                                <React.Fragment>
-                                                    <br />
-                                                    Total:{' '}
-                                                    <RoundedFloat
-                                                        value={
-                                                            props.playerProbabilities.facts[
-                                                                scoreStats.key
-                                                            ].facts[cardOutcome.key][
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key].decision
-                                                            ].actionOutcome.totalProbability
-                                                        }
-                                                    />
-                                                </React.Fragment>
-                                            )}
-                                        </React.Fragment>
-                                    )}
-                                </div>
-                                {isRowExpanded && (
-                                    <div
-                                        style={{
-                                            paddingLeft: 4,
-                                            paddingTop: 16,
-                                            textAlign: 'left'
-                                        }}
-                                    >
-                                        Stand -----
-                                        <br />
-                                        {`P(< D): `}
-                                        <RoundedFloat
-                                            value={
-                                                props.playerProbabilities.facts[scoreStats.key]
-                                                    .facts[cardOutcome.key]
-                                                    .standLessThanDealerProbability
-                                            }
-                                        />
-                                        {props.displayAdditionalProbabilities && (
-                                            <React.Fragment>
-                                                <br />
-                                                {`P(= D): `}
-                                                <RoundedFloat
-                                                    value={
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key]
-                                                            .standEqualToDealerProbability
-                                                    }
-                                                />
-                                                <br />
-                                                {`P(> D): `}
-                                                <RoundedFloat
-                                                    value={
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key]
-                                                            .standMoreThanDealerProbability
-                                                    }
-                                                />
-                                                <br />
-                                                {`D(>${maximumScore}): `}
-                                                <RoundedFloat
-                                                    value={
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key]
-                                                            .standDealerBustingProbability
-                                                    }
-                                                />
-                                                {displayProbabilityTotals && (
-                                                    <React.Fragment>
-                                                        <br />
-                                                        Total:{' '}
-                                                        <RoundedFloat
-                                                            value={
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .standTotalProbability
-                                                            }
-                                                        />
-                                                    </React.Fragment>
-                                                )}
-                                            </React.Fragment>
-                                        )}
-                                        <br />
-                                        <br />
-                                        Hit -------
-                                        <br />
-                                        {`P(>${maximumScore}): `}
-                                        <RoundedFloat
-                                            value={
-                                                props.playerProbabilities.facts[scoreStats.key]
-                                                    .facts[cardOutcome.key].hitBustingProbability
-                                            }
-                                        />
-                                        <br />
-                                        {`P(< D): `}
-                                        <RoundedFloat
-                                            value={
-                                                props.playerProbabilities.facts[scoreStats.key]
-                                                    .facts[cardOutcome.key]
-                                                    .hitLessThanDealerProbability
-                                            }
-                                        />
-                                        {props.displayAdditionalProbabilities && (
-                                            <React.Fragment>
-                                                <br />
-                                                {`P(= D): `}
-                                                <RoundedFloat
-                                                    value={
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key]
-                                                            .hitEqualToDealerProbability
-                                                    }
-                                                />
-                                                <br />
-                                                {`P(> D): `}
-                                                <RoundedFloat
-                                                    value={
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key]
-                                                            .hitMoreThanDealerProbability
-                                                    }
-                                                />
-                                                <br />
-                                                {`D(>21): `}
-                                                <RoundedFloat
-                                                    value={
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key]
-                                                            .hitDealerBustingProbability
-                                                    }
-                                                />
-                                                {displayProbabilityTotals && (
-                                                    <React.Fragment>
-                                                        <br />
-                                                        Total:{' '}
-                                                        <RoundedFloat
-                                                            value={
-                                                                props.playerProbabilities.facts[
-                                                                    scoreStats.key
-                                                                ].facts[cardOutcome.key]
-                                                                    .hitTotalProbability
-                                                            }
-                                                        />
-                                                    </React.Fragment>
-                                                )}
-                                            </React.Fragment>
-                                        )}
-                                        {scoreStats.representativeHand.allScores.length > 1 && (
-                                            <React.Fragment>
-                                                <br />
-                                                <br />
-                                                {`P(<${scoreStats.representativeHand.effectiveScore}): `}
-                                                <RoundedFloat
-                                                    value={
-                                                        props.playerProbabilities.facts[
-                                                            scoreStats.key
-                                                        ].facts[cardOutcome.key]
-                                                            .hitLessThanCurrentProbability
-                                                    }
-                                                />
-                                            </React.Fragment>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        ))}
-                    </div>
-                );
-            })}
+            <CustomTable
+                columns={columns}
+                columnStyle={(cellProps) => {
+                    const { key } = cellProps.row.original;
+                    const scoreFacts = props.playerProbabilities.facts[key];
+                    const dealerCardKey =
+                        cellProps.column.id === 'score'
+                            ? undefined
+                            : (cellProps.column.id as ScoreKey);
+                    const actionStyles: CSSProperties = dealerCardKey
+                        ? scoreFacts.facts[dealerCardKey].decision === PlayerDecision.hit
+                            ? {
+                                  backgroundColor: 'rgb(66, 139, 202)',
+                                  color: 'white'
+                              }
+                            : {
+                                  backgroundColor: 'rgb(92, 184, 92)'
+                              }
+                        : {};
+
+                    return {
+                        border: '1px solid black',
+                        padding: 0,
+                        ...actionStyles
+                    };
+                }}
+                data={data}
+                width="100%"
+            />
             <p>P({'<'} D) = probability of getting a score lower than dealer's</p>
             <p>P({'>'}21) = probability of busting</p>
             {props.displayAdditionalProbabilities && (

@@ -6,6 +6,7 @@ interface CustomTableProps<T extends {}> {
     columnStyle?: (cell: Cell<T>) => CSSProperties | undefined;
     data: T[];
     rowStyle?: (row: Row<T>) => CSSProperties | undefined;
+    width?: string | number;
 }
 
 export const CustomTable = <T extends {}>(props: CustomTableProps<T>) => {
@@ -15,24 +16,27 @@ export const CustomTable = <T extends {}>(props: CustomTableProps<T>) => {
     });
 
     return (
-        <table {...getTableProps()}>
+        <table width={props.width} {...getTableProps()}>
             <thead>
                 {headerGroups.map((headerGroup, headerIndex) => (
                     <tr {...headerGroup.getHeaderGroupProps()} key={`header-row-${headerIndex}`}>
-                        {headerGroup.headers.map((column) => (
-                            <th
-                                {...column.getHeaderProps()}
-                                style={{
-                                    border: '1px solid black',
-                                    fontWeight: 'bold',
-                                    paddingLeft: 4,
-                                    paddingRight: 4
-                                }}
-                                key={column.id}
-                            >
-                                {column.render('Header')}
-                            </th>
-                        ))}
+                        {headerGroup.headers.map((column) => {
+                            const headerProps = column.getHeaderProps();
+                            return (
+                                <th
+                                    {...column.getHeaderProps()}
+                                    style={{
+                                        ...headerProps.style,
+                                        border: '1px solid black',
+                                        fontWeight: 'bold',
+                                        padding: '2px 4px'
+                                    }}
+                                    key={column.id}
+                                >
+                                    {column.render('Header')}
+                                </th>
+                            );
+                        })}
                     </tr>
                 ))}
             </thead>
@@ -42,19 +46,17 @@ export const CustomTable = <T extends {}>(props: CustomTableProps<T>) => {
                     return (
                         <tr style={props.rowStyle && props.rowStyle(row)} {...row.getRowProps()}>
                             {row.cells.map((cell) => {
-                                const baseColumnStyle: CSSProperties = {
-                                    padding: 4,
-                                    paddingBottom: 8,
-                                    paddingTop: 8,
-                                    textAlign: 'center'
+                                const cellProps = cell.getCellProps();
+                                const columnStyle: CSSProperties = {
+                                    ...cellProps.style,
+                                    padding: '8px 4px',
+                                    textAlign: 'center',
+                                    ...(props.columnStyle ? props.columnStyle(cell) : {})
                                 };
-                                const columnStyle: CSSProperties = props.columnStyle
-                                    ? { ...baseColumnStyle, ...props.columnStyle(cell) }
-                                    : baseColumnStyle;
 
                                 return (
                                     <td
-                                        {...cell.getCellProps()}
+                                        {...cellProps}
                                         style={columnStyle}
                                         key={row.id + '-' + cell.column.id}
                                     >
