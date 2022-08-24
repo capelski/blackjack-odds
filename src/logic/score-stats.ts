@@ -10,6 +10,7 @@ import {
     EffectiveScoreProbabilities,
     Hand,
     OutcomesSet,
+    PlayerDecisionsOverrides,
     ScoreAllDealerCardBasedFacts,
     ScoreDealerBasedFacts,
     ScoreStats
@@ -91,13 +92,15 @@ export const getDealerCardBasedProbabilities = ({
     dealerProbabilities,
     hitMinimalProbabilityGain,
     hitStrategy,
-    outcomesSet
+    outcomesSet,
+    playerDecisionsOverrides
 }: {
     allScoreStats: ScoreStats[];
     dealerProbabilities: AllEffectiveScoreProbabilities;
     hitMinimalProbabilityGain: number;
     hitStrategy: HitStrategy;
     outcomesSet: OutcomesSet;
+    playerDecisionsOverrides: PlayerDecisionsOverrides;
 }): AllScoreDealerCardBasedProbabilities => {
     const allScoreStatsFacts = allScoreStats.reduce((reduced, scoreStats) => {
         const scoreAllFacts = outcomesSet.allOutcomes
@@ -203,10 +206,11 @@ export const getDealerCardBasedProbabilities = ({
                     hitActionOutcome.winProbability;
 
                 const decision: PlayerDecision =
-                    standDealerProbabilities.lessThanDealer - hitStrategyProbability >
+                    playerDecisionsOverrides[scoreStats.key]?.[dealerCardKey] ||
+                    (standDealerProbabilities.lessThanDealer - hitStrategyProbability >
                     hitMinimalProbabilityGain
                         ? PlayerDecision.hit
-                        : PlayerDecision.stand;
+                        : PlayerDecision.stand);
 
                 const dealerCardBasedFacts: DealerCardBasedFacts = {
                     decision,

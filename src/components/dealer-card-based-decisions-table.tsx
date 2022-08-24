@@ -7,6 +7,7 @@ import {
     AllScoreDealerCardBasedProbabilities,
     ExpandedRows,
     OutcomesSet,
+    PlayerDecisionsOverrides,
     ScoreStats
 } from '../types';
 import { CustomTable } from './custom-table';
@@ -16,6 +17,9 @@ interface DealerCardBasedDecisionsTableProps {
     allScoreStats: ScoreStats[];
     displayAdditionalProbabilities: boolean;
     outcomesSet: OutcomesSet;
+    playerDecisionsEdit: boolean;
+    playerDecisionsOverrides: PlayerDecisionsOverrides;
+    playerDecisionsOverridesSetter: (playerDecisionsOverride: PlayerDecisionsOverrides) => void;
     playerProbabilities: AllScoreDealerCardBasedProbabilities;
 }
 
@@ -80,10 +84,33 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
 
                     return (
                         <div key={cardOutcome.symbol}>
-                            <div style={{ textTransform: 'capitalize' }}>
-                                {dealerCardFacts.decision}
+                            <div>
+                                {props.playerDecisionsEdit ? (
+                                    <select
+                                        onChange={(event) => {
+                                            props.playerDecisionsOverridesSetter({
+                                                ...props.playerDecisionsOverrides,
+                                                [scoreKey]: {
+                                                    ...props.playerDecisionsOverrides[scoreKey],
+                                                    [cardOutcome.key]: event.target
+                                                        .value as PlayerDecision
+                                                }
+                                            });
+                                        }}
+                                        value={dealerCardFacts.decision}
+                                    >
+                                        {Object.values(PlayerDecision).map((playerDecision) => (
+                                            <option key={playerDecision} value={playerDecision}>
+                                                {playerDecision}
+                                            </option>
+                                        ))}
+                                    </select>
+                                ) : (
+                                    dealerCardFacts.decision
+                                )}
                                 {isRowExpanded && (
                                     <React.Fragment>
+                                        <br />
                                         <br />
                                         Loss:{' '}
                                         <RoundedFloat
@@ -230,6 +257,8 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
         props.allScoreStats,
         props.displayAdditionalProbabilities,
         props.outcomesSet,
+        props.playerDecisionsEdit,
+        props.playerDecisionsOverrides,
         props.playerProbabilities
     ]);
 

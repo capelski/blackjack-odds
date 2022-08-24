@@ -12,6 +12,7 @@ import {
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
     OutcomesSet,
+    PlayerDecisionsOverrides,
     ScoreStats
 } from '../types';
 import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
@@ -31,6 +32,9 @@ export const App: React.FC = () => {
     // const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
     //     useState<AllEffectiveScoreProbabilities>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
+    const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
+    const [playerDecisionsOverrides, setPlayerDecisionsOverrides] =
+        useState<PlayerDecisionsOverrides>({});
     const [playerProbabilities, setPlayerProbabilities] =
         useState<AllScoreDealerCardBasedProbabilities>();
 
@@ -55,7 +59,8 @@ export const App: React.FC = () => {
             dealerProbabilities: nextDealerProbabilities,
             hitMinimalProbabilityGain: parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
             hitStrategy,
-            outcomesSet: nextOutcomesSet
+            outcomesSet: nextOutcomesSet,
+            playerDecisionsOverrides
         });
 
         setOutcomesSet(nextOutcomesSet);
@@ -77,11 +82,12 @@ export const App: React.FC = () => {
                 hitMinimalProbabilityGain:
                     parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
                 hitStrategy,
-                outcomesSet
+                outcomesSet,
+                playerDecisionsOverrides
             });
             setPlayerProbabilities(nextPlayerProbabilities);
         }
-    }, [hitMinimalProbabilityGain, hitStrategy]);
+    }, [hitMinimalProbabilityGain, hitStrategy, playerDecisionsOverrides]);
 
     return (
         <div>
@@ -119,6 +125,23 @@ export const App: React.FC = () => {
             Display additional probabilities (i.e. P({'='} D), P({'>'} D) and D({'>'}21) )
             <br />
             <br />
+            <input
+                type="checkbox"
+                checked={playerDecisionsEdit}
+                onChange={(event) => setPlayerDecisionsEdit(event.target.checked)}
+            />
+            Edit player decisions{' '}
+            <button
+                disabled={Object.keys(playerDecisionsOverrides).length === 0}
+                onClick={() => {
+                    setPlayerDecisionsOverrides({});
+                }}
+                type="button"
+            >
+                Clear edits
+            </button>
+            <br />
+            <br />
             {allScoreStats !== undefined &&
             outcomesSet !== undefined &&
             playerProbabilities !== undefined ? (
@@ -126,6 +149,9 @@ export const App: React.FC = () => {
                     allScoreStats={allScoreStats}
                     displayAdditionalProbabilities={displayAdditionalProbabilities}
                     outcomesSet={outcomesSet}
+                    playerDecisionsEdit={playerDecisionsEdit}
+                    playerDecisionsOverrides={playerDecisionsOverrides}
+                    playerDecisionsOverridesSetter={setPlayerDecisionsOverrides}
                     playerProbabilities={playerProbabilities}
                 />
             ) : (

@@ -1,4 +1,4 @@
 export enum PlayerDecision {
-    hit = 'hit',
-    stand = 'stand'
+    hit = 'Hit',
+    stand = 'Stand'
 }
