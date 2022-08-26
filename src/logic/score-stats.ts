@@ -199,12 +199,13 @@ export const getDealerCardBasedProbabilities = ({
                     hitActionOutcome.winProbability;
 
                 const decisionComparison =
-                    playerStrategy === PlayerStrategy.busting
+                    playerStrategy === PlayerStrategy.hitBusting_standLessThanDealer
                         ? standDealerProbabilities.lessThanDealer - hitBustingProbability
-                        : playerStrategy === PlayerStrategy.lowerThanCurrent
+                        : playerStrategy === PlayerStrategy.hitBustingOrLower_standLessThanDealer
                         ? standDealerProbabilities.lessThanDealer -
                           (hitBustingProbability + hitLessThanCurrentProbability)
-                        : playerStrategy === PlayerStrategy.lowerThanDealer
+                        : playerStrategy ===
+                          PlayerStrategy.hitBustingOrLessThanDealer_standLessThanDealer
                         ? standDealerProbabilities.lessThanDealer -
                           (hitBustingProbability + hitDealerProbabilities.lessThanDealer)
                         : hitActionOutcome.winProbability * 2 +

@@ -36,7 +36,7 @@ export const App: React.FC = () => {
     const [playerProbabilities, setPlayerProbabilities] =
         useState<AllScoreDealerCardBasedProbabilities>();
     const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
-        PlayerStrategy.winPushProbabilityComparison
+        PlayerStrategy.hit2WinAndPush_stand2WinAndPush
     );
 
     useEffect(() => {
