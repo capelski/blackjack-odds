@@ -7,7 +7,7 @@ import {
     getStandThresholdProbabilities,
     getDealerCardBasedProbabilities
 } from '../logic';
-import { HitStrategy } from '../models';
+import { PlayerStrategy } from '../models';
 import {
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
@@ -28,7 +28,6 @@ export const App: React.FC = () => {
         useState<AllEffectiveScoreProbabilities>();
     const [displayAdditionalProbabilities, setDisplayAdditionalProbabilities] = useState(false);
     const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
-    const [hitStrategy, setHitStrategy] = useState<HitStrategy>(HitStrategy.lowerThanDealer);
     // const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
     //     useState<AllEffectiveScoreProbabilities>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
@@ -37,6 +36,9 @@ export const App: React.FC = () => {
         useState<PlayerDecisionsOverrides>({});
     const [playerProbabilities, setPlayerProbabilities] =
         useState<AllScoreDealerCardBasedProbabilities>();
+    const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
+        PlayerStrategy.winPushProbabilityComparison
+    );
 
     useEffect(() => {
         const nextOutcomesSet = getOutcomesSet();
@@ -58,9 +60,9 @@ export const App: React.FC = () => {
             allScoreStats: nextAllScoreStats,
             dealerProbabilities: nextDealerProbabilities,
             hitMinimalProbabilityGain: parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
-            hitStrategy,
             outcomesSet: nextOutcomesSet,
-            playerDecisionsOverrides
+            playerDecisionsOverrides,
+            playerStrategy
         });
 
         setOutcomesSet(nextOutcomesSet);
@@ -81,23 +83,26 @@ export const App: React.FC = () => {
                 dealerProbabilities,
                 hitMinimalProbabilityGain:
                     parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
-                hitStrategy,
                 outcomesSet,
-                playerDecisionsOverrides
+                playerDecisionsOverrides,
+                playerStrategy
             });
             setPlayerProbabilities(nextPlayerProbabilities);
         }
-    }, [hitMinimalProbabilityGain, hitStrategy, playerDecisionsOverrides]);
+    }, [hitMinimalProbabilityGain, playerStrategy, playerDecisionsOverrides]);
 
     return (
         <div>
-            <h3>Dealer card based decisions table</h3>
-            {Object.values(HitStrategy).map((hitStrategyOption) => (
+            <h3>Settings</h3>
+            <p>Player strategy:</p>
+            {Object.values(PlayerStrategy).map((hitStrategyOption) => (
                 <React.Fragment key={hitStrategyOption}>
                     <input
-                        checked={hitStrategy === hitStrategyOption}
+                        checked={playerStrategy === hitStrategyOption}
                         name="hit-strategy"
-                        onChange={(option) => setHitStrategy(option.target.value as HitStrategy)}
+                        onChange={(option) =>
+                            setPlayerStrategy(option.target.value as PlayerStrategy)
+                        }
                         type="radio"
                         value={hitStrategyOption}
                     />
@@ -142,6 +147,7 @@ export const App: React.FC = () => {
             </button>
             <br />
             <br />
+            <h3>Dealer card based decisions table</h3>
             {allScoreStats !== undefined &&
             outcomesSet !== undefined &&
             playerProbabilities !== undefined ? (

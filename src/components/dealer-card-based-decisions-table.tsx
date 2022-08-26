@@ -310,7 +310,10 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                         : {};
 
                     return {
-                        border: '1px solid black',
+                        border:
+                            dealerCardKey && props.playerDecisionsOverrides[key]?.[dealerCardKey]
+                                ? '2px solid coral'
+                                : '1px solid black',
                         padding: 0,
                         ...actionStyles
                     };
@@ -327,7 +330,6 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 </React.Fragment>
             )}
             <p>P({'<'} X) = probability of getting a score lower than X (only soft hands)</p>
-            <p>Loss = Probability of player losing</p>
         </div>
     );
 };

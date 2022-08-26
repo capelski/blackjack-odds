@@ -1,5 +1,5 @@
 import { blackjackScore } from '../constants';
-import { HitStrategy, PlayerDecision, ScoreKey } from '../models';
+import { PlayerDecision, PlayerStrategy, ScoreKey } from '../models';
 import {
     ActionOutcome,
     AllEffectiveScoreProbabilities,
@@ -91,16 +91,16 @@ export const getDealerCardBasedProbabilities = ({
     allScoreStats,
     dealerProbabilities,
     hitMinimalProbabilityGain,
-    hitStrategy,
     outcomesSet,
-    playerDecisionsOverrides
+    playerDecisionsOverrides,
+    playerStrategy
 }: {
     allScoreStats: ScoreStats[];
     dealerProbabilities: AllEffectiveScoreProbabilities;
     hitMinimalProbabilityGain: number;
-    hitStrategy: HitStrategy;
     outcomesSet: OutcomesSet;
     playerDecisionsOverrides: PlayerDecisionsOverrides;
+    playerStrategy: PlayerStrategy;
 }): AllScoreDealerCardBasedProbabilities => {
     const allScoreStatsFacts = allScoreStats.reduce((reduced, scoreStats) => {
         const scoreAllFacts = outcomesSet.allOutcomes
@@ -185,13 +185,6 @@ export const getDealerCardBasedProbabilities = ({
                         { dealerBusting: 0, equalToDealer: 0, lessThanDealer: 0, moreThanDealer: 0 }
                     );
 
-                const hitStrategyProbability =
-                    hitStrategy === HitStrategy.busting
-                        ? hitBustingProbability
-                        : hitStrategy === HitStrategy.lowerThanCurrent
-                        ? hitBustingProbability + hitLessThanCurrentProbability
-                        : hitBustingProbability + hitDealerProbabilities.lessThanDealer;
-
                 const hitActionOutcome: ActionOutcome = {
                     lossProbability: hitBustingProbability + hitDealerProbabilities.lessThanDealer,
                     pushProbability: hitDealerProbabilities.equalToDealer,
@@ -205,10 +198,23 @@ export const getDealerCardBasedProbabilities = ({
                     hitActionOutcome.pushProbability +
                     hitActionOutcome.winProbability;
 
+                const decisionComparison =
+                    playerStrategy === PlayerStrategy.busting
+                        ? standDealerProbabilities.lessThanDealer - hitBustingProbability
+                        : playerStrategy === PlayerStrategy.lowerThanCurrent
+                        ? standDealerProbabilities.lessThanDealer -
+                          (hitBustingProbability + hitLessThanCurrentProbability)
+                        : playerStrategy === PlayerStrategy.lowerThanDealer
+                        ? standDealerProbabilities.lessThanDealer -
+                          (hitBustingProbability + hitDealerProbabilities.lessThanDealer)
+                        : hitActionOutcome.winProbability * 2 +
+                          hitActionOutcome.pushProbability -
+                          (standActionOutcome.winProbability * 2 +
+                              standActionOutcome.pushProbability);
+
                 const decision: PlayerDecision =
                     playerDecisionsOverrides[scoreStats.key]?.[dealerCardKey] ||
-                    (standDealerProbabilities.lessThanDealer - hitStrategyProbability >
-                    hitMinimalProbabilityGain
+                    (decisionComparison > hitMinimalProbabilityGain
                         ? PlayerDecision.hit
                         : PlayerDecision.stand);
 
