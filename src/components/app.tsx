@@ -26,7 +26,6 @@ export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [dealerProbabilities, setDealerProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
-    const [displayAdditionalProbabilities, setDisplayAdditionalProbabilities] = useState(false);
     const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
     // const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
     //     useState<AllEffectiveScoreProbabilities>();
@@ -124,14 +123,6 @@ export const App: React.FC = () => {
             <br />
             <input
                 type="checkbox"
-                checked={displayAdditionalProbabilities}
-                onChange={(event) => setDisplayAdditionalProbabilities(event.target.checked)}
-            />
-            Display additional probabilities (i.e. P({'='} D), P({'>'} D) and D({'>'}21) )
-            <br />
-            <br />
-            <input
-                type="checkbox"
                 checked={playerDecisionsEdit}
                 onChange={(event) => setPlayerDecisionsEdit(event.target.checked)}
             />
@@ -153,7 +144,6 @@ export const App: React.FC = () => {
             playerProbabilities !== undefined ? (
                 <DealerCardBasedDecisionsTable
                     allScoreStats={allScoreStats}
-                    displayAdditionalProbabilities={displayAdditionalProbabilities}
                     outcomesSet={outcomesSet}
                     playerDecisionsEdit={playerDecisionsEdit}
                     playerDecisionsOverrides={playerDecisionsOverrides}
