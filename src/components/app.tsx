@@ -7,7 +7,7 @@ import {
     getStandThresholdProbabilities,
     getDealerCardBasedProbabilities
 } from '../logic';
-import { PlayerStrategy } from '../models';
+import { PlayerStrategy, playerStrategyLegend } from '../models';
 import {
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
@@ -94,18 +94,18 @@ export const App: React.FC = () => {
         <div>
             <h3>Settings</h3>
             <p>Player strategy:</p>
-            {Object.values(PlayerStrategy).map((hitStrategyOption) => (
-                <React.Fragment key={hitStrategyOption}>
+            {Object.values(PlayerStrategy).map((playerStrategyOption) => (
+                <React.Fragment key={playerStrategyOption}>
                     <input
-                        checked={playerStrategy === hitStrategyOption}
+                        checked={playerStrategy === playerStrategyOption}
                         name="hit-strategy"
                         onChange={(option) =>
                             setPlayerStrategy(option.target.value as PlayerStrategy)
                         }
                         type="radio"
-                        value={hitStrategyOption}
+                        value={playerStrategyOption}
                     />
-                    {hitStrategyOption}
+                    {playerStrategyLegend[playerStrategyOption]}
                     <br />
                 </React.Fragment>
             ))}
