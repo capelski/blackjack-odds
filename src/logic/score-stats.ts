@@ -209,11 +209,9 @@ export const getDealerCardBasedProbabilities = ({
                           PlayerStrategy.hitBustingOrLessThanDealer_standLessThanDealer
                         ? standDealerProbabilities.lessThanDealer -
                           (hitBustingProbability + hitDealerProbabilities.lessThanDealer)
-                        : hitActionOutcome.winProbability * 2 +
-                          hitActionOutcome.pushProbability -
-                          (standActionOutcome.winProbability * 2 +
-                              standActionOutcome.pushProbability);
-
+                        : standActionOutcome.lossProbability -
+                          standActionOutcome.winProbability -
+                          (hitActionOutcome.lossProbability - hitActionOutcome.winProbability);
                 const decision: PlayerDecision =
                     playerDecisionsOverrides[scoreStats.key]?.[dealerCardKey] ||
                     (decisionComparison > hitMinimalProbabilityGain

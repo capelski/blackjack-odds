@@ -307,10 +307,6 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 data={data}
                 width="100%"
             />
-            <p>{probabilityLabels.playerLoss} = probability of player losing</p>
-            <p>{probabilityLabels.playerPush} = probability of player pushing</p>
-            <p>{probabilityLabels.playerWin} = probability of player winning</p>
-            <br />
             <p>{probabilityLabels.playerBusting} = probability of player busting</p>
             <p>{probabilityLabels.dealerBusting} = probability of dealer busting</p>
             <p>
@@ -328,6 +324,18 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
             <p>
                 {probabilityLabels.playerLessThanCurrent('X')} = probability of player getting a
                 score lower than X (only soft hands)
+            </p>
+            <p>
+                {probabilityLabels.playerLoss} = probability of player losing (i.e.{' '}
+                {probabilityLabels.playerBusting} + {probabilityLabels.playerLessThanDealer} )
+            </p>
+            <p>
+                {probabilityLabels.playerPush} = probability of player pushing (i.e.{' '}
+                {probabilityLabels.playerEqualToDealer} )
+            </p>
+            <p>
+                {probabilityLabels.playerWin} = probability of player winning (i.e.{' '}
+                {probabilityLabels.dealerBusting} + {probabilityLabels.playerMoreThanDealer} )
             </p>
         </div>
     );

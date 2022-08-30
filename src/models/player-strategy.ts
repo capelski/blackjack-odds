@@ -6,7 +6,7 @@ export enum PlayerStrategy {
     hitBusting_standLessThanDealer = 'hitBusting_standLessThanDealer',
     hitBustingOrLower_standLessThanDealer = 'hitBustingOrLower_standLessThanDealer',
     hitBustingOrLessThanDealer_standLessThanDealer = 'hitBustingOrLessThanDealer_standLessThanDealer',
-    hit2WinAndPush_stand2WinAndPush = 'hit2WinAndPush_stand2WinAndPush'
+    hitLossMinusWin_standLossMinusWin = 'hitLossMinusWin_standLossMinusWin'
 }
 
 export const playerStrategyLegend: Dictionary<string, PlayerStrategy> = {
@@ -17,5 +17,5 @@ export const playerStrategyLegend: Dictionary<string, PlayerStrategy> = {
         PlayerDecision.hit
     } is lower than [ ${probabilityLabels.playerLessThanDealer} ] for ${PlayerDecision.stand}`,
     [PlayerStrategy.hitBustingOrLessThanDealer_standLessThanDealer]: `${PlayerDecision.hit} when [ ${probabilityLabels.playerBusting} + ${probabilityLabels.playerLessThanDealer} ] for ${PlayerDecision.hit} is lower than [ ${probabilityLabels.playerLessThanDealer} ] for ${PlayerDecision.stand}`,
-    [PlayerStrategy.hit2WinAndPush_stand2WinAndPush]: `${PlayerDecision.hit} when [ 2 * ${probabilityLabels.playerWin} + ${probabilityLabels.playerPush} ] for ${PlayerDecision.hit} is higher than [ 2 * ${probabilityLabels.playerWin} + ${probabilityLabels.playerPush} ] for ${PlayerDecision.stand}`
+    [PlayerStrategy.hitLossMinusWin_standLossMinusWin]: `${PlayerDecision.hit} when [ ${probabilityLabels.playerLoss} - ${probabilityLabels.playerWin} ] for ${PlayerDecision.hit} is lower than [ ${probabilityLabels.playerLoss} - ${probabilityLabels.playerWin} ] for ${PlayerDecision.stand}`
 };
