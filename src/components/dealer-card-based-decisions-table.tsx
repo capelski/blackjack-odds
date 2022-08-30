@@ -81,8 +81,9 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                     const { key: scoreKey, representativeHand } = cellProps.row.original;
                     const scoreFacts = props.playerProbabilities.facts[scoreKey];
                     const dealerCardFacts = scoreFacts.facts[cardOutcome.key];
-                    const { decisionOutcome: dealerCardDecisionOutcome } =
-                        dealerCardFacts[dealerCardFacts.decision];
+                    const standDecisionOutcome =
+                        dealerCardFacts[PlayerDecision.stand].decisionOutcome;
+                    const hitDecisionOutcome = dealerCardFacts[PlayerDecision.hit].decisionOutcome;
                     const isRowExpanded = expandedRows[scoreKey];
 
                     return (
@@ -110,37 +111,6 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                     </select>
                                 ) : (
                                     dealerCardFacts.decision
-                                )}
-                                {isRowExpanded && (
-                                    <React.Fragment>
-                                        <br />
-                                        <br />
-                                        {probabilityLabels.playerLoss}:{' '}
-                                        <RoundedFloat
-                                            value={dealerCardDecisionOutcome.lossProbability}
-                                        />
-                                        <br />
-                                        {probabilityLabels.playerPush}:{' '}
-                                        <RoundedFloat
-                                            value={dealerCardDecisionOutcome.pushProbability}
-                                        />
-                                        <br />
-                                        {probabilityLabels.playerWin}:{' '}
-                                        <RoundedFloat
-                                            value={dealerCardDecisionOutcome.winProbability}
-                                        />
-                                        {displayProbabilityTotals && (
-                                            <React.Fragment>
-                                                <br />
-                                                {probabilityLabels.playerTotal}:{' '}
-                                                <RoundedFloat
-                                                    value={
-                                                        dealerCardDecisionOutcome.totalProbability
-                                                    }
-                                                />
-                                            </React.Fragment>
-                                        )}
-                                    </React.Fragment>
                                 )}
                             </div>
                             {isRowExpanded && (
@@ -178,6 +148,25 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                             Total:{' '}
                                             <RoundedFloat
                                                 value={dealerCardFacts.standTotalProbability}
+                                            />
+                                        </React.Fragment>
+                                    )}
+                                    <br />
+                                    <br />
+                                    {probabilityLabels.playerLoss}:{' '}
+                                    <RoundedFloat value={standDecisionOutcome.lossProbability} />
+                                    <br />
+                                    {probabilityLabels.playerPush}:{' '}
+                                    <RoundedFloat value={standDecisionOutcome.pushProbability} />
+                                    <br />
+                                    {probabilityLabels.playerWin}:{' '}
+                                    <RoundedFloat value={standDecisionOutcome.winProbability} />
+                                    {displayProbabilityTotals && (
+                                        <React.Fragment>
+                                            <br />
+                                            {probabilityLabels.playerTotal}:{' '}
+                                            <RoundedFloat
+                                                value={standDecisionOutcome.totalProbability}
                                             />
                                         </React.Fragment>
                                     )}
@@ -228,6 +217,25 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 }
                                             />
                                         </i>
+                                    )}
+                                    <br />
+                                    <br />
+                                    {probabilityLabels.playerLoss}:{' '}
+                                    <RoundedFloat value={hitDecisionOutcome.lossProbability} />
+                                    <br />
+                                    {probabilityLabels.playerPush}:{' '}
+                                    <RoundedFloat value={hitDecisionOutcome.pushProbability} />
+                                    <br />
+                                    {probabilityLabels.playerWin}:{' '}
+                                    <RoundedFloat value={hitDecisionOutcome.winProbability} />
+                                    {displayProbabilityTotals && (
+                                        <React.Fragment>
+                                            <br />
+                                            {probabilityLabels.playerTotal}:{' '}
+                                            <RoundedFloat
+                                                value={hitDecisionOutcome.totalProbability}
+                                            />
+                                        </React.Fragment>
                                     )}
                                 </div>
                             )}
