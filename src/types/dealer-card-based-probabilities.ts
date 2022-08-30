@@ -1,15 +1,15 @@
 import { PlayerDecision, ScoreKey } from '../models';
-import { ActionOutcome } from './action-outcome';
+import { DecisionOutcome } from './decision-outcome';
 import { Dictionary } from './dictionary';
 import { EffectiveScoreProbabilities } from './effective-score-probabilities';
 import { PlayerAdvantage } from './player-advantage';
 
-export type ScoreDealerBasedFacts = ActionOutcome & {
+export type ScoreDealerBasedFacts = DecisionOutcome & {
     facts: ScoreAllDealerCardBasedFacts;
     playerAdvantage: PlayerAdvantage;
 };
 
-export type AllScoreDealerCardBasedProbabilities = ActionOutcome & {
+export type AllScoreDealerCardBasedProbabilities = DecisionOutcome & {
     facts: AllScoreDealerCardBasedFacts;
     playerAdvantage: PlayerAdvantage;
 };
@@ -19,7 +19,7 @@ export type AllScoreDealerCardBasedFacts = Dictionary<ScoreDealerBasedFacts, Sco
 export type DealerCardBasedFacts = {
     decision: PlayerDecision;
     [PlayerDecision.hit]: {
-        actionOutcome: ActionOutcome;
+        decisionOutcome: DecisionOutcome;
         probabilities: EffectiveScoreProbabilities;
     };
     hitBustingProbability: number;
@@ -30,7 +30,7 @@ export type DealerCardBasedFacts = {
     hitLessThanDealerProbability: number;
     hitTotalProbability: number;
     [PlayerDecision.stand]: {
-        actionOutcome: ActionOutcome;
+        decisionOutcome: DecisionOutcome;
         probabilities: EffectiveScoreProbabilities;
     };
     standDealerBustingProbability: number;

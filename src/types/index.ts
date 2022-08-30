@@ -1,4 +1,3 @@
-export { ActionOutcome } from './action-outcome';
 export { CardOutcome } from './card-outcome';
 export {
     AllScoreDealerCardBasedFacts,
@@ -7,6 +6,7 @@ export {
     ScoreAllDealerCardBasedFacts,
     ScoreDealerBasedFacts
 } from './dealer-card-based-probabilities';
+export { DecisionOutcome } from './decision-outcome';
 export { Dictionary } from './dictionary';
 export {
     AllEffectiveScoreProbabilities,

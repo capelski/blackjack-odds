@@ -1,4 +1,4 @@
-export type ActionOutcome = {
+export type DecisionOutcome = {
     lossProbability: number;
     pushProbability: number;
     totalProbability: number;
