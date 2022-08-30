@@ -1,10 +1,10 @@
 import { blackjackScore, maximumScore } from '../constants';
-import { DecisionProbabilities, EffectiveScoreProbabilities } from '../types';
+import { DecisionProbabilities, FinalScoreProbabilities } from '../types';
 import {
     getBustingProbability,
     getPossibleFinalScores,
     getRangeProbability
-} from './effective-score-probabilities';
+} from './final-score-probabilities';
 import { isBustScore } from './hand';
 
 export const getDecisionProbabilities = ({
@@ -12,8 +12,8 @@ export const getDecisionProbabilities = ({
     playerProbabilities,
     playerScore
 }: {
-    dealerProbabilities: EffectiveScoreProbabilities;
-    playerProbabilities: EffectiveScoreProbabilities;
+    dealerProbabilities: FinalScoreProbabilities;
+    playerProbabilities: FinalScoreProbabilities;
     playerScore: number;
 }): DecisionProbabilities => {
     const decisionProbabilities: DecisionProbabilities = {

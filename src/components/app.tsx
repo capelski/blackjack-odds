@@ -9,8 +9,8 @@ import {
 } from '../logic';
 import { PlayerDecision, PlayerStrategy, playerStrategyLegend } from '../models';
 import {
-    AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
+    FinalScoresDictionary,
     OutcomesSet,
     PlayerDecisionsOverrides,
     ScoreStats
@@ -25,11 +25,10 @@ const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [blackjackPayout, setBlackjackPayout] = useState(true);
-    const [dealerProbabilities, setDealerProbabilities] =
-        useState<AllEffectiveScoreProbabilities>();
+    const [dealerProbabilities, setDealerProbabilities] = useState<FinalScoresDictionary>();
     const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
     // const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
-    //     useState<AllEffectiveScoreProbabilities>();
+    //     useState<FinalScoresDictionary>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
     const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const [playerDecisionsOverrides, setPlayerDecisionsOverrides] =

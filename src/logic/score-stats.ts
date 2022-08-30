@@ -1,12 +1,12 @@
 import { blackjackScore } from '../constants';
 import { PlayerDecision, PlayerStrategy, ScoreKey } from '../models';
 import {
-    AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedFacts,
     AllScoreDealerCardBasedProbabilities,
     DealerCardBasedFacts,
     Dictionary,
-    EffectiveScoreProbabilities,
+    FinalScoreProbabilities,
+    FinalScoresDictionary,
     Hand,
     OutcomesSet,
     PlayerAdvantage,
@@ -21,8 +21,8 @@ import {
     getApplicableDealerProbabilities,
     mergeProbabilities,
     weightProbabilities
-} from './effective-score-probabilities';
-import { isBlackjack, isBustScore } from './hand';
+} from './final-score-probabilities';
+import { isBlackjack } from './hand';
 
 /**
  * Returns a list of all possible valid scores' stats
@@ -94,7 +94,7 @@ export const getDealerCardBasedProbabilities = ({
 }: {
     allScoreStats: ScoreStats[];
     blackjackPayout: boolean;
-    dealerProbabilities: AllEffectiveScoreProbabilities;
+    dealerProbabilities: FinalScoresDictionary;
     hitMinimalProbabilityGain: number;
     outcomesSet: OutcomesSet;
     playerDecisionsOverrides: PlayerDecisionsOverrides;
@@ -109,17 +109,17 @@ export const getDealerCardBasedProbabilities = ({
                     dealerCardKey
                 );
 
-                const standEffectiveProbabilities: EffectiveScoreProbabilities = {
+                const standFinalProbabilities: FinalScoreProbabilities = {
                     [scoreStats.representativeHand.effectiveScore]: 1
                 };
                 const standDecisionProbabilities = getDecisionProbabilities({
                     dealerProbabilities: applicableDealerProbabilities,
-                    playerProbabilities: standEffectiveProbabilities,
+                    playerProbabilities: standFinalProbabilities,
                     playerScore: scoreStats.representativeHand.effectiveScore
                 });
                 const standDecisionOutcome = getDecisionOutcome(standDecisionProbabilities);
 
-                const hitEffectiveProbabilities: EffectiveScoreProbabilities =
+                const hitFinalProbabilities: FinalScoreProbabilities =
                     scoreStats.representativeHand.descendants
                         .map((descendant) => {
                             return weightProbabilities(
@@ -133,10 +133,10 @@ export const getDealerCardBasedProbabilities = ({
                                 descendant.lastCard.weight / outcomesSet.totalWeight
                             );
                         })
-                        .reduce(mergeProbabilities, <EffectiveScoreProbabilities>{});
+                        .reduce(mergeProbabilities, <FinalScoreProbabilities>{});
                 const hitDecisionProbabilities = getDecisionProbabilities({
                     dealerProbabilities: applicableDealerProbabilities,
-                    playerProbabilities: hitEffectiveProbabilities,
+                    playerProbabilities: hitFinalProbabilities,
                     playerScore: scoreStats.representativeHand.effectiveScore
                 });
                 const hitDecisionOutcome = getDecisionOutcome(hitDecisionProbabilities);
@@ -169,12 +169,12 @@ export const getDealerCardBasedProbabilities = ({
                         [PlayerDecision.hit]: {
                             decisionOutcome: hitDecisionOutcome,
                             decisionProbabilities: hitDecisionProbabilities,
-                            probabilities: hitEffectiveProbabilities
+                            probabilities: hitFinalProbabilities
                         },
                         [PlayerDecision.stand]: {
                             decisionOutcome: standDecisionOutcome,
                             decisionProbabilities: standDecisionProbabilities,
-                            probabilities: standEffectiveProbabilities
+                            probabilities: standFinalProbabilities
                         }
                     }
                 };
@@ -281,33 +281,6 @@ export const getDealerCardBasedProbabilities = ({
     return probabilities;
 };
 
-// /**
-//  * Returns a dictionary with the effective score probabilities when hitting ONCE for each score
-//  */
-// export const getOneMoreCardProbabilities = ({
-//     allScoreStats,
-//     outcomesSet
-// }: {
-//     allScoreStats: ScoreStats[];
-//     outcomesSet: OutcomesSet;
-// }) => {
-//     return allScoreStats.reduce((reduced, scoreStats) => {
-//         return {
-//             ...reduced,
-//             [scoreStats.key]: scoreStats.representativeHand.descendants.reduce(
-//                 (handReduced, descendant) => {
-//                     return {
-//                         ...handReduced,
-//                         [descendant.effectiveScore]:
-//                             descendant.lastCard.weight / outcomesSet.totalWeight
-//                     };
-//                 },
-//                 <EffectiveScoreProbabilities>{}
-//             )
-//         };
-//     }, <AllEffectiveScoreProbabilities>{});
-// };
-
 export const getPlayerScoreStats = (allScoreStats: ScoreStats[]) => {
     return (
         sortScoreStats(allScoreStats)
@@ -320,42 +293,6 @@ export const getPlayerScoreStats = (allScoreStats: ScoreStats[]) => {
             }))
             .filter((scoreStats) => scoreStats.combinations.length > 0)
     );
-};
-
-/**
- * Returns a dictionary with the effective score probabilities when hitting WHILE below a threshold for each score
- */
-export const getStandThresholdProbabilities = ({
-    allScoreStats,
-    outcomesSet,
-    standThreshold
-}: {
-    allScoreStats: ScoreStats[];
-    outcomesSet: OutcomesSet;
-    standThreshold: number;
-}) => {
-    return allScoreStats.reduce((reduced, scoreStats) => {
-        return {
-            ...reduced,
-            [scoreStats.key]:
-                scoreStats.representativeHand.effectiveScore >= standThreshold
-                    ? {
-                          [scoreStats.representativeHand.effectiveScore]: 1
-                      }
-                    : scoreStats.representativeHand.descendants
-                          .map((descendant) => {
-                              return weightProbabilities(
-                                  isBustScore(descendant.effectiveScore)
-                                      ? {
-                                            [descendant.effectiveScore]: 1
-                                        }
-                                      : reduced[descendant.scoreKey],
-                                  descendant.lastCard.weight / outcomesSet.totalWeight
-                              );
-                          })
-                          .reduce(mergeProbabilities, <EffectiveScoreProbabilities>{})
-        };
-    }, <AllEffectiveScoreProbabilities>{});
 };
 
 export const sortScoreStats = (allScoreStats: ScoreStats[]) => {

@@ -6,12 +6,12 @@ import {
     getBustingProbability,
     getRangeProbability
 } from '../logic';
-import { ScoreStats, AllEffectiveScoreProbabilities, OutcomesSet, CardOutcome } from '../types';
+import { CardOutcome, FinalScoresDictionary, OutcomesSet, ScoreStats } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface DealerScoreStatsTableProps {
-    dealerProbabilities: AllEffectiveScoreProbabilities;
+    dealerProbabilities: FinalScoresDictionary;
     outcomeSet: OutcomesSet;
 }
 

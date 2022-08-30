@@ -9,11 +9,8 @@ export {
 export { DecisionOutcome } from './decision-outcome';
 export { DecisionProbabilities } from './decision-probabilities';
 export { Dictionary } from './dictionary';
-export {
-    AllEffectiveScoreProbabilities,
-    EffectiveScoreProbabilities
-} from './effective-score-probabilities';
 export { ExpandedRows } from './expanded-rows';
+export { FinalScoreProbabilities, FinalScoresDictionary } from './final-score-probabilities';
 export { Hand } from './hand';
 export { OutcomesSet } from './outcomes-set';
 export { PlayerAdvantage } from './player-advantage';

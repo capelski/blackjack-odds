@@ -3,16 +3,16 @@ export { getDecisionProbabilities } from './decision-probabilities';
 export {
     getApplicableDealerProbabilities,
     getBustingProbability,
+    getOneMoreCardProbabilities,
     getRangeProbability,
+    getStandThresholdProbabilities,
     mergeProbabilities,
     weightProbabilities
-} from './effective-score-probabilities';
+} from './final-score-probabilities';
 export { getAllHands, isBlackjack, isBustScore } from './hand';
 export { getOutcomesSet } from './outcomes-set';
 export {
     getAllScoreStats,
     getDealerCardBasedProbabilities,
-    // getOneMoreCardProbabilities,
-    getPlayerScoreStats,
-    getStandThresholdProbabilities
+    getPlayerScoreStats
 } from './score-stats';

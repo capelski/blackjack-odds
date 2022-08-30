@@ -2,7 +2,7 @@ import { PlayerDecision, ScoreKey } from '../models';
 import { DecisionOutcome } from './decision-outcome';
 import { DecisionProbabilities } from './decision-probabilities';
 import { Dictionary } from './dictionary';
-import { EffectiveScoreProbabilities } from './effective-score-probabilities';
+import { FinalScoreProbabilities } from './final-score-probabilities';
 import { PlayerAdvantage } from './player-advantage';
 
 export type ScoreDealerBasedFacts = DecisionOutcome & {
@@ -23,7 +23,7 @@ export type DealerCardBasedFacts = {
         {
             decisionOutcome: DecisionOutcome;
             decisionProbabilities: DecisionProbabilities;
-            probabilities: EffectiveScoreProbabilities;
+            probabilities: FinalScoreProbabilities;
         },
         PlayerDecision
     >;
