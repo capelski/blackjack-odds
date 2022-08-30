@@ -7,7 +7,7 @@ import {
     getStandThresholdProbabilities,
     getDealerCardBasedProbabilities
 } from '../logic';
-import { PlayerStrategy, playerStrategyLegend } from '../models';
+import { PlayerDecision, PlayerStrategy, playerStrategyLegend } from '../models';
 import {
     AllEffectiveScoreProbabilities,
     AllScoreDealerCardBasedProbabilities,
@@ -24,6 +24,7 @@ const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
 
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
+    const [blackjackPayout, setBlackjackPayout] = useState(true);
     const [dealerProbabilities, setDealerProbabilities] =
         useState<AllEffectiveScoreProbabilities>();
     const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
@@ -57,6 +58,7 @@ export const App: React.FC = () => {
         });
         const nextPlayerProbabilities = getDealerCardBasedProbabilities({
             allScoreStats: nextAllScoreStats,
+            blackjackPayout: blackjackPayout,
             dealerProbabilities: nextDealerProbabilities,
             hitMinimalProbabilityGain: parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
             outcomesSet: nextOutcomesSet,
@@ -79,6 +81,7 @@ export const App: React.FC = () => {
         ) {
             const nextPlayerProbabilities = getDealerCardBasedProbabilities({
                 allScoreStats,
+                blackjackPayout,
                 dealerProbabilities,
                 hitMinimalProbabilityGain:
                     parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
@@ -88,7 +91,7 @@ export const App: React.FC = () => {
             });
             setPlayerProbabilities(nextPlayerProbabilities);
         }
-    }, [hitMinimalProbabilityGain, playerStrategy, playerDecisionsOverrides]);
+    }, [blackjackPayout, hitMinimalProbabilityGain, playerStrategy, playerDecisionsOverrides]);
 
     return (
         <div>
@@ -111,6 +114,14 @@ export const App: React.FC = () => {
             ))}
             <br />
             <input
+                type="checkbox"
+                checked={blackjackPayout}
+                onChange={(event) => setBlackjackPayout(event.target.checked)}
+            />
+            Blackjack pays 3 to 2
+            <br />
+            <br />
+            <input
                 max={100}
                 min={0}
                 onChange={(event) => setHitMinimalProbabilityGain(event.target.value)}
@@ -118,7 +129,7 @@ export const App: React.FC = () => {
                 type="number"
                 value={hitMinimalProbabilityGain}
             />
-            % Minimal probability gain of Hitting over Standing
+            % Minimal probability gain of {PlayerDecision.hit} over {PlayerDecision.stand}
             <br />
             <br />
             <input

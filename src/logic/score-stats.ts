@@ -90,6 +90,7 @@ export const getAllScoreStats = ({
  */
 export const getDealerCardBasedProbabilities = ({
     allScoreStats,
+    blackjackPayout,
     dealerProbabilities,
     hitMinimalProbabilityGain,
     outcomesSet,
@@ -97,6 +98,7 @@ export const getDealerCardBasedProbabilities = ({
     playerStrategy
 }: {
     allScoreStats: ScoreStats[];
+    blackjackPayout: boolean;
     dealerProbabilities: AllEffectiveScoreProbabilities;
     hitMinimalProbabilityGain: number;
     outcomesSet: OutcomesSet;
@@ -292,7 +294,9 @@ export const getDealerCardBasedProbabilities = ({
             hands: scoreDealerBasedFacts.winProbability - scoreDealerBasedFacts.lossProbability,
             payout:
                 scoreDealerBasedFacts.winProbability *
-                    (isBlackjack(scoreStats.representativeHand.cardSymbols) ? 1.5 : 1) -
+                    (isBlackjack(scoreStats.representativeHand.cardSymbols) && blackjackPayout
+                        ? 1.5
+                        : 1) -
                 scoreDealerBasedFacts.lossProbability
         };
 
