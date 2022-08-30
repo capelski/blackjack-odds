@@ -81,9 +81,6 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                     const { key: scoreKey, representativeHand } = cellProps.row.original;
                     const scoreFacts = props.playerProbabilities.facts[scoreKey];
                     const dealerCardFacts = scoreFacts.facts[cardOutcome.key];
-                    const standDecisionOutcome =
-                        dealerCardFacts[PlayerDecision.stand].decisionOutcome;
-                    const hitDecisionOutcome = dealerCardFacts[PlayerDecision.hit].decisionOutcome;
                     const isRowExpanded = expandedRows[scoreKey];
 
                     return (
@@ -101,7 +98,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                                 }
                                             });
                                         }}
-                                        value={dealerCardFacts.decision}
+                                        value={dealerCardFacts.choice}
                                     >
                                         {Object.values(PlayerDecision).map((playerDecision) => (
                                             <option key={playerDecision} value={playerDecision}>
@@ -110,7 +107,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                         ))}
                                     </select>
                                 ) : (
-                                    dealerCardFacts.decision
+                                    dealerCardFacts.choice
                                 )}
                             </div>
                             {isRowExpanded && (
@@ -121,122 +118,95 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                                         textAlign: 'left'
                                     }}
                                 >
-                                    Stand -----
-                                    <br />
-                                    {`${probabilityLabels.dealerBusting}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.standDealerBustingProbability}
-                                    />
-                                    <br />
-                                    {`${probabilityLabels.playerLessThanDealer}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.standLessThanDealerProbability}
-                                    />
-                                    <br />
-                                    {`${probabilityLabels.playerEqualToDealer}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.standEqualToDealerProbability}
-                                    />
-                                    <br />
-                                    {`${probabilityLabels.playerMoreThanDealer}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.standMoreThanDealerProbability}
-                                    />
-                                    {displayProbabilityTotals && (
-                                        <React.Fragment>
-                                            <br />
-                                            Total:{' '}
-                                            <RoundedFloat
-                                                value={dealerCardFacts.standTotalProbability}
-                                            />
-                                        </React.Fragment>
-                                    )}
-                                    <br />
-                                    <br />
-                                    {probabilityLabels.playerLoss}:{' '}
-                                    <RoundedFloat value={standDecisionOutcome.lossProbability} />
-                                    <br />
-                                    {probabilityLabels.playerPush}:{' '}
-                                    <RoundedFloat value={standDecisionOutcome.pushProbability} />
-                                    <br />
-                                    {probabilityLabels.playerWin}:{' '}
-                                    <RoundedFloat value={standDecisionOutcome.winProbability} />
-                                    {displayProbabilityTotals && (
-                                        <React.Fragment>
-                                            <br />
-                                            {probabilityLabels.playerTotal}:{' '}
-                                            <RoundedFloat
-                                                value={standDecisionOutcome.totalProbability}
-                                            />
-                                        </React.Fragment>
-                                    )}
-                                    <br />
-                                    <br />
-                                    Hit -------
-                                    <br />
-                                    {`${probabilityLabels.playerBusting}: `}
-                                    <RoundedFloat value={dealerCardFacts.hitBustingProbability} />
-                                    <br />
-                                    {`${probabilityLabels.dealerBusting}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.hitDealerBustingProbability}
-                                    />
-                                    <br />
-                                    {`${probabilityLabels.playerLessThanDealer}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.hitLessThanDealerProbability}
-                                    />
-                                    <br />
-                                    {`${probabilityLabels.playerEqualToDealer}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.hitEqualToDealerProbability}
-                                    />
-                                    <br />
-                                    {`${probabilityLabels.playerMoreThanDealer}: `}
-                                    <RoundedFloat
-                                        value={dealerCardFacts.hitMoreThanDealerProbability}
-                                    />
-                                    {displayProbabilityTotals && (
-                                        <React.Fragment>
-                                            <br />
-                                            Total:{' '}
-                                            <RoundedFloat
-                                                value={dealerCardFacts.hitTotalProbability}
-                                            />
-                                        </React.Fragment>
-                                    )}
-                                    {representativeHand.allScores.length > 1 && (
-                                        <i>
-                                            <br />
-                                            {`${probabilityLabels.playerLessThanCurrent(
-                                                representativeHand.effectiveScore
-                                            )}: `}
-                                            <RoundedFloat
-                                                value={
-                                                    dealerCardFacts.hitLessThanCurrentProbability
-                                                }
-                                            />
-                                        </i>
-                                    )}
-                                    <br />
-                                    <br />
-                                    {probabilityLabels.playerLoss}:{' '}
-                                    <RoundedFloat value={hitDecisionOutcome.lossProbability} />
-                                    <br />
-                                    {probabilityLabels.playerPush}:{' '}
-                                    <RoundedFloat value={hitDecisionOutcome.pushProbability} />
-                                    <br />
-                                    {probabilityLabels.playerWin}:{' '}
-                                    <RoundedFloat value={hitDecisionOutcome.winProbability} />
-                                    {displayProbabilityTotals && (
-                                        <React.Fragment>
-                                            <br />
-                                            {probabilityLabels.playerTotal}:{' '}
-                                            <RoundedFloat
-                                                value={hitDecisionOutcome.totalProbability}
-                                            />
-                                        </React.Fragment>
-                                    )}
+                                    {Object.values(PlayerDecision).map((playerDecision) => {
+                                        const { decisionOutcome, decisionProbabilities } =
+                                            dealerCardFacts.decisions[playerDecision];
+                                        return (
+                                            <React.Fragment>
+                                                {playerDecision} -------
+                                                <br />
+                                                {`${probabilityLabels.playerBusting}: `}
+                                                <RoundedFloat
+                                                    value={decisionProbabilities.playerBusting}
+                                                />
+                                                <br />
+                                                {`${probabilityLabels.dealerBusting}: `}
+                                                <RoundedFloat
+                                                    value={decisionProbabilities.dealerBusting}
+                                                />
+                                                <br />
+                                                {`${probabilityLabels.playerLessThanDealer}: `}
+                                                <RoundedFloat
+                                                    value={
+                                                        decisionProbabilities.playerLessThanDealer
+                                                    }
+                                                />
+                                                <br />
+                                                {`${probabilityLabels.playerEqualToDealer}: `}
+                                                <RoundedFloat
+                                                    value={
+                                                        decisionProbabilities.playerEqualToDealer
+                                                    }
+                                                />
+                                                <br />
+                                                {`${probabilityLabels.playerMoreThanDealer}: `}
+                                                <RoundedFloat
+                                                    value={
+                                                        decisionProbabilities.playerMoreThanDealer
+                                                    }
+                                                />
+                                                {displayProbabilityTotals && (
+                                                    <React.Fragment>
+                                                        <br />
+                                                        Total:{' '}
+                                                        <RoundedFloat
+                                                            value={decisionProbabilities.total}
+                                                        />
+                                                    </React.Fragment>
+                                                )}
+                                                {representativeHand.allScores.length > 1 && (
+                                                    <i>
+                                                        <br />
+                                                        {`${probabilityLabels.playerLessThanCurrent(
+                                                            representativeHand.effectiveScore
+                                                        )}: `}
+                                                        <RoundedFloat
+                                                            value={
+                                                                decisionProbabilities.playerLessThanCurrent
+                                                            }
+                                                        />
+                                                    </i>
+                                                )}
+                                                <br />
+                                                <br />
+                                                {probabilityLabels.playerLoss}:{' '}
+                                                <RoundedFloat
+                                                    value={decisionOutcome.lossProbability}
+                                                />
+                                                <br />
+                                                {probabilityLabels.playerPush}:{' '}
+                                                <RoundedFloat
+                                                    value={decisionOutcome.pushProbability}
+                                                />
+                                                <br />
+                                                {probabilityLabels.playerWin}:{' '}
+                                                <RoundedFloat
+                                                    value={decisionOutcome.winProbability}
+                                                />
+                                                {displayProbabilityTotals && (
+                                                    <React.Fragment>
+                                                        <br />
+                                                        {probabilityLabels.playerTotal}:{' '}
+                                                        <RoundedFloat
+                                                            value={decisionOutcome.totalProbability}
+                                                        />
+                                                    </React.Fragment>
+                                                )}
+                                                <br />
+                                                <br />
+                                            </React.Fragment>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
@@ -295,7 +265,7 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                             ? undefined
                             : (cellProps.column.id as ScoreKey);
                     const actionStyles: CSSProperties = dealerCardKey
-                        ? scoreFacts.facts[dealerCardKey].decision === PlayerDecision.hit
+                        ? scoreFacts.facts[dealerCardKey].choice === PlayerDecision.hit
                             ? {
                                   backgroundColor: 'rgb(66, 139, 202)',
                                   color: 'white'

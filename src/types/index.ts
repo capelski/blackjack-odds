@@ -7,6 +7,7 @@ export {
     ScoreDealerBasedFacts
 } from './dealer-card-based-probabilities';
 export { DecisionOutcome } from './decision-outcome';
+export { DecisionProbabilities } from './decision-probabilities';
 export { Dictionary } from './dictionary';
 export {
     AllEffectiveScoreProbabilities,

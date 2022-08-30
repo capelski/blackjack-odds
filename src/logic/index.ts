@@ -1,8 +1,7 @@
+export { getDecisionOutcome } from './decision-outcome';
+export { getDecisionProbabilities } from './decision-probabilities';
 export {
     getApplicableDealerProbabilities,
-    getDealerBasedProbabilities
-} from './dealer-card-based-probabilities';
-export {
     getBustingProbability,
     getRangeProbability,
     mergeProbabilities,

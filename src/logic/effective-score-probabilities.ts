@@ -1,5 +1,13 @@
-import { EffectiveScoreProbabilities } from '../types';
+import { ScoreKey } from '../models';
+import { AllEffectiveScoreProbabilities, EffectiveScoreProbabilities } from '../types';
 import { isBustScore } from './hand';
+
+export const getApplicableDealerProbabilities = (
+    dealerProbabilities: AllEffectiveScoreProbabilities,
+    dealerCardKey: ScoreKey
+): EffectiveScoreProbabilities => {
+    return dealerProbabilities[dealerCardKey === ScoreKey.hard10 ? ScoreKey.figure : dealerCardKey];
+};
 
 export const getBustingProbability = (
     effectiveScoreProbabilities: EffectiveScoreProbabilities
