@@ -2,15 +2,16 @@ import { PlayerDecision, ScoreKey } from '../models';
 import { ActionOutcome } from './action-outcome';
 import { Dictionary } from './dictionary';
 import { EffectiveScoreProbabilities } from './effective-score-probabilities';
+import { PlayerAdvantage } from './player-advantage';
 
 export type ScoreDealerBasedFacts = ActionOutcome & {
     facts: ScoreAllDealerCardBasedFacts;
-    payoutRatio: number;
+    playerAdvantage: PlayerAdvantage;
 };
 
 export type AllScoreDealerCardBasedProbabilities = ActionOutcome & {
     facts: AllScoreDealerCardBasedFacts;
-    payoutRatio: number;
+    playerAdvantage: PlayerAdvantage;
 };
 
 export type AllScoreDealerCardBasedFacts = Dictionary<ScoreDealerBasedFacts, ScoreKey>;

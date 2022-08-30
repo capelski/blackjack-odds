@@ -15,5 +15,6 @@ export {
 export { ExpandedRows } from './expanded-rows';
 export { Hand } from './hand';
 export { OutcomesSet } from './outcomes-set';
+export { PlayerAdvantage } from './player-advantage';
 export { PlayerDecisionsOverrides } from './player-decisions-overrides';
 export { ScoreStats } from './score-stats';

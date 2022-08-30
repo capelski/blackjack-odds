@@ -268,16 +268,11 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 </React.Fragment>
             )}
             <br />
-            Player advantage:{' '}
-            <RoundedFloat
-                value={
-                    props.playerProbabilities.winProbability -
-                    props.playerProbabilities.lossProbability
-                }
-            />
+            Player advantage (hands):{' '}
+            <RoundedFloat value={props.playerProbabilities.playerAdvantage.hands} />
             <br />
             Player advantage (payout):{' '}
-            <RoundedFloat value={props.playerProbabilities.payoutRatio - 1} />
+            <RoundedFloat value={props.playerProbabilities.playerAdvantage.payout} />
             <br />
             <br />
             <CustomTable

@@ -10,6 +10,7 @@ import {
     EffectiveScoreProbabilities,
     Hand,
     OutcomesSet,
+    PlayerAdvantage,
     PlayerDecisionsOverrides,
     ScoreAllDealerCardBasedFacts,
     ScoreDealerBasedFacts,
@@ -260,7 +261,10 @@ export const getDealerCardBasedProbabilities = ({
 
         const scoreDealerBasedFacts: ScoreDealerBasedFacts = {
             facts: scoreAllFacts,
-            payoutRatio: 0,
+            playerAdvantage: {
+                hands: 0,
+                payout: 0
+            },
             ...outcomesSet.allOutcomes.reduce(
                 (outcomeReduce, cardOutcome) => {
                     const { decision } = scoreAllFacts[cardOutcome.key];
@@ -288,10 +292,13 @@ export const getDealerCardBasedProbabilities = ({
             )
         };
 
-        scoreDealerBasedFacts.payoutRatio =
-            scoreDealerBasedFacts.pushProbability +
-            scoreDealerBasedFacts.winProbability *
-                (isBlackjack(scoreStats.representativeHand.cardSymbols) ? 2.5 : 2);
+        scoreDealerBasedFacts.playerAdvantage = {
+            hands: scoreDealerBasedFacts.winProbability - scoreDealerBasedFacts.lossProbability,
+            payout:
+                scoreDealerBasedFacts.winProbability *
+                    (isBlackjack(scoreStats.representativeHand.cardSymbols) ? 1.5 : 1) -
+                scoreDealerBasedFacts.lossProbability
+        };
 
         return {
             ...reduced,
@@ -308,11 +315,18 @@ export const getDealerCardBasedProbabilities = ({
                     allScoreStatsFacts[scoreStats.key].lossProbability,
             0
         ),
-        payoutRatio: Object.values(allScoreStats).reduce(
-            (reduced, scoreStats) =>
-                reduced +
-                scoreStats.initialHandProbability * allScoreStatsFacts[scoreStats.key].payoutRatio,
-            0
+        playerAdvantage: Object.values(allScoreStats).reduce<PlayerAdvantage>(
+            (reduced, scoreStats) => ({
+                hands:
+                    reduced.hands +
+                    scoreStats.initialHandProbability *
+                        allScoreStatsFacts[scoreStats.key].playerAdvantage.hands,
+                payout:
+                    reduced.payout +
+                    scoreStats.initialHandProbability *
+                        allScoreStatsFacts[scoreStats.key].playerAdvantage.payout
+            }),
+            { hands: 0, payout: 0 }
         ),
         pushProbability: Object.values(allScoreStats).reduce(
             (reduced, scoreStats) =>
