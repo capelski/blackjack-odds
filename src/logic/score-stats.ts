@@ -205,10 +205,8 @@ export const getDealerCardBasedProbabilities = ({
                         : playerStrategy === PlayerStrategy.hitBustingOrLower_standLessThanDealer
                         ? standDealerProbabilities.lessThanDealer -
                           (hitBustingProbability + hitLessThanCurrentProbability)
-                        : playerStrategy ===
-                          PlayerStrategy.hitBustingOrLessThanDealer_standLessThanDealer
-                        ? standDealerProbabilities.lessThanDealer -
-                          (hitBustingProbability + hitDealerProbabilities.lessThanDealer)
+                        : playerStrategy === PlayerStrategy.hitLoss_standLoss
+                        ? standDecisionOutcome.lossProbability - hitDecisionOutcome.lossProbability
                         : standDecisionOutcome.lossProbability -
                           standDecisionOutcome.winProbability -
                           (hitDecisionOutcome.lossProbability - hitDecisionOutcome.winProbability);

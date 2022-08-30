@@ -278,10 +278,10 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
                 </React.Fragment>
             )}
             <br />
-            Player advantage (hands):{' '}
+            {probabilityLabels.playerAdvantageHands}:{' '}
             <RoundedFloat value={props.playerProbabilities.playerAdvantage.hands} />
             <br />
-            Player advantage (payout):{' '}
+            {probabilityLabels.playerAdvantagePayout}:{' '}
             <RoundedFloat value={props.playerProbabilities.playerAdvantage.payout} />
             <br />
             <br />
@@ -346,6 +346,15 @@ export const DealerCardBasedDecisionsTable: React.FC<DealerCardBasedDecisionsTab
             <p>
                 {probabilityLabels.playerWin} = probability of player winning (i.e.{' '}
                 {probabilityLabels.dealerBusting} + {probabilityLabels.playerMoreThanDealer} )
+            </p>
+            <p>
+                {probabilityLabels.playerAdvantageHands} = probability of winning hands on the long
+                run (i.e. {probabilityLabels.playerWin} - {probabilityLabels.playerLoss} )
+            </p>
+            <p>
+                {probabilityLabels.playerAdvantagePayout} = probability of winning money on the long
+                run (i.e. {probabilityLabels.playerWin} * winPayout - {probabilityLabels.playerLoss}{' '}
+                )
             </p>
         </div>
     );
