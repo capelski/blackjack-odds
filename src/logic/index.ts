@@ -1,5 +1,6 @@
+export { getAllDecisionsData } from './decision-data';
 export { getDecisionOutcome } from './decision-outcome';
-export { getDecisionProbabilities } from './decision-probabilities';
+export { getDecisionProbabilityBreakdown } from './decision-probability-breakdown';
 export {
     getApplicableDealerProbabilities,
     getBustingProbability,
@@ -11,8 +12,6 @@ export {
 } from './final-score-probabilities';
 export { getAllHands, isBlackjack, isBustScore } from './hand';
 export { getOutcomesSet } from './outcomes-set';
-export {
-    getAllScoreStats,
-    getDealerCardBasedProbabilities,
-    getPlayerScoreStats
-} from './score-stats';
+export { getPlayerAdvantage, mergePlayerAdvantages } from './player-advantage';
+export { getAllScoreStats, getPlayerScoreStats } from './score-stats';
+export { getAllScoresStatsChoicesSummary } from './score-stats-choice';

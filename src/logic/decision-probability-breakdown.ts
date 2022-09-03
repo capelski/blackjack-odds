@@ -1,5 +1,5 @@
 import { blackjackScore, maximumScore } from '../constants';
-import { DecisionProbabilities, FinalScoreProbabilities } from '../types';
+import { DecisionProbabilityBreakdown, FinalScoreProbabilities } from '../types';
 import {
     getBustingProbability,
     getPossibleFinalScores,
@@ -7,7 +7,7 @@ import {
 } from './final-score-probabilities';
 import { isBustScore } from './hand';
 
-export const getDecisionProbabilities = ({
+export const getDecisionProbabilityBreakdown = ({
     dealerProbabilities,
     playerProbabilities,
     playerScore
@@ -15,8 +15,8 @@ export const getDecisionProbabilities = ({
     dealerProbabilities: FinalScoreProbabilities;
     playerProbabilities: FinalScoreProbabilities;
     playerScore: number;
-}): DecisionProbabilities => {
-    const decisionProbabilities: DecisionProbabilities = {
+}): DecisionProbabilityBreakdown => {
+    const probabilityBreakdown: DecisionProbabilityBreakdown = {
         playerBusting: getBustingProbability(playerProbabilities),
         playerLessThanCurrent: getRangeProbability(playerProbabilities, 0, playerScore - 1),
         total: 0,
@@ -60,12 +60,12 @@ export const getDecisionProbabilities = ({
             )
     };
 
-    decisionProbabilities.total =
-        decisionProbabilities.playerBusting +
-        decisionProbabilities.dealerBusting +
-        decisionProbabilities.playerEqualToDealer +
-        decisionProbabilities.playerLessThanDealer +
-        decisionProbabilities.playerMoreThanDealer;
+    probabilityBreakdown.total =
+        probabilityBreakdown.playerBusting +
+        probabilityBreakdown.dealerBusting +
+        probabilityBreakdown.playerEqualToDealer +
+        probabilityBreakdown.playerLessThanDealer +
+        probabilityBreakdown.playerMoreThanDealer;
 
-    return decisionProbabilities;
+    return probabilityBreakdown;
 };

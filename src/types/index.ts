@@ -1,13 +1,7 @@
 export { CardOutcome } from './card-outcome';
-export {
-    AllScoreDealerCardBasedFacts,
-    AllScoreDealerCardBasedProbabilities,
-    DealerCardBasedFacts,
-    ScoreAllDealerCardBasedFacts,
-    ScoreDealerBasedFacts
-} from './dealer-card-based-probabilities';
+export { AllDecisionsData, DecisionData } from './decision-data';
 export { DecisionOutcome } from './decision-outcome';
-export { DecisionProbabilities } from './decision-probabilities';
+export { DecisionProbabilityBreakdown } from './decision-probability-breakdown';
 export { Dictionary } from './dictionary';
 export { ExpandedRows } from './expanded-rows';
 export { FinalScoreProbabilities, FinalScoresDictionary } from './final-score-probabilities';
@@ -16,3 +10,10 @@ export { OutcomesSet } from './outcomes-set';
 export { PlayerAdvantage } from './player-advantage';
 export { PlayerDecisionsOverrides } from './player-decisions-overrides';
 export { ScoreStats } from './score-stats';
+export {
+    AllScoreStatsChoices,
+    AllScoreStatsChoicesSummary,
+    ScoreStatsAllDealerCardChoices,
+    ScoreStatsChoice,
+    ScoreStatsDealerCardChoice
+} from './score-stats-choice';

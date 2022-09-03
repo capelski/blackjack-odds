@@ -1,4 +1,4 @@
-export type DecisionProbabilities = {
+export type DecisionProbabilityBreakdown = {
     dealerBusting: number;
     playerBusting: number;
     playerEqualToDealer: number;

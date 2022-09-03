@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { dealerStandThreshold } from '../constants';
 import {
-    getOutcomesSet,
     getAllHands,
+    getAllScoresStatsChoicesSummary,
     getAllScoreStats,
-    getStandThresholdProbabilities,
-    getDealerCardBasedProbabilities
+    getOutcomesSet,
+    getStandThresholdProbabilities
 } from '../logic';
 import { PlayerDecision, PlayerStrategy, playerStrategyLegend } from '../models';
 import {
-    AllScoreDealerCardBasedProbabilities,
+    AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
     OutcomesSet,
     PlayerDecisionsOverrides,
     ScoreStats
 } from '../types';
-import { DealerCardBasedDecisionsTable } from './dealer-card-based-decisions-table';
 import { DealerScoreStatsTable } from './dealer-score-stats-table';
 import { PlayerScoreStatsTable } from './player-score-stats-table';
+import { ScoreStatsChoicesTable } from './score-stats-choices-table';
 
 const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
     parseInt(hitMinimalProbabilityGain) / 100 || 0;
@@ -30,11 +30,10 @@ export const App: React.FC = () => {
     // const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
     //     useState<FinalScoresDictionary>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
+    const [playerChoices, setPlayerChoices] = useState<AllScoreStatsChoicesSummary>();
     const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const [playerDecisionsOverrides, setPlayerDecisionsOverrides] =
         useState<PlayerDecisionsOverrides>({});
-    const [playerProbabilities, setPlayerProbabilities] =
-        useState<AllScoreDealerCardBasedProbabilities>();
     const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
         PlayerStrategy.hitLossMinusWin_standLossMinusWin
     );
@@ -55,7 +54,7 @@ export const App: React.FC = () => {
             outcomesSet: nextOutcomesSet,
             standThreshold: dealerStandThreshold
         });
-        const nextPlayerProbabilities = getDealerCardBasedProbabilities({
+        const nextPlayerChoices = getAllScoresStatsChoicesSummary({
             allScoreStats: nextAllScoreStats,
             blackjackPayout: blackjackPayout,
             dealerProbabilities: nextDealerProbabilities,
@@ -69,7 +68,7 @@ export const App: React.FC = () => {
         setAllScoreStats(nextAllScoreStats);
         // setOneMoreCardProbabilities(nextOneMoreCardProbabilities);
         setDealerProbabilities(nextDealerProbabilities);
-        setPlayerProbabilities(nextPlayerProbabilities);
+        setPlayerChoices(nextPlayerChoices);
     }, []);
 
     useEffect(() => {
@@ -78,7 +77,7 @@ export const App: React.FC = () => {
             outcomesSet !== undefined &&
             dealerProbabilities !== undefined
         ) {
-            const nextPlayerProbabilities = getDealerCardBasedProbabilities({
+            const nextPlayerChoices = getAllScoresStatsChoicesSummary({
                 allScoreStats,
                 blackjackPayout,
                 dealerProbabilities,
@@ -88,7 +87,7 @@ export const App: React.FC = () => {
                 playerDecisionsOverrides,
                 playerStrategy
             });
-            setPlayerProbabilities(nextPlayerProbabilities);
+            setPlayerChoices(nextPlayerChoices);
         }
     }, [blackjackPayout, hitMinimalProbabilityGain, playerStrategy, playerDecisionsOverrides]);
 
@@ -151,14 +150,14 @@ export const App: React.FC = () => {
             <h3>Dealer card based decisions table</h3>
             {allScoreStats !== undefined &&
             outcomesSet !== undefined &&
-            playerProbabilities !== undefined ? (
-                <DealerCardBasedDecisionsTable
+            playerChoices !== undefined ? (
+                <ScoreStatsChoicesTable
                     allScoreStats={allScoreStats}
                     outcomesSet={outcomesSet}
+                    playerChoices={playerChoices}
                     playerDecisionsEdit={playerDecisionsEdit}
                     playerDecisionsOverrides={playerDecisionsOverrides}
                     playerDecisionsOverridesSetter={setPlayerDecisionsOverrides}
-                    playerProbabilities={playerProbabilities}
                 />
             ) : (
                 'Loading...'
