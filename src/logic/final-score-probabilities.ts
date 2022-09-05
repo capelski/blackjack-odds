@@ -20,33 +20,6 @@ export const getBustingProbability = (finalScoreProbabilities: FinalScoreProbabi
 export const getPossibleFinalScores = (finalScoreProbabilities: FinalScoreProbabilities) =>
     Object.keys(finalScoreProbabilities).map((finalScore) => parseFloat(finalScore));
 
-/**
- * Returns a dictionary with the final score probabilities when hitting ONCE for each score
- */
-export const getOneMoreCardProbabilities = ({
-    allScoreStats,
-    outcomesSet
-}: {
-    allScoreStats: ScoreStats[];
-    outcomesSet: OutcomesSet;
-}): FinalScoresDictionary => {
-    return allScoreStats.reduce((reduced, scoreStats) => {
-        return {
-            ...reduced,
-            [scoreStats.key]: scoreStats.representativeHand.descendants.reduce(
-                (handReduced, descendant) => {
-                    return {
-                        ...handReduced,
-                        [descendant.effectiveScore]:
-                            descendant.lastCard.weight / outcomesSet.totalWeight
-                    };
-                },
-                <FinalScoreProbabilities>{}
-            )
-        };
-    }, <FinalScoresDictionary>{});
-};
-
 export const getRangeProbability = (
     finalScoreProbabilities: FinalScoreProbabilities,
     rangeStart: number,

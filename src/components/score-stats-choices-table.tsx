@@ -1,7 +1,7 @@
 import React, { CSSProperties, useMemo, useState } from 'react';
 import { Column, CellProps } from 'react-table';
 import { displayProbabilityTotals, probabilityLabels } from '../constants';
-import { getPlayerScoreStats } from '../logic';
+import { getDisplayPlayerDecision, getPlayerScoreStats } from '../logic';
 import { PlayerDecision, ScoreKey } from '../models';
 import {
     AllScoreStatsChoicesSummary,
@@ -59,6 +59,12 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                                     <br />
                                     {probabilityLabels.playerWin}:{' '}
                                     <RoundedFloat value={decisionOutcome.winProbability} />
+                                    <br />
+                                    {probabilityLabels.playerAdvantageHands}:{' '}
+                                    <RoundedFloat value={decisionOutcome.playerAdvantage.hands} />
+                                    <br />
+                                    {probabilityLabels.playerAdvantagePayout}:{' '}
+                                    <RoundedFloat value={decisionOutcome.playerAdvantage.payout} />
                                     {displayProbabilityTotals && (
                                         <React.Fragment>
                                             <br />
@@ -100,11 +106,16 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                                         }}
                                         value={choice}
                                     >
-                                        {Object.values(PlayerDecision).map((playerDecision) => (
-                                            <option key={playerDecision} value={playerDecision}>
-                                                {playerDecision}
-                                            </option>
-                                        ))}
+                                        {Object.keys(decisions)
+                                            .filter(
+                                                (playerDecision: PlayerDecision) =>
+                                                    decisions[playerDecision].available
+                                            )
+                                            .map((playerDecision) => (
+                                                <option key={playerDecision} value={playerDecision}>
+                                                    {playerDecision}
+                                                </option>
+                                            ))}
                                     </select>
                                 ) : (
                                     choice
@@ -118,87 +129,106 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                                         textAlign: 'left'
                                     }}
                                 >
-                                    {Object.values(PlayerDecision).map((playerDecision) => {
-                                        const { outcome, probabilityBreakdown } =
-                                            decisions[playerDecision];
-                                        return (
-                                            <React.Fragment key={playerDecision}>
-                                                {playerDecision} -------
-                                                <br />
-                                                {`${probabilityLabels.playerBusting}: `}
-                                                <RoundedFloat
-                                                    value={probabilityBreakdown.playerBusting}
-                                                />
-                                                <br />
-                                                {`${probabilityLabels.dealerBusting}: `}
-                                                <RoundedFloat
-                                                    value={probabilityBreakdown.dealerBusting}
-                                                />
-                                                <br />
-                                                {`${probabilityLabels.playerLessThanDealer}: `}
-                                                <RoundedFloat
-                                                    value={
-                                                        probabilityBreakdown.playerLessThanDealer
-                                                    }
-                                                />
-                                                <br />
-                                                {`${probabilityLabels.playerEqualToDealer}: `}
-                                                <RoundedFloat
-                                                    value={probabilityBreakdown.playerEqualToDealer}
-                                                />
-                                                <br />
-                                                {`${probabilityLabels.playerMoreThanDealer}: `}
-                                                <RoundedFloat
-                                                    value={
-                                                        probabilityBreakdown.playerMoreThanDealer
-                                                    }
-                                                />
-                                                {displayProbabilityTotals && (
-                                                    <React.Fragment>
-                                                        <br />
-                                                        Total:{' '}
-                                                        <RoundedFloat
-                                                            value={probabilityBreakdown.total}
-                                                        />
-                                                    </React.Fragment>
-                                                )}
-                                                {representativeHand.allScores.length > 1 && (
-                                                    <i>
-                                                        <br />
-                                                        {`${probabilityLabels.playerLessThanCurrent(
-                                                            representativeHand.effectiveScore
-                                                        )}: `}
-                                                        <RoundedFloat
-                                                            value={
-                                                                probabilityBreakdown.playerLessThanCurrent
-                                                            }
-                                                        />
-                                                    </i>
-                                                )}
-                                                <br />
-                                                <br />
-                                                {probabilityLabels.playerLoss}:{' '}
-                                                <RoundedFloat value={outcome.lossProbability} />
-                                                <br />
-                                                {probabilityLabels.playerPush}:{' '}
-                                                <RoundedFloat value={outcome.pushProbability} />
-                                                <br />
-                                                {probabilityLabels.playerWin}:{' '}
-                                                <RoundedFloat value={outcome.winProbability} />
-                                                {displayProbabilityTotals && (
-                                                    <React.Fragment>
-                                                        <br />
-                                                        {probabilityLabels.playerTotal}:{' '}
-                                                        <RoundedFloat
-                                                            value={outcome.totalProbability}
-                                                        />
-                                                    </React.Fragment>
-                                                )}
-                                                <br />
-                                                <br />
-                                            </React.Fragment>
-                                        );
-                                    })}
+                                    {Object.keys(decisions)
+                                        .filter(
+                                            (playerDecision: PlayerDecision) =>
+                                                decisions[playerDecision].available &&
+                                                playerDecision !== PlayerDecision.doubleStand
+                                        )
+                                        .map((playerDecision: PlayerDecision) => {
+                                            const { outcome, probabilityBreakdown } =
+                                                decisions[playerDecision];
+                                            return (
+                                                <React.Fragment key={playerDecision}>
+                                                    {getDisplayPlayerDecision(playerDecision)}{' '}
+                                                    -------
+                                                    <br />
+                                                    {`${probabilityLabels.playerBusting}: `}
+                                                    <RoundedFloat
+                                                        value={probabilityBreakdown.playerBusting}
+                                                    />
+                                                    <br />
+                                                    {`${probabilityLabels.dealerBusting}: `}
+                                                    <RoundedFloat
+                                                        value={probabilityBreakdown.dealerBusting}
+                                                    />
+                                                    <br />
+                                                    {`${probabilityLabels.playerLessThanDealer}: `}
+                                                    <RoundedFloat
+                                                        value={
+                                                            probabilityBreakdown.playerLessThanDealer
+                                                        }
+                                                    />
+                                                    <br />
+                                                    {`${probabilityLabels.playerEqualToDealer}: `}
+                                                    <RoundedFloat
+                                                        value={
+                                                            probabilityBreakdown.playerEqualToDealer
+                                                        }
+                                                    />
+                                                    <br />
+                                                    {`${probabilityLabels.playerMoreThanDealer}: `}
+                                                    <RoundedFloat
+                                                        value={
+                                                            probabilityBreakdown.playerMoreThanDealer
+                                                        }
+                                                    />
+                                                    {displayProbabilityTotals && (
+                                                        <React.Fragment>
+                                                            <br />
+                                                            Total:{' '}
+                                                            <RoundedFloat
+                                                                value={probabilityBreakdown.total}
+                                                            />
+                                                        </React.Fragment>
+                                                    )}
+                                                    {representativeHand.allScores.length > 1 && (
+                                                        <i>
+                                                            <br />
+                                                            {`${probabilityLabels.playerLessThanCurrent(
+                                                                representativeHand.effectiveScore
+                                                            )}: `}
+                                                            <RoundedFloat
+                                                                value={
+                                                                    probabilityBreakdown.playerLessThanCurrent
+                                                                }
+                                                            />
+                                                        </i>
+                                                    )}
+                                                    <br />
+                                                    <br />
+                                                    {probabilityLabels.playerLoss}:{' '}
+                                                    <RoundedFloat value={outcome.lossProbability} />
+                                                    <br />
+                                                    {probabilityLabels.playerPush}:{' '}
+                                                    <RoundedFloat value={outcome.pushProbability} />
+                                                    <br />
+                                                    {probabilityLabels.playerWin}:{' '}
+                                                    <RoundedFloat value={outcome.winProbability} />
+                                                    <br />
+                                                    {probabilityLabels.playerAdvantageHands}:{' '}
+                                                    <RoundedFloat
+                                                        value={outcome.playerAdvantage.hands}
+                                                    />
+                                                    <br />
+                                                    {probabilityLabels.playerAdvantagePayout}:{' '}
+                                                    <RoundedFloat
+                                                        value={outcome.playerAdvantage.payout}
+                                                    />
+                                                    {displayProbabilityTotals && (
+                                                        <React.Fragment>
+                                                            <br />
+                                                            {probabilityLabels.playerTotal}:{' '}
+                                                            <RoundedFloat
+                                                                value={outcome.totalProbability}
+                                                            />
+                                                        </React.Fragment>
+                                                    )}
+                                                    <br />
+                                                    <br />
+                                                </React.Fragment>
+                                            );
+                                        })}
                                 </div>
                             )}
                         </div>
@@ -241,10 +271,10 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
             )}
             <br />
             {probabilityLabels.playerAdvantageHands}:{' '}
-            <RoundedFloat value={props.playerChoices.playerAdvantage.hands} />
+            <RoundedFloat value={props.playerChoices.outcome.playerAdvantage.hands} />
             <br />
             {probabilityLabels.playerAdvantagePayout}:{' '}
-            <RoundedFloat value={props.playerChoices.playerAdvantage.payout} />
+            <RoundedFloat value={props.playerChoices.outcome.playerAdvantage.payout} />
             <br />
             <br />
             <CustomTable
@@ -257,14 +287,26 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                             ? undefined
                             : (cellProps.column.id as ScoreKey);
                     const actionStyles: CSSProperties = dealerCardKey
-                        ? dealerCardChoices[dealerCardKey].choice === PlayerDecision.hit
+                        ? dealerCardChoices[dealerCardKey].choice === PlayerDecision.doubleHit
+                            ? {
+                                  backgroundColor: 'goldenrod',
+                                  color: 'black'
+                              }
+                            : dealerCardChoices[dealerCardKey].choice === PlayerDecision.doubleStand
+                            ? {
+                                  backgroundColor: 'darkgoldenrod',
+                                  color: 'black'
+                              }
+                            : dealerCardChoices[dealerCardKey].choice === PlayerDecision.hit
                             ? {
                                   backgroundColor: 'rgb(66, 139, 202)',
                                   color: 'white'
                               }
-                            : {
+                            : dealerCardChoices[dealerCardKey].choice === PlayerDecision.stand
+                            ? {
                                   backgroundColor: 'rgb(92, 184, 92)'
                               }
+                            : {}
                         : {};
 
                     return {
@@ -316,7 +358,7 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
             <p>
                 {probabilityLabels.playerAdvantagePayout} = probability of winning money on the long
                 run (i.e. {probabilityLabels.playerWin} * winPayout - {probabilityLabels.playerLoss}{' '}
-                )
+                * lossCost )
             </p>
         </div>
     );

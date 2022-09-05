@@ -1,4 +1,4 @@
-import { PlayerStrategy, ScoreKey } from '../models';
+import { DoublingMode, PlayerStrategy, ScoreKey } from '../models';
 import {
     AllScoreStatsChoices,
     AllScoreStatsChoicesSummary,
@@ -12,11 +12,11 @@ import {
 } from '../types';
 import { getAllDecisionsData, getPlayerChoice } from './decision-data';
 import { mergeOutcomesByOutcomeSet, mergeOutcomesByInitialHands } from './decision-outcome';
-import { getPlayerAdvantage, mergePlayerAdvantages } from './player-advantage';
 
 type ScoreStatsChoiceBaseParameters = {
+    blackjackPayout: boolean;
     dealerProbabilities: FinalScoresDictionary;
-    hitMinimalProbabilityGain: number;
+    doublingMode: DoublingMode;
     outcomesSet: OutcomesSet;
     playerDecisionsOverrides: PlayerDecisionsOverrides;
     playerStrategy: PlayerStrategy;
@@ -35,7 +35,6 @@ const getScoreStatsDealerCardChoice = (
         params.playerDecisionsOverrides[params.scoreStats.key]?.[params.dealerCardKey] ||
         getPlayerChoice({
             allDecisionsData: decisions,
-            hitMinimalProbabilityGain: params.hitMinimalProbabilityGain,
             playerStrategy: params.playerStrategy
         });
 
@@ -47,7 +46,6 @@ const getScoreStatsDealerCardChoice = (
 
 const getScoreStatsChoice = (
     params: ScoreStatsChoiceBaseParameters & {
-        blackjackPayout: boolean;
         scoreStats: ScoreStats;
         scoreStatsDealerCardsDictionary: AllScoreStatsChoices;
     }
@@ -69,23 +67,15 @@ const getScoreStatsChoice = (
         scoreStatsAllChoices: dealerCardChoices
     });
 
-    const playerAdvantage = getPlayerAdvantage({
-        blackjackPayout: params.blackjackPayout,
-        decisionOutcome,
-        scoreStats: params.scoreStats
-    });
-
     return {
         decisionOutcome,
-        dealerCardChoices,
-        playerAdvantage
+        dealerCardChoices
     };
 };
 
 export const getAllScoresStatsChoicesSummary = (
     params: ScoreStatsChoiceBaseParameters & {
         allScoreStats: ScoreStats[];
-        blackjackPayout: boolean;
     }
 ): AllScoreStatsChoicesSummary => {
     const choices = params.allScoreStats.reduce((reduced, scoreStats) => {
@@ -104,14 +94,8 @@ export const getAllScoresStatsChoicesSummary = (
         allScoreStatsChoices: choices
     });
 
-    const playerAdvantage = mergePlayerAdvantages({
-        allScoreStats: params.allScoreStats,
-        allScoreStatsChoices: choices
-    });
-
     return {
         choices,
-        outcome,
-        playerAdvantage
+        outcome
     };
 };

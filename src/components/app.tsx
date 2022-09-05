@@ -5,9 +5,10 @@ import {
     getAllScoresStatsChoicesSummary,
     getAllScoreStats,
     getOutcomesSet,
-    getStandThresholdProbabilities
+    getStandThresholdProbabilities,
+    playerStrategyLegend
 } from '../logic';
-import { PlayerDecision, PlayerStrategy, playerStrategyLegend } from '../models';
+import { DoublingMode, PlayerStrategy } from '../models';
 import {
     AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
@@ -19,23 +20,20 @@ import { DealerScoreStatsTable } from './dealer-score-stats-table';
 import { PlayerScoreStatsTable } from './player-score-stats-table';
 import { ScoreStatsChoicesTable } from './score-stats-choices-table';
 
-const parseHitMinimalProbabilityGain = (hitMinimalProbabilityGain: string) =>
-    parseInt(hitMinimalProbabilityGain) / 100 || 0;
-
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [blackjackPayout, setBlackjackPayout] = useState(true);
     const [dealerProbabilities, setDealerProbabilities] = useState<FinalScoresDictionary>();
-    const [hitMinimalProbabilityGain, setHitMinimalProbabilityGain] = useState('0');
-    // const [oneMoreCardProbabilities, setOneMoreCardProbabilities] =
-    //     useState<FinalScoresDictionary>();
+    const [doublingMode, setDoublingMode] = useState<DoublingMode>(
+        DoublingMode.nine_ten_eleven_plus_soft
+    );
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
     const [playerChoices, setPlayerChoices] = useState<AllScoreStatsChoicesSummary>();
     const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const [playerDecisionsOverrides, setPlayerDecisionsOverrides] =
         useState<PlayerDecisionsOverrides>({});
     const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
-        PlayerStrategy.hitLossMinusWin_standLossMinusWin
+        PlayerStrategy.doubleLossMinusWin_hitLossMinusWin_standLossMinusWin
     );
 
     useEffect(() => {
@@ -45,10 +43,6 @@ export const App: React.FC = () => {
             allHands: nextAllHands,
             outcomesSet: nextOutcomesSet
         });
-        // const nextOneMoreCardProbabilities = getOneMoreCardProbabilities({
-        //     allScoreStats: nextAllScoreStats,
-        //     outcomesSet: nextOutcomesSet
-        // });
         const nextDealerProbabilities = getStandThresholdProbabilities({
             allScoreStats: nextAllScoreStats,
             outcomesSet: nextOutcomesSet,
@@ -58,7 +52,7 @@ export const App: React.FC = () => {
             allScoreStats: nextAllScoreStats,
             blackjackPayout: blackjackPayout,
             dealerProbabilities: nextDealerProbabilities,
-            hitMinimalProbabilityGain: parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
+            doublingMode,
             outcomesSet: nextOutcomesSet,
             playerDecisionsOverrides,
             playerStrategy
@@ -66,7 +60,6 @@ export const App: React.FC = () => {
 
         setOutcomesSet(nextOutcomesSet);
         setAllScoreStats(nextAllScoreStats);
-        // setOneMoreCardProbabilities(nextOneMoreCardProbabilities);
         setDealerProbabilities(nextDealerProbabilities);
         setPlayerChoices(nextPlayerChoices);
     }, []);
@@ -74,22 +67,21 @@ export const App: React.FC = () => {
     useEffect(() => {
         if (
             allScoreStats !== undefined &&
-            outcomesSet !== undefined &&
-            dealerProbabilities !== undefined
+            dealerProbabilities !== undefined &&
+            outcomesSet !== undefined
         ) {
             const nextPlayerChoices = getAllScoresStatsChoicesSummary({
                 allScoreStats,
                 blackjackPayout,
                 dealerProbabilities,
-                hitMinimalProbabilityGain:
-                    parseHitMinimalProbabilityGain(hitMinimalProbabilityGain),
+                doublingMode,
                 outcomesSet,
                 playerDecisionsOverrides,
                 playerStrategy
             });
             setPlayerChoices(nextPlayerChoices);
         }
-    }, [blackjackPayout, hitMinimalProbabilityGain, playerStrategy, playerDecisionsOverrides]);
+    }, [blackjackPayout, doublingMode, playerStrategy, playerDecisionsOverrides]);
 
     return (
         <div>
@@ -119,15 +111,19 @@ export const App: React.FC = () => {
             Blackjack pays 3 to 2
             <br />
             <br />
-            <input
-                max={100}
-                min={0}
-                onChange={(event) => setHitMinimalProbabilityGain(event.target.value)}
-                style={{ textAlign: 'right' }}
-                type="number"
-                value={hitMinimalProbabilityGain}
-            />
-            % Minimal probability gain of {PlayerDecision.hit} over {PlayerDecision.stand}
+            Doubling mode:{' '}
+            <select
+                onChange={(event) => {
+                    setDoublingMode(event.target.value as DoublingMode);
+                }}
+                value={doublingMode}
+            >
+                {Object.values(DoublingMode).map((doublingMode) => (
+                    <option key={doublingMode} value={doublingMode}>
+                        {doublingMode}
+                    </option>
+                ))}
+            </select>
             <br />
             <br />
             <input

@@ -7,7 +7,8 @@ import { FinalScoreProbabilities } from './final-score-probabilities';
 export type AllDecisionsData = Dictionary<DecisionData, PlayerDecision>;
 
 export type DecisionData = {
-    outcome: DecisionOutcome;
+    available: boolean;
     finalProbabilities: FinalScoreProbabilities;
+    outcome: DecisionOutcome;
     probabilityBreakdown: DecisionProbabilityBreakdown;
 };

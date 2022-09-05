@@ -8,8 +8,8 @@ export const blackjackScore = maximumScore + 0.5;
 
 export const probabilityLabels = {
     dealerBusting: `P (d > ${maximumScore})`,
-    playerAdvantageHands: 'Player advantage (hands)',
-    playerAdvantagePayout: 'Player advantage (payout)',
+    playerAdvantageHands: 'PA (hands)',
+    playerAdvantagePayout: 'PA (payout)',
     playerBusting: `P (p > ${maximumScore})`,
     playerEqualToDealer: 'P (p = d)',
     playerLessThanCurrent: (current: string | number) => `P (p < ${current})`,
