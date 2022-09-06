@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { dealerStandThreshold } from '../constants';
+import { dealerStandThreshold, maximumScore } from '../constants';
 import {
     getAllHands,
     getAllScoresStatsChoicesSummary,
@@ -8,7 +8,7 @@ import {
     getStandThresholdProbabilities,
     playerStrategyLegend
 } from '../logic';
-import { DoublingMode, PlayerStrategy } from '../models';
+import { DoublingMode, PlayerDecision, PlayerStrategy } from '../models';
 import {
     AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
@@ -19,6 +19,12 @@ import {
 import { DealerScoreStatsTable } from './dealer-score-stats-table';
 import { PlayerScoreStatsTable } from './player-score-stats-table';
 import { ScoreStatsChoicesTable } from './score-stats-choices-table';
+
+const parseStandThreshold = (standThreshold: string) => {
+    const parsedThreshold = parseInt(standThreshold) || 16;
+    const effectiveThreshold = Math.min(maximumScore, Math.max(4, parsedThreshold));
+    return effectiveThreshold;
+};
 
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
@@ -35,6 +41,7 @@ export const App: React.FC = () => {
     const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
         PlayerStrategy.doubleLossMinusWin_hitLossMinusWin_standLossMinusWin
     );
+    const [standThreshold, setStandThreshold] = useState('16');
 
     useEffect(() => {
         const nextOutcomesSet = getOutcomesSet();
@@ -55,7 +62,8 @@ export const App: React.FC = () => {
             doublingMode,
             outcomesSet: nextOutcomesSet,
             playerDecisionsOverrides,
-            playerStrategy
+            playerStrategy,
+            standThreshold: parseStandThreshold(standThreshold)
         });
 
         setOutcomesSet(nextOutcomesSet);
@@ -77,11 +85,12 @@ export const App: React.FC = () => {
                 doublingMode,
                 outcomesSet,
                 playerDecisionsOverrides,
-                playerStrategy
+                playerStrategy,
+                standThreshold: parseStandThreshold(standThreshold)
             });
             setPlayerChoices(nextPlayerChoices);
         }
-    }, [blackjackPayout, doublingMode, playerStrategy, playerDecisionsOverrides]);
+    }, [blackjackPayout, doublingMode, playerStrategy, playerDecisionsOverrides, standThreshold]);
 
     return (
         <div>
@@ -102,6 +111,20 @@ export const App: React.FC = () => {
                     <br />
                 </React.Fragment>
             ))}
+            <br />
+            <input
+                disabled={playerStrategy !== PlayerStrategy.standThreshold}
+                onBlur={() => {
+                    setStandThreshold(String(parseStandThreshold(standThreshold)));
+                }}
+                onChange={(event) => {
+                    setStandThreshold(event.target.value);
+                }}
+                type="number"
+                value={playerStrategy !== PlayerStrategy.standThreshold ? '' : standThreshold}
+            />{' '}
+            {PlayerDecision.stand} Threshold (4 to 21)
+            <br />
             <br />
             <input
                 type="checkbox"

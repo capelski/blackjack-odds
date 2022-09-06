@@ -1,4 +1,4 @@
-import { blackjackScore, maximumScore } from '../constants';
+import { maximumScore } from '../constants';
 import { DoublingMode, PlayerDecision, PlayerStrategy, ScoreKey } from '../models';
 import {
     AllDecisionsData,
@@ -23,15 +23,22 @@ import { isBlackjack } from './hand';
 const playerStrategyPredicates: Dictionary<
     ({
         double,
+        effectiveScore,
         hit,
-        stand
+        stand,
+        standThreshold
     }: {
         double: DecisionData;
+        effectiveScore: number;
         hit: DecisionData;
         stand: DecisionData;
+        standThreshold: number;
     }) => PlayerDecision,
     PlayerStrategy
 > = {
+    [PlayerStrategy.standThreshold]: ({ effectiveScore, standThreshold }) => {
+        return effectiveScore < standThreshold ? PlayerDecision.hit : PlayerDecision.stand;
+    },
     [PlayerStrategy.hitBusting_standLessThanDealer]: ({ hit, stand }) => {
         return hit.probabilityBreakdown.playerBusting <
             stand.probabilityBreakdown.playerLessThanDealer
@@ -116,7 +123,7 @@ export const getAllDecisionsData = ({
                 [descendant.effectiveScore]: 1
             };
 
-            if (descendant.effectiveScore <= blackjackScore) {
+            if (descendant.effectiveScore < maximumScore) {
                 const { dealerCardChoices } = scoreStatsDealerCardsDictionary[descendant.scoreKey];
                 const { choice, decisions } = dealerCardChoices[dealerCardKey];
                 finalProbabilities =
@@ -204,14 +211,24 @@ export const getAllDecisionsData = ({
 
 export const getPlayerChoice = ({
     allDecisionsData,
-    playerStrategy
+    effectiveScore,
+    playerStrategy,
+    standThreshold
 }: {
     allDecisionsData: AllDecisionsData;
+    effectiveScore: number;
     playerStrategy: PlayerStrategy;
+    standThreshold: number;
 }): PlayerDecision => {
     const double = allDecisionsData[PlayerDecision.doubleHit];
     const hit = allDecisionsData[PlayerDecision.hit];
     const stand = allDecisionsData[PlayerDecision.stand];
 
-    return playerStrategyPredicates[playerStrategy]({ double, hit, stand });
+    return playerStrategyPredicates[playerStrategy]({
+        double,
+        effectiveScore,
+        hit,
+        stand,
+        standThreshold
+    });
 };

@@ -20,6 +20,7 @@ type ScoreStatsChoiceBaseParameters = {
     outcomesSet: OutcomesSet;
     playerDecisionsOverrides: PlayerDecisionsOverrides;
     playerStrategy: PlayerStrategy;
+    standThreshold: number;
 };
 
 const getScoreStatsDealerCardChoice = (
@@ -35,7 +36,9 @@ const getScoreStatsDealerCardChoice = (
         params.playerDecisionsOverrides[params.scoreStats.key]?.[params.dealerCardKey] ||
         getPlayerChoice({
             allDecisionsData: decisions,
-            playerStrategy: params.playerStrategy
+            effectiveScore: params.scoreStats.representativeHand.effectiveScore,
+            playerStrategy: params.playerStrategy,
+            standThreshold: params.standThreshold
         });
 
     return {
