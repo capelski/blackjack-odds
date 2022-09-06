@@ -4,7 +4,8 @@ import { Dictionary } from '../types';
 import { getDisplayPlayerDecision } from './player-decision';
 
 export const playerStrategyLegend: Dictionary<string, PlayerStrategy> = {
-    [PlayerStrategy.standThreshold]: `${PlayerDecision.hit} when score is LOWER than ${PlayerDecision.stand} Threshold`,
+    [PlayerStrategy.standThreshold]: `${PlayerDecision.hit} when score is LOWER than `,
+    [PlayerStrategy.bustingThreshold]: `${PlayerDecision.hit} when [ ${probabilityLabels.playerBusting} ] for ${PlayerDecision.hit} is LOWER than `,
     [PlayerStrategy.hitBusting_standLessThanDealer]: `${PlayerDecision.hit} when [ ${probabilityLabels.playerBusting} ] for ${PlayerDecision.hit} is LOWER than [ ${probabilityLabels.playerLessThanDealer} ] for ${PlayerDecision.stand}`,
     [PlayerStrategy.hitBustingOrLower_standLessThanDealer]: `${PlayerDecision.hit} when [ ${
         probabilityLabels.playerBusting

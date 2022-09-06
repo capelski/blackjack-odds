@@ -8,7 +8,7 @@ import {
     getStandThresholdProbabilities,
     playerStrategyLegend
 } from '../logic';
-import { DoublingMode, PlayerDecision, PlayerStrategy } from '../models';
+import { DoublingMode, PlayerStrategy } from '../models';
 import {
     AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
@@ -20,6 +20,12 @@ import { DealerScoreStatsTable } from './dealer-score-stats-table';
 import { PlayerScoreStatsTable } from './player-score-stats-table';
 import { ScoreStatsChoicesTable } from './score-stats-choices-table';
 
+const parseBustingThreshold = (bustingThreshold: string) => {
+    const parsedThreshold = parseFloat(bustingThreshold) ?? 50;
+    const effectiveThreshold = Math.min(100, Math.max(0, parsedThreshold));
+    return effectiveThreshold;
+};
+
 const parseStandThreshold = (standThreshold: string) => {
     const parsedThreshold = parseInt(standThreshold) || 16;
     const effectiveThreshold = Math.min(maximumScore, Math.max(4, parsedThreshold));
@@ -29,6 +35,7 @@ const parseStandThreshold = (standThreshold: string) => {
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [blackjackPayout, setBlackjackPayout] = useState(true);
+    const [bustingThreshold, setBustingThreshold] = useState('50');
     const [dealerProbabilities, setDealerProbabilities] = useState<FinalScoresDictionary>();
     const [doublingMode, setDoublingMode] = useState<DoublingMode>(
         DoublingMode.nine_ten_eleven_plus_soft
@@ -58,6 +65,7 @@ export const App: React.FC = () => {
         const nextPlayerChoices = getAllScoresStatsChoicesSummary({
             allScoreStats: nextAllScoreStats,
             blackjackPayout: blackjackPayout,
+            bustingThreshold: parseBustingThreshold(bustingThreshold),
             dealerProbabilities: nextDealerProbabilities,
             doublingMode,
             outcomesSet: nextOutcomesSet,
@@ -81,6 +89,7 @@ export const App: React.FC = () => {
             const nextPlayerChoices = getAllScoresStatsChoicesSummary({
                 allScoreStats,
                 blackjackPayout,
+                bustingThreshold: parseBustingThreshold(bustingThreshold),
                 dealerProbabilities,
                 doublingMode,
                 outcomesSet,
@@ -90,7 +99,14 @@ export const App: React.FC = () => {
             });
             setPlayerChoices(nextPlayerChoices);
         }
-    }, [blackjackPayout, doublingMode, playerStrategy, playerDecisionsOverrides, standThreshold]);
+    }, [
+        blackjackPayout,
+        bustingThreshold,
+        doublingMode,
+        playerStrategy,
+        playerDecisionsOverrides,
+        standThreshold
+    ]);
 
     return (
         <div>
@@ -100,7 +116,7 @@ export const App: React.FC = () => {
                 <React.Fragment key={playerStrategyOption}>
                     <input
                         checked={playerStrategy === playerStrategyOption}
-                        name="hit-strategy"
+                        name="player-strategy"
                         onChange={(option) =>
                             setPlayerStrategy(option.target.value as PlayerStrategy)
                         }
@@ -108,31 +124,49 @@ export const App: React.FC = () => {
                         value={playerStrategyOption}
                     />
                     {playerStrategyLegend[playerStrategyOption]}
+
+                    {playerStrategyOption === PlayerStrategy.standThreshold && (
+                        <React.Fragment>
+                            <input
+                                disabled={playerStrategy !== PlayerStrategy.standThreshold}
+                                onBlur={() => {
+                                    setStandThreshold(String(parseStandThreshold(standThreshold)));
+                                }}
+                                onChange={(event) => {
+                                    setStandThreshold(event.target.value);
+                                }}
+                                type="number"
+                                value={standThreshold}
+                                style={{ width: 40 }}
+                            />{' '}
+                            (4 to 21)
+                        </React.Fragment>
+                    )}
+
+                    {playerStrategyOption === PlayerStrategy.bustingThreshold && (
+                        <React.Fragment>
+                            <input
+                                disabled={playerStrategy !== PlayerStrategy.bustingThreshold}
+                                onBlur={() => {
+                                    setBustingThreshold(
+                                        String(parseBustingThreshold(bustingThreshold))
+                                    );
+                                }}
+                                onChange={(event) => {
+                                    setBustingThreshold(event.target.value);
+                                }}
+                                step={10}
+                                type="number"
+                                value={bustingThreshold}
+                                style={{ width: 40 }}
+                            />
+                            % (0 to 100)
+                        </React.Fragment>
+                    )}
+
                     <br />
                 </React.Fragment>
             ))}
-            <br />
-            <input
-                disabled={playerStrategy !== PlayerStrategy.standThreshold}
-                onBlur={() => {
-                    setStandThreshold(String(parseStandThreshold(standThreshold)));
-                }}
-                onChange={(event) => {
-                    setStandThreshold(event.target.value);
-                }}
-                type="number"
-                value={playerStrategy !== PlayerStrategy.standThreshold ? '' : standThreshold}
-            />{' '}
-            {PlayerDecision.stand} Threshold (4 to 21)
-            <br />
-            <br />
-            <input
-                type="checkbox"
-                checked={blackjackPayout}
-                onChange={(event) => setBlackjackPayout(event.target.checked)}
-            />
-            Blackjack pays 3 to 2
-            <br />
             <br />
             Doubling mode:{' '}
             <select
@@ -148,6 +182,12 @@ export const App: React.FC = () => {
                 ))}
             </select>
             <br />
+            <input
+                type="checkbox"
+                checked={blackjackPayout}
+                onChange={(event) => setBlackjackPayout(event.target.checked)}
+            />
+            Blackjack pays 3 to 2
             <br />
             <input
                 type="checkbox"
@@ -164,7 +204,6 @@ export const App: React.FC = () => {
             >
                 Clear edits
             </button>
-            <br />
             <br />
             <h3>Dealer card based decisions table</h3>
             {allScoreStats !== undefined &&

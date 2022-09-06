@@ -15,6 +15,7 @@ import { mergeOutcomesByOutcomeSet, mergeOutcomesByInitialHands } from './decisi
 
 type ScoreStatsChoiceBaseParameters = {
     blackjackPayout: boolean;
+    bustingThreshold: number;
     dealerProbabilities: FinalScoresDictionary;
     doublingMode: DoublingMode;
     outcomesSet: OutcomesSet;
@@ -36,6 +37,7 @@ const getScoreStatsDealerCardChoice = (
         params.playerDecisionsOverrides[params.scoreStats.key]?.[params.dealerCardKey] ||
         getPlayerChoice({
             allDecisionsData: decisions,
+            bustingThreshold: params.bustingThreshold,
             effectiveScore: params.scoreStats.representativeHand.effectiveScore,
             playerStrategy: params.playerStrategy,
             standThreshold: params.standThreshold
