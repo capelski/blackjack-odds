@@ -1,5 +1,5 @@
 import { maximumScore } from '../constants';
-import { DoublingMode } from '../models';
+import { DoublingMode, doublingModeSeparator, ScoreKey } from '../models';
 import { ScoreStats } from '../types';
 
 export const canDouble = (scoreStats: ScoreStats, doublingMode: DoublingMode) => {
@@ -7,8 +7,10 @@ export const canDouble = (scoreStats: ScoreStats, doublingMode: DoublingMode) =>
         scoreStats.representativeHand.effectiveScore < maximumScore &&
         (doublingMode === DoublingMode.any_pair ||
             doublingMode
-                .split(',')
+                .split(doublingModeSeparator)
                 .map((scoreKey) => scoreKey.trim())
-                .some((scoreKey) => scoreKey === scoreStats.key))
+                .some((scoreKey) => scoreKey === scoreStats.key) ||
+            (doublingMode !== DoublingMode.none &&
+                scoreStats.representativeHand.scoreKey === ScoreKey.split5s))
     );
 };

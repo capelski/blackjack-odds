@@ -30,7 +30,9 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
             {
                 Cell: (cellProps: CellProps<ScoreStats>) => {
                     const { key } = cellProps.row.original;
-                    const { decisionOutcome } = props.playerChoices.choices[key];
+                    const scoreStatsChoice = props.playerChoices.choices[key];
+                    /* scoreStatsChoice might be undefined during settings re-processing */
+                    const decisionOutcome = scoreStatsChoice?.decisionOutcome;
                     const isRowExpanded = expandedRows[key];
                     return (
                         <div>
@@ -48,7 +50,7 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                             >
                                 {isRowExpanded ? '✖️' : '👁️'}
                             </span>
-                            {isRowExpanded && (
+                            {isRowExpanded && decisionOutcome && (
                                 <React.Fragment>
                                     <br />
                                     {probabilityLabels.playerLoss}:{' '}
@@ -85,8 +87,15 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
             ...props.outcomesSet.allOutcomes.map((cardOutcome) => ({
                 Cell: (cellProps: CellProps<ScoreStats>) => {
                     const { key: scoreKey, representativeHand } = cellProps.row.original;
+                    const scoreStatsChoice = props.playerChoices.choices[scoreKey];
+
+                    /* scoreStatsChoice might be undefined during settings re-processing */
+                    if (!scoreStatsChoice) {
+                        return <div key={cardOutcome.symbol}>-</div>;
+                    }
+
                     const { choice, decisions } =
-                        props.playerChoices.choices[scoreKey].dealerCardChoices[cardOutcome.key];
+                        scoreStatsChoice.dealerCardChoices[cardOutcome.key];
                     const isRowExpanded = expandedRows[scoreKey];
 
                     return (
@@ -280,41 +289,51 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
             <CustomTable
                 columns={columns}
                 columnStyle={(cellProps) => {
+                    const baseStyles: CSSProperties = {
+                        border: '1px solid black',
+                        padding: 0
+                    };
                     const { key } = cellProps.row.original;
-                    const { dealerCardChoices } = props.playerChoices.choices[key];
                     const dealerCardKey =
                         cellProps.column.id === 'score'
                             ? undefined
                             : (cellProps.column.id as ScoreKey);
-                    const actionStyles: CSSProperties = dealerCardKey
-                        ? dealerCardChoices[dealerCardKey].choice === PlayerDecision.doubleHit
+                    const scoreStatsChoice = props.playerChoices.choices[key];
+
+                    /* scoreStatsChoice might be undefined during settings re-processing */
+                    if (!scoreStatsChoice || !dealerCardKey) {
+                        return baseStyles;
+                    }
+
+                    if (props.playerDecisionsOverrides[key]?.[dealerCardKey]) {
+                        baseStyles.border = '2px solid coral';
+                    }
+
+                    const { choice } = scoreStatsChoice.dealerCardChoices[dealerCardKey];
+                    const actionStyles: CSSProperties =
+                        choice === PlayerDecision.doubleHit
                             ? {
                                   backgroundColor: 'goldenrod',
                                   color: 'black'
                               }
-                            : dealerCardChoices[dealerCardKey].choice === PlayerDecision.doubleStand
+                            : choice === PlayerDecision.doubleStand
                             ? {
                                   backgroundColor: 'darkgoldenrod',
                                   color: 'black'
                               }
-                            : dealerCardChoices[dealerCardKey].choice === PlayerDecision.hit
+                            : choice === PlayerDecision.hit
                             ? {
                                   backgroundColor: 'rgb(66, 139, 202)',
                                   color: 'white'
                               }
-                            : dealerCardChoices[dealerCardKey].choice === PlayerDecision.stand
+                            : choice === PlayerDecision.stand
                             ? {
                                   backgroundColor: 'rgb(92, 184, 92)'
                               }
-                            : {}
-                        : {};
+                            : {};
 
                     return {
-                        border:
-                            dealerCardKey && props.playerDecisionsOverrides[key]?.[dealerCardKey]
-                                ? '2px solid coral'
-                                : '1px solid black',
-                        padding: 0,
+                        ...baseStyles,
                         ...actionStyles
                     };
                 }}

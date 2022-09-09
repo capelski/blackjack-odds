@@ -1,10 +1,14 @@
 import toposort from 'toposort';
 import { blackjackScore } from '../constants';
-import { CardSymbol, ScoreKey } from '../models';
+import { CardSymbol, handKeySeparator, ScoreKey, scoreKeySeparator } from '../models';
 import { CardOutcome, Dictionary, Hand, OutcomesSet } from '../types';
 import { cartesianProduct, removeDuplicates } from '../utils';
 
-const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): Hand => {
+const createHand = (
+    cardOutcome: CardOutcome,
+    previousHand: Hand | undefined,
+    splitAllowed: boolean
+): Hand => {
     const handScores = previousHand
         ? getHandNextScores(previousHand.allScores, cardOutcome.values)
         : cardOutcome.values;
@@ -12,7 +16,7 @@ const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): H
         ? previousHand.cardSymbols.concat([cardOutcome.symbol])
         : [cardOutcome.symbol];
     const key = getHandKey(cardSymbols);
-    const scoreKey = getHandScoreKey(cardSymbols, handScores);
+    const scoreKey = getHandScoreKey(cardSymbols, handScores, splitAllowed);
     const effectiveScore = getHandScore(cardSymbols, handScores);
 
     return {
@@ -29,10 +33,10 @@ const createHand = (cardOutcome: CardOutcome, previousHand: Hand | undefined): H
 /**
  * Returns a list of all non-bust hands, topologically sorted by descendants
  */
-export const getAllHands = (outcomesSet: OutcomesSet): Hand[] => {
+export const getAllHands = (outcomesSet: OutcomesSet, splitAllowed: boolean): Hand[] => {
     const allHandsDictionary: Dictionary<Hand> = {};
     const handsQueue = outcomesSet.allOutcomes.map((cardOutcome) =>
-        createHand(cardOutcome, undefined)
+        createHand(cardOutcome, undefined, splitAllowed)
     );
     const handDependencies: [string, string][] = [];
 
@@ -45,7 +49,7 @@ export const getAllHands = (outcomesSet: OutcomesSet): Hand[] => {
             allHandsDictionary[hand.key] = hand;
 
             outcomesSet.allOutcomes.forEach((cardOutcome) => {
-                const descendant = createHand(cardOutcome, hand);
+                const descendant = createHand(cardOutcome, hand, splitAllowed);
 
                 hand.descendants.push(descendant);
 
@@ -65,7 +69,7 @@ export const getAllHands = (outcomesSet: OutcomesSet): Hand[] => {
 };
 
 const getHandKey = (cardSymbols: CardSymbol[]) => {
-    return [...cardSymbols].sort().join(',');
+    return [...cardSymbols].sort().join(handKeySeparator);
 };
 
 const getHandNextScores = (previousScores: number[], nextValues: number[]) => {
@@ -82,12 +86,18 @@ const getHandScore = (cardSymbols: CardSymbol[], scores: number[]) => {
     return isBlackjack(cardSymbols) ? blackjackScore : getValidScores(scores).reverse()[0];
 };
 
-const getHandScoreKey = (cardSymbols: CardSymbol[], handScores: number[]) => {
+const getHandScoreKey = (
+    cardSymbols: CardSymbol[],
+    handScores: number[],
+    splitAllowed: boolean
+) => {
     return isBlackjack(cardSymbols)
         ? ScoreKey.blackjack
         : cardSymbols.length === 1 && cardSymbols[0] === CardSymbol.figure
         ? ScoreKey.figure
-        : <ScoreKey>handScores.join('/');
+        : splitAllowed && cardSymbols.length === 2 && cardSymbols[0] === cardSymbols[1]
+        ? <ScoreKey>`${cardSymbols[0]}${handKeySeparator}${cardSymbols[1]}`
+        : <ScoreKey>handScores.join(scoreKeySeparator);
 };
 
 const getValidScores = (scores: number[]) => {

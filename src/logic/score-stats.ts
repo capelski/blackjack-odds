@@ -1,4 +1,4 @@
-import { ScoreKey } from '../models';
+import { handKeySeparator, ScoreKey, scoreKeySeparator } from '../models';
 import { Dictionary, Hand, OutcomesSet, ScoreStats } from '../types';
 
 /**
@@ -15,7 +15,7 @@ export const getAllScoreStats = ({
     const allScoreStats: ScoreStats[] = [];
 
     allHands.forEach((hand) => {
-        const handSymbols = hand.cardSymbols.join(',');
+        const handSymbols = hand.cardSymbols.join(handKeySeparator);
 
         if (allScoresStatsMap[hand.scoreKey] === undefined) {
             allScoresStatsMap[hand.scoreKey] = {
@@ -48,7 +48,9 @@ export const getAllScoreStats = ({
     });
 
     allScoreStats.forEach((scoreStats) => {
-        scoreStats.combinations.sort((a, b) => a.split(',').length - b.split(',').length);
+        scoreStats.combinations.sort(
+            (a, b) => a.split(handKeySeparator).length - b.split(handKeySeparator).length
+        );
     });
 
     // const totalProbability = allScoreStats.reduce((x, y) => x + y.initialHandProbability, 0);
@@ -64,7 +66,7 @@ export const getPlayerScoreStats = (allScoreStats: ScoreStats[]) => {
             .map((scoreStats) => ({
                 ...scoreStats,
                 combinations: scoreStats.combinations.filter((combination) =>
-                    combination.includes(',')
+                    combination.includes(handKeySeparator)
                 )
             }))
             .filter((scoreStats) => scoreStats.combinations.length > 0)
@@ -73,15 +75,28 @@ export const getPlayerScoreStats = (allScoreStats: ScoreStats[]) => {
 
 export const sortScoreStats = (allScoreStats: ScoreStats[]) => {
     return [...allScoreStats].sort((a, b) => {
+        const isSplitA = a.key.indexOf(handKeySeparator) > -1;
+        const isSplitB = b.key.indexOf(handKeySeparator) > -1;
+        const isSplitDifference = isSplitA !== isSplitB;
+
+        const isSoftA = a.key.indexOf(scoreKeySeparator) > -1;
+        const isSoftB = b.key.indexOf(scoreKeySeparator) > -1;
+        const isSoftDifference = isSoftA !== isSoftB;
+
         const isBlackjackA = a.key === ScoreKey.blackjack;
         const isBlackjackB = b.key === ScoreKey.blackjack;
+        const isBlackjackDifference = isBlackjackA !== isBlackjackB;
 
-        return a.representativeHand.allScores.length === b.representativeHand.allScores.length
-            ? isBlackjackA
-                ? -1
-                : isBlackjackB
-                ? 1
-                : a.representativeHand.effectiveScore - b.representativeHand.effectiveScore
-            : a.representativeHand.allScores.length - b.representativeHand.allScores.length;
+        return isSplitDifference
+            ? +isSplitB - +isSplitA
+            : isSoftDifference
+            ? +isSoftB - +isSoftA
+            : isBlackjackDifference
+            ? +isBlackjackA - +isBlackjackB
+            : !isSplitDifference && a.key === ScoreKey.splitAs
+            ? 1
+            : !isSplitDifference && b.key === ScoreKey.splitAs
+            ? -1
+            : a.representativeHand.effectiveScore - b.representativeHand.effectiveScore;
     });
 };

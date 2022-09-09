@@ -1,3 +1,6 @@
+export const handKeySeparator = ',';
+export const scoreKeySeparator = '/';
+
 export enum ScoreKey {
     hard2 = '2',
     hard3 = '3',
@@ -32,5 +35,15 @@ export enum ScoreKey {
     soft18 = '8/18',
     soft19 = '9/19',
     soft20 = '10/20',
-    soft21 = '11/21'
+    soft21 = '11/21',
+    split2s = '2,2',
+    split3s = '3,3',
+    split4s = '4,4',
+    split5s = '5,5',
+    split6s = '6,6',
+    split7s = '7,7',
+    split8s = '8,8',
+    split9s = '9,9',
+    split10s = '10,10',
+    splitAs = 'A,A'
 }

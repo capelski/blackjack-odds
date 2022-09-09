@@ -48,46 +48,52 @@ export const App: React.FC = () => {
     const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
         PlayerStrategy.doubleLossMinusWin_hitLossMinusWin_standLossMinusWin
     );
+    const [processing, setProcessing] = useState(true);
+    const [splitAllowed, setSplitAllowed] = useState(true);
     const [standThreshold, setStandThreshold] = useState('16');
 
+    // outcomesSet and dealerProbabilities are constant regardless the active settings
     useEffect(() => {
-        const nextOutcomesSet = getOutcomesSet();
-        const nextAllHands = getAllHands(nextOutcomesSet);
-        const nextAllScoreStats = getAllScoreStats({
-            allHands: nextAllHands,
-            outcomesSet: nextOutcomesSet
+        const outcomesSet = getOutcomesSet();
+        const allHands = getAllHands(outcomesSet, false);
+        const allScoreStats = getAllScoreStats({
+            allHands,
+            outcomesSet
         });
-        const nextDealerProbabilities = getStandThresholdProbabilities({
-            allScoreStats: nextAllScoreStats,
-            outcomesSet: nextOutcomesSet,
+        const dealerProbabilities = getStandThresholdProbabilities({
+            allScoreStats: allScoreStats,
+            outcomesSet,
             standThreshold: dealerStandThreshold
         });
-        const nextPlayerChoices = getAllScoresStatsChoicesSummary({
-            allScoreStats: nextAllScoreStats,
-            blackjackPayout: blackjackPayout,
-            bustingThreshold: parseBustingThreshold(bustingThreshold),
-            dealerProbabilities: nextDealerProbabilities,
-            doublingMode,
-            outcomesSet: nextOutcomesSet,
-            playerDecisionsOverrides,
-            playerStrategy,
-            standThreshold: parseStandThreshold(standThreshold)
-        });
 
-        setOutcomesSet(nextOutcomesSet);
-        setAllScoreStats(nextAllScoreStats);
-        setDealerProbabilities(nextDealerProbabilities);
-        setPlayerChoices(nextPlayerChoices);
+        setDealerProbabilities(dealerProbabilities);
+        setOutcomesSet(outcomesSet);
     }, []);
 
+    // A change in settings disables further changes in settings until re-processing data
+    // (could be done with a setTimeout, but safer to trigger an additional render cycle)
     useEffect(() => {
-        if (
-            allScoreStats !== undefined &&
-            dealerProbabilities !== undefined &&
-            outcomesSet !== undefined
-        ) {
+        setProcessing(true);
+    }, [
+        blackjackPayout,
+        bustingThreshold,
+        doublingMode,
+        playerStrategy,
+        playerDecisionsOverrides,
+        splitAllowed,
+        standThreshold
+    ]);
+
+    // allScoreStats and playerChoices must be recomputed upon settings change
+    useEffect(() => {
+        if (processing && outcomesSet !== undefined && dealerProbabilities !== undefined) {
+            const nextAllHands = getAllHands(outcomesSet, splitAllowed);
+            const nextAllScoreStats = getAllScoreStats({
+                allHands: nextAllHands,
+                outcomesSet
+            });
             const nextPlayerChoices = getAllScoresStatsChoicesSummary({
-                allScoreStats,
+                allScoreStats: nextAllScoreStats,
                 blackjackPayout,
                 bustingThreshold: parseBustingThreshold(bustingThreshold),
                 dealerProbabilities,
@@ -95,18 +101,15 @@ export const App: React.FC = () => {
                 outcomesSet,
                 playerDecisionsOverrides,
                 playerStrategy,
+                // splitAllowed,
                 standThreshold: parseStandThreshold(standThreshold)
             });
+
+            setAllScoreStats(nextAllScoreStats);
             setPlayerChoices(nextPlayerChoices);
+            setProcessing(false);
         }
-    }, [
-        blackjackPayout,
-        bustingThreshold,
-        doublingMode,
-        playerStrategy,
-        playerDecisionsOverrides,
-        standThreshold
-    ]);
+    }, [dealerProbabilities, outcomesSet, processing]);
 
     return (
         <div>
@@ -116,6 +119,7 @@ export const App: React.FC = () => {
                 <React.Fragment key={playerStrategyOption}>
                     <input
                         checked={playerStrategy === playerStrategyOption}
+                        disabled={processing}
                         name="player-strategy"
                         onChange={(option) =>
                             setPlayerStrategy(option.target.value as PlayerStrategy)
@@ -128,7 +132,9 @@ export const App: React.FC = () => {
                     {playerStrategyOption === PlayerStrategy.standThreshold && (
                         <React.Fragment>
                             <input
-                                disabled={playerStrategy !== PlayerStrategy.standThreshold}
+                                disabled={
+                                    processing || playerStrategy !== PlayerStrategy.standThreshold
+                                }
                                 onBlur={() => {
                                     setStandThreshold(String(parseStandThreshold(standThreshold)));
                                 }}
@@ -146,7 +152,9 @@ export const App: React.FC = () => {
                     {playerStrategyOption === PlayerStrategy.bustingThreshold && (
                         <React.Fragment>
                             <input
-                                disabled={playerStrategy !== PlayerStrategy.bustingThreshold}
+                                disabled={
+                                    processing || playerStrategy !== PlayerStrategy.bustingThreshold
+                                }
                                 onBlur={() => {
                                     setBustingThreshold(
                                         String(parseBustingThreshold(bustingThreshold))
@@ -170,6 +178,7 @@ export const App: React.FC = () => {
             <br />
             Doubling mode:{' '}
             <select
+                disabled={processing}
                 onChange={(event) => {
                     setDoublingMode(event.target.value as DoublingMode);
                 }}
@@ -183,20 +192,30 @@ export const App: React.FC = () => {
             </select>
             <br />
             <input
+                checked={splitAllowed}
+                disabled={processing}
+                onChange={(event) => setSplitAllowed(event.target.checked)}
                 type="checkbox"
+            />
+            Split allowed
+            <br />
+            <input
                 checked={blackjackPayout}
+                disabled={processing}
                 onChange={(event) => setBlackjackPayout(event.target.checked)}
+                type="checkbox"
             />
             Blackjack pays 3 to 2
             <br />
             <input
-                type="checkbox"
                 checked={playerDecisionsEdit}
+                disabled={processing}
                 onChange={(event) => setPlayerDecisionsEdit(event.target.checked)}
+                type="checkbox"
             />
             Edit player decisions{' '}
             <button
-                disabled={Object.keys(playerDecisionsOverrides).length === 0}
+                disabled={processing || Object.keys(playerDecisionsOverrides).length === 0}
                 onClick={() => {
                     setPlayerDecisionsOverrides({});
                 }}
@@ -213,12 +232,12 @@ export const App: React.FC = () => {
                     allScoreStats={allScoreStats}
                     outcomesSet={outcomesSet}
                     playerChoices={playerChoices}
-                    playerDecisionsEdit={playerDecisionsEdit}
+                    playerDecisionsEdit={!processing && playerDecisionsEdit}
                     playerDecisionsOverrides={playerDecisionsOverrides}
                     playerDecisionsOverridesSetter={setPlayerDecisionsOverrides}
                 />
             ) : (
-                'Loading...'
+                'Processing...'
             )}
             <h3>Dealer cards</h3>
             {dealerProbabilities !== undefined && outcomesSet !== undefined ? (
@@ -227,13 +246,13 @@ export const App: React.FC = () => {
                     outcomeSet={outcomesSet}
                 />
             ) : (
-                'Loading...'
+                'Processing...'
             )}
             <h3>Player scores</h3>
             {allScoreStats !== undefined ? (
                 <PlayerScoreStatsTable allScoreStats={allScoreStats} />
             ) : (
-                'Loading...'
+                'Processing...'
             )}
         </div>
     );
