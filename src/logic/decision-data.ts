@@ -59,26 +59,22 @@ const playerStrategyPredicates: Dictionary<
             ? PlayerDecision.hit
             : PlayerDecision.stand;
     },
-    [PlayerStrategy.hitLoss_standLoss]: ({ hit, stand }) => {
+    [PlayerStrategy.minimumLoss_hit_stand]: ({ hit, stand }) => {
         return hit.outcome.lossProbability < stand.outcome.lossProbability
             ? PlayerDecision.hit
             : PlayerDecision.stand;
     },
-    [PlayerStrategy.hitWin_standWin]: ({ hit, stand }) => {
+    [PlayerStrategy.maximumWin_hit_stand]: ({ hit, stand }) => {
         return hit.outcome.winProbability > stand.outcome.winProbability
             ? PlayerDecision.hit
             : PlayerDecision.stand;
     },
-    [PlayerStrategy.hitLossMinusWin_standLossMinusWin]: ({ hit, stand }) => {
+    [PlayerStrategy.maximumPayout_hit_stand]: ({ hit, stand }) => {
         return hit.outcome.playerAdvantage.payout > stand.outcome.playerAdvantage.payout
             ? PlayerDecision.hit
             : PlayerDecision.stand;
     },
-    [PlayerStrategy.doubleLossMinusWin_hitLossMinusWin_standLossMinusWin]: ({
-        double,
-        hit,
-        stand
-    }) => {
+    [PlayerStrategy.maximumPayout_hit_stand_double]: ({ double, hit, stand }) => {
         const shouldDouble =
             double.available &&
             double.outcome.playerAdvantage.payout > hit.outcome.playerAdvantage.payout &&

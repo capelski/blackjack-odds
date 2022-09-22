@@ -46,7 +46,7 @@ export const App: React.FC = () => {
     const [playerDecisionsOverrides, setPlayerDecisionsOverrides] =
         useState<PlayerDecisionsOverrides>({});
     const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
-        PlayerStrategy.doubleLossMinusWin_hitLossMinusWin_standLossMinusWin
+        PlayerStrategy.maximumPayout_hit_stand_double
     );
     const [processing, setProcessing] = useState(true);
     const [splitAllowed, setSplitAllowed] = useState(true);

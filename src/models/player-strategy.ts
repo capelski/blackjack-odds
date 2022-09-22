@@ -3,8 +3,8 @@ export enum PlayerStrategy {
     bustingThreshold = 'bustingThreshold',
     hitBusting_standLessThanDealer = 'hitBusting_standLessThanDealer',
     hitBustingOrLower_standLessThanDealer = 'hitBustingOrLower_standLessThanDealer',
-    hitLoss_standLoss = 'hitLoss_standLoss',
-    hitWin_standWin = 'hitWin_standWin',
-    hitLossMinusWin_standLossMinusWin = 'hitLossMinusWin_standLossMinusWin',
-    doubleLossMinusWin_hitLossMinusWin_standLossMinusWin = 'doubleLossMinusWin_hitLossMinusWin_standLossMinusWin'
+    minimumLoss_hit_stand = 'minimumLoss_hit_stand',
+    maximumWin_hit_stand = 'maximumWin_hit_stand',
+    maximumPayout_hit_stand = 'maximumPayout_hit_stand',
+    maximumPayout_hit_stand_double = 'maximumPayout_hit_stand_double'
 }
