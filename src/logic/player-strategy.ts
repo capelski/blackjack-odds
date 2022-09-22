@@ -19,5 +19,15 @@ export const playerStrategyLegend: Dictionary<string, PlayerStrategy> = {
         probabilityLabels.playerAdvantagePayout
     }: ${PlayerDecision.hit} / ${PlayerDecision.stand} / ${getDisplayPlayerDecision(
         PlayerDecision.doubleHit
-    )}`
+    )}`,
+    [PlayerStrategy.maximumPayout_hit_stand_split]: `Maximum ${
+        probabilityLabels.playerAdvantagePayout
+    }: ${PlayerDecision.hit} / ${PlayerDecision.stand} / ${getDisplayPlayerDecision(
+        PlayerDecision.splitHit
+    )}`,
+    [PlayerStrategy.maximumPayout_hit_stand_double_split]: `Maximum ${
+        probabilityLabels.playerAdvantagePayout
+    }: ${PlayerDecision.hit} / ${PlayerDecision.stand} / ${getDisplayPlayerDecision(
+        PlayerDecision.doubleHit
+    )} / ${getDisplayPlayerDecision(PlayerDecision.splitHit)}`
 };

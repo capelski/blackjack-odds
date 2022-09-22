@@ -52,15 +52,15 @@ export const getStandThresholdProbabilities = ({
                     ? {
                           [scoreStats.representativeHand.effectiveScore]: 1
                       }
-                    : scoreStats.representativeHand.descendants
-                          .map((descendant) => {
+                    : scoreStats.representativeHand.hitDescendants
+                          .map((hitDescendant) => {
                               return weightProbabilities(
-                                  isBustScore(descendant.effectiveScore)
+                                  isBustScore(hitDescendant.effectiveScore)
                                       ? {
-                                            [descendant.effectiveScore]: 1
+                                            [hitDescendant.effectiveScore]: 1
                                         }
-                                      : reduced[descendant.scoreKey],
-                                  descendant.lastCard.weight / outcomesSet.totalWeight
+                                      : reduced[hitDescendant.scoreKey],
+                                  hitDescendant.lastCard.weight / outcomesSet.totalWeight
                               );
                           })
                           .reduce(mergeProbabilities, <FinalScoreProbabilities>{})

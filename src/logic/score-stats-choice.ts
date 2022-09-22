@@ -8,7 +8,8 @@ import {
     ScoreStats,
     ScoreStatsAllDealerCardChoices,
     ScoreStatsChoice,
-    ScoreStatsDealerCardChoice
+    ScoreStatsDealerCardChoice,
+    SplitOptions
 } from '../types';
 import { getAllDecisionsData, getPlayerChoice } from './decision-data';
 import { mergeOutcomesByOutcomeSet, mergeOutcomesByInitialHands } from './decision-outcome';
@@ -21,6 +22,7 @@ type ScoreStatsChoiceBaseParameters = {
     outcomesSet: OutcomesSet;
     playerDecisionsOverrides: PlayerDecisionsOverrides;
     playerStrategy: PlayerStrategy;
+    splitOptions: SplitOptions;
     standThreshold: number;
 };
 

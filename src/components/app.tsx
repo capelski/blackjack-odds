@@ -14,7 +14,8 @@ import {
     FinalScoresDictionary,
     OutcomesSet,
     PlayerDecisionsOverrides,
-    ScoreStats
+    ScoreStats,
+    SplitOptions
 } from '../types';
 import { DealerScoreStatsTable } from './dealer-score-stats-table';
 import { PlayerScoreStatsTable } from './player-score-stats-table';
@@ -46,16 +47,24 @@ export const App: React.FC = () => {
     const [playerDecisionsOverrides, setPlayerDecisionsOverrides] =
         useState<PlayerDecisionsOverrides>({});
     const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
-        PlayerStrategy.maximumPayout_hit_stand_double
+        PlayerStrategy.maximumPayout_hit_stand_double_split
     );
     const [processing, setProcessing] = useState(true);
-    const [splitAllowed, setSplitAllowed] = useState(true);
+    const [splitOptions, setSplitOptions] = useState<SplitOptions>({
+        allowed: true,
+        blackjackAfterSplit: false,
+        hitSplitAces: false
+    });
     const [standThreshold, setStandThreshold] = useState('16');
 
     // outcomesSet and dealerProbabilities are constant regardless the active settings
     useEffect(() => {
         const outcomesSet = getOutcomesSet();
-        const allHands = getAllHands(outcomesSet, false);
+        const allHands = getAllHands(outcomesSet, {
+            allowed: false,
+            blackjackAfterSplit: false,
+            hitSplitAces: false
+        });
         const allScoreStats = getAllScoreStats({
             allHands,
             outcomesSet
@@ -80,14 +89,14 @@ export const App: React.FC = () => {
         doublingMode,
         playerStrategy,
         playerDecisionsOverrides,
-        splitAllowed,
+        splitOptions,
         standThreshold
     ]);
 
     // allScoreStats and playerChoices must be recomputed upon settings change
     useEffect(() => {
         if (processing && outcomesSet !== undefined && dealerProbabilities !== undefined) {
-            const nextAllHands = getAllHands(outcomesSet, splitAllowed);
+            const nextAllHands = getAllHands(outcomesSet, splitOptions);
             const nextAllScoreStats = getAllScoreStats({
                 allHands: nextAllHands,
                 outcomesSet
@@ -101,7 +110,7 @@ export const App: React.FC = () => {
                 outcomesSet,
                 playerDecisionsOverrides,
                 playerStrategy,
-                // splitAllowed,
+                splitOptions,
                 standThreshold: parseStandThreshold(standThreshold)
             });
 
@@ -180,7 +189,8 @@ export const App: React.FC = () => {
             <select
                 disabled={processing}
                 onChange={(event) => {
-                    setDoublingMode(event.target.value as DoublingMode);
+                    const nextDoublingMode = event.target.value as DoublingMode;
+                    setDoublingMode(nextDoublingMode);
                 }}
                 value={doublingMode}
             >
@@ -192,13 +202,47 @@ export const App: React.FC = () => {
             </select>
             <br />
             <input
-                checked={splitAllowed}
+                checked={splitOptions.allowed}
                 disabled={processing}
-                onChange={(event) => setSplitAllowed(event.target.checked)}
+                onChange={(event) => {
+                    const nextSplitAllowed = event.target.checked;
+                    setSplitOptions({
+                        allowed: nextSplitAllowed,
+                        blackjackAfterSplit: nextSplitAllowed
+                            ? splitOptions.blackjackAfterSplit
+                            : false,
+                        hitSplitAces: nextSplitAllowed ? splitOptions.hitSplitAces : false
+                    });
+                }}
                 type="checkbox"
             />
             Split allowed
             <br />
+            <div style={{ paddingLeft: 24 }}>
+                <input
+                    checked={splitOptions.blackjackAfterSplit}
+                    disabled={processing || !splitOptions.allowed}
+                    onChange={(event) =>
+                        setSplitOptions({
+                            ...splitOptions,
+                            blackjackAfterSplit: event.target.checked
+                        })
+                    }
+                    type="checkbox"
+                />
+                Blackjack after split allowed (considered 21 otherwise)
+                <br />
+                <input
+                    checked={splitOptions.hitSplitAces}
+                    disabled={processing || !splitOptions.allowed}
+                    onChange={(event) =>
+                        setSplitOptions({ ...splitOptions, hitSplitAces: event.target.checked })
+                    }
+                    type="checkbox"
+                />
+                Hit split spaces allowed (limiting to Stand or Split otherwise)
+                <br />
+            </div>
             <input
                 checked={blackjackPayout}
                 disabled={processing}

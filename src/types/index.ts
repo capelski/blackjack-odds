@@ -5,7 +5,7 @@ export { DecisionProbabilityBreakdown } from './decision-probability-breakdown';
 export { Dictionary } from './dictionary';
 export { ExpandedRows } from './expanded-rows';
 export { FinalScoreProbabilities, FinalScoresDictionary } from './final-score-probabilities';
-export { Hand } from './hand';
+export { Hand, SplitHand } from './hand';
 export { OutcomesSet } from './outcomes-set';
 export { PlayerAdvantage } from './player-advantage';
 export { PlayerDecisionsOverrides } from './player-decisions-overrides';
@@ -17,3 +17,4 @@ export {
     ScoreStatsChoice,
     ScoreStatsDealerCardChoice
 } from './score-stats-choice';
+export { SplitOptions } from './split-options';

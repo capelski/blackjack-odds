@@ -1,7 +1,7 @@
 import React, { CSSProperties, useMemo, useState } from 'react';
 import { Column, CellProps } from 'react-table';
 import { displayProbabilityTotals, probabilityLabels } from '../constants';
-import { getDisplayPlayerDecision, getPlayerScoreStats } from '../logic';
+import { getDisplayPlayerDecision, getPlayerScoreStats, isVisibleDecision } from '../logic';
 import { PlayerDecision, ScoreKey } from '../models';
 import {
     AllScoreStatsChoicesSummary,
@@ -142,7 +142,7 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                                         .filter(
                                             (playerDecision: PlayerDecision) =>
                                                 decisions[playerDecision].available &&
-                                                playerDecision !== PlayerDecision.doubleStand
+                                                isVisibleDecision(playerDecision)
                                         )
                                         .map((playerDecision: PlayerDecision) => {
                                             const { outcome, probabilityBreakdown } =
@@ -324,6 +324,16 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                             : choice === PlayerDecision.hit
                             ? {
                                   backgroundColor: 'rgb(66, 139, 202)',
+                                  color: 'white'
+                              }
+                            : choice === PlayerDecision.splitHit
+                            ? {
+                                  backgroundColor: '#9A6F93',
+                                  color: 'white'
+                              }
+                            : choice === PlayerDecision.splitStand
+                            ? {
+                                  backgroundColor: '#80567A',
                                   color: 'white'
                               }
                             : choice === PlayerDecision.stand
