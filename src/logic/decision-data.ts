@@ -149,34 +149,34 @@ export const getAllDecisionsData = ({
         [scoreStats.representativeHand.effectiveScore]: 1
     };
 
-    const doubleDecisionProbabilities = getDecisionProbabilityBreakdown({
+    const doubleProbabilityBreakdown = getDecisionProbabilityBreakdown({
         dealerProbabilities: applicableDealerProbabilities,
         playerProbabilities: doubleFinalProbabilities,
         playerScore: scoreStats.representativeHand.effectiveScore
     });
-    const hitDecisionProbabilities = getDecisionProbabilityBreakdown({
+    const hitProbabilityBreakdown = getDecisionProbabilityBreakdown({
         dealerProbabilities: applicableDealerProbabilities,
         playerProbabilities: hitFinalProbabilities,
         playerScore: scoreStats.representativeHand.effectiveScore
     });
-    const standDecisionProbabilities = getDecisionProbabilityBreakdown({
+    const standProbabilityBreakdown = getDecisionProbabilityBreakdown({
         dealerProbabilities: applicableDealerProbabilities,
         playerProbabilities: standFinalProbabilities,
         playerScore: scoreStats.representativeHand.effectiveScore
     });
 
     const doubleDecisionOutcome = getDecisionOutcome({
-        decisionProbabilities: doubleDecisionProbabilities,
+        decisionProbabilities: doubleProbabilityBreakdown,
         lossPayout: 2,
         winPayout: 2
     });
     const hitDecisionOutcome = getDecisionOutcome({
-        decisionProbabilities: hitDecisionProbabilities,
+        decisionProbabilities: hitProbabilityBreakdown,
         lossPayout: 1,
         winPayout: 1
     });
     const standDecisionOutcome = getDecisionOutcome({
-        decisionProbabilities: standDecisionProbabilities,
+        decisionProbabilities: standProbabilityBreakdown,
         lossPayout: 1,
         winPayout:
             isBlackjack(scoreStats.representativeHand.cardSymbols) && blackjackPayout ? 1.5 : 1
@@ -184,31 +184,30 @@ export const getAllDecisionsData = ({
 
     const _canDouble = canDouble(scoreStats, doublingMode);
 
+    const doubleDecisionData: DecisionData = {
+        available: _canDouble,
+        finalProbabilities: doubleFinalProbabilities,
+        outcome: doubleDecisionOutcome,
+        probabilityBreakdown: doubleProbabilityBreakdown
+    };
+    const hitDecisionData: DecisionData = {
+        available: scoreStats.representativeHand.effectiveScore < maximumScore,
+        finalProbabilities: hitFinalProbabilities,
+        outcome: hitDecisionOutcome,
+        probabilityBreakdown: hitProbabilityBreakdown
+    };
+    const standDecisionData: DecisionData = {
+        available: true,
+        finalProbabilities: standFinalProbabilities,
+        outcome: standDecisionOutcome,
+        probabilityBreakdown: standProbabilityBreakdown
+    };
+
     return {
-        [PlayerDecision.doubleHit]: {
-            available: _canDouble,
-            finalProbabilities: doubleFinalProbabilities,
-            outcome: doubleDecisionOutcome,
-            probabilityBreakdown: doubleDecisionProbabilities
-        },
-        [PlayerDecision.doubleStand]: {
-            available: _canDouble,
-            finalProbabilities: doubleFinalProbabilities,
-            outcome: doubleDecisionOutcome,
-            probabilityBreakdown: doubleDecisionProbabilities
-        },
-        [PlayerDecision.hit]: {
-            available: scoreStats.representativeHand.effectiveScore < maximumScore,
-            finalProbabilities: hitFinalProbabilities,
-            outcome: hitDecisionOutcome,
-            probabilityBreakdown: hitDecisionProbabilities
-        },
-        [PlayerDecision.stand]: {
-            available: true,
-            finalProbabilities: standFinalProbabilities,
-            outcome: standDecisionOutcome,
-            probabilityBreakdown: standDecisionProbabilities
-        }
+        [PlayerDecision.doubleHit]: doubleDecisionData,
+        [PlayerDecision.doubleStand]: doubleDecisionData,
+        [PlayerDecision.hit]: hitDecisionData,
+        [PlayerDecision.stand]: standDecisionData
     };
 };
 
