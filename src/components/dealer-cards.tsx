@@ -10,12 +10,12 @@ import { CardOutcome, FinalScoresDictionary, OutcomesSet, ScoreStats } from '../
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
-interface DealerScoreStatsTableProps {
+interface DealerCardsProps {
     dealerProbabilities: FinalScoresDictionary;
-    outcomeSet: OutcomesSet;
+    outcomesSet: OutcomesSet;
 }
 
-export const DealerScoreStatsTable = (props: DealerScoreStatsTableProps) => {
+export const DealerCards = (props: DealerCardsProps) => {
     const { columns, data } = useMemo(() => {
         const columns: Column<CardOutcome>[] = [
             {
@@ -86,10 +86,10 @@ export const DealerScoreStatsTable = (props: DealerScoreStatsTableProps) => {
             }
         ];
 
-        const data = props.outcomeSet.allOutcomes;
+        const data = props.outcomesSet.allOutcomes;
 
         return { columns, data };
-    }, [props.dealerProbabilities, props.outcomeSet]);
+    }, [props.dealerProbabilities, props.outcomesSet]);
 
     return <CustomTable columns={columns} data={data} />;
 };

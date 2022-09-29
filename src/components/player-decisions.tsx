@@ -7,23 +7,24 @@ import {
     AllScoreStatsChoicesSummary,
     ExpandedRows,
     OutcomesSet,
-    PlayerDecisionsOverrides,
+    PlayerSettings,
     ScoreStats
 } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
-interface ScoreStatsChoicesTableProps {
+interface ComponentCoreProps {
     allScoreStats: ScoreStats[];
     outcomesSet: OutcomesSet;
     playerChoices: AllScoreStatsChoicesSummary;
-    playerDecisionsEdit: boolean;
-    playerDecisionsOverrides: PlayerDecisionsOverrides;
-    playerDecisionsOverridesSetter: (playerDecisionsOverride: PlayerDecisionsOverrides) => void;
+    playerSettings: PlayerSettings;
+    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
+    processing: boolean;
 }
 
-export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (props) => {
+const ComponentCore: React.FC<ComponentCoreProps> = (props) => {
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
+    const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
 
     const { columns, data } = useMemo(() => {
         const columns: Column<ScoreStats>[] = [
@@ -101,15 +102,20 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                     return (
                         <div key={cardOutcome.symbol}>
                             <div>
-                                {props.playerDecisionsEdit ? (
+                                {!props.processing && playerDecisionsEdit ? (
                                     <select
                                         onChange={(event) => {
-                                            props.playerDecisionsOverridesSetter({
-                                                ...props.playerDecisionsOverrides,
-                                                [scoreKey]: {
-                                                    ...props.playerDecisionsOverrides[scoreKey],
-                                                    [cardOutcome.key]: event.target
-                                                        .value as PlayerDecision
+                                            props.playerSettingsSetter({
+                                                ...props.playerSettings,
+                                                playerDecisionsOverrides: {
+                                                    ...props.playerSettings
+                                                        .playerDecisionsOverrides,
+                                                    [scoreKey]: {
+                                                        ...props.playerSettings
+                                                            .playerDecisionsOverrides[scoreKey],
+                                                        [cardOutcome.key]: event.target
+                                                            .value as PlayerDecision
+                                                    }
                                                 }
                                             });
                                         }}
@@ -253,15 +259,15 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
         return { columns, data };
     }, [
         expandedRows,
+        playerDecisionsEdit,
         props.allScoreStats,
         props.outcomesSet,
         props.playerChoices,
-        props.playerDecisionsEdit,
-        props.playerDecisionsOverrides
+        props.playerSettings
     ]);
 
     return (
-        <div>
+        <React.Fragment>
             {probabilityLabels.playerLoss}:{' '}
             <RoundedFloat value={props.playerChoices.outcome.lossProbability} />
             <br />
@@ -286,6 +292,29 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
             <RoundedFloat value={props.playerChoices.outcome.playerAdvantage.payout} />
             <br />
             <br />
+            <input
+                checked={playerDecisionsEdit}
+                disabled={props.processing}
+                onChange={(event) => setPlayerDecisionsEdit(event.target.checked)}
+                type="checkbox"
+            />
+            Edit player decisions{' '}
+            <button
+                disabled={
+                    props.processing ||
+                    Object.keys(props.playerSettings.playerDecisionsOverrides).length === 0
+                }
+                onClick={() => {
+                    props.playerSettingsSetter({
+                        ...props.playerSettings,
+                        playerDecisionsOverrides: {}
+                    });
+                }}
+                type="button"
+            >
+                Clear edits
+            </button>
+            <br />
             <CustomTable
                 columns={columns}
                 columnStyle={(cellProps) => {
@@ -305,7 +334,7 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                         return baseStyles;
                     }
 
-                    if (props.playerDecisionsOverrides[key]?.[dealerCardKey]) {
+                    if (props.playerSettings.playerDecisionsOverrides[key]?.[dealerCardKey]) {
                         baseStyles.border = '2px solid coral';
                     }
 
@@ -350,45 +379,35 @@ export const ScoreStatsChoicesTable: React.FC<ScoreStatsChoicesTableProps> = (pr
                 data={data}
                 width="100%"
             />
-            <p>{probabilityLabels.playerBusting} = probability of player busting</p>
-            <p>{probabilityLabels.dealerBusting} = probability of dealer busting</p>
-            <p>
-                {probabilityLabels.playerLessThanDealer} = probability of player getting a score
-                lower than dealer's score
-            </p>
-            <p>
-                {probabilityLabels.playerEqualToDealer} = probability of player getting the same
-                score as dealer's score
-            </p>
-            <p>
-                {probabilityLabels.playerMoreThanDealer} = probability of player getting a score
-                higher than dealer's score
-            </p>
-            <p>
-                {probabilityLabels.playerLessThanCurrent('X')} = probability of player getting a
-                score lower than X (only soft hands)
-            </p>
-            <p>
-                {probabilityLabels.playerLoss} = probability of player losing (i.e.{' '}
-                {probabilityLabels.playerBusting} + {probabilityLabels.playerLessThanDealer} )
-            </p>
-            <p>
-                {probabilityLabels.playerPush} = probability of player pushing (i.e.{' '}
-                {probabilityLabels.playerEqualToDealer} )
-            </p>
-            <p>
-                {probabilityLabels.playerWin} = probability of player winning (i.e.{' '}
-                {probabilityLabels.dealerBusting} + {probabilityLabels.playerMoreThanDealer} )
-            </p>
-            <p>
-                {probabilityLabels.playerAdvantageHands} = probability of winning hands on the long
-                run (i.e. {probabilityLabels.playerWin} - {probabilityLabels.playerLoss} )
-            </p>
-            <p>
-                {probabilityLabels.playerAdvantagePayout} = probability of winning money on the long
-                run (i.e. {probabilityLabels.playerWin} * winPayout - {probabilityLabels.playerLoss}{' '}
-                * lossCost )
-            </p>
+        </React.Fragment>
+    );
+};
+
+interface PlayerDecisionsComponentProps {
+    allScoreStats?: ScoreStats[];
+    outcomesSet?: OutcomesSet;
+    playerChoices?: AllScoreStatsChoicesSummary;
+    playerSettings: PlayerSettings;
+    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
+    processing: boolean;
+}
+
+export const PlayerDecisionsComponent: React.FC<PlayerDecisionsComponentProps> = (props) => {
+    return (
+        <div>
+            <h3>Player decisions</h3>
+            {props.allScoreStats !== undefined &&
+            props.outcomesSet !== undefined &&
+            props.playerChoices !== undefined ? (
+                <ComponentCore
+                    {...props}
+                    allScoreStats={props.allScoreStats}
+                    outcomesSet={props.outcomesSet}
+                    playerChoices={props.playerChoices}
+                />
+            ) : (
+                'Processing...'
+            )}
         </div>
     );
 };

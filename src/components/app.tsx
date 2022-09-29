@@ -1,61 +1,38 @@
 import React, { useEffect, useState } from 'react';
-import { dealerStandThreshold, maximumScore } from '../constants';
+import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { dealerStandThreshold } from '../constants';
 import {
     getAllHands,
     getAllScoresStatsChoicesSummary,
     getAllScoreStats,
+    getDefaultCasinoRues,
+    getDefaultPlayerSettings,
     getOutcomesSet,
-    getStandThresholdProbabilities,
-    playerStrategyLegend
+    getStandThresholdProbabilities
 } from '../logic';
-import { DoublingMode, PlayerStrategy } from '../models';
+import { Paths } from '../models';
 import {
     AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
     OutcomesSet,
-    PlayerDecisionsOverrides,
-    ScoreStats,
-    SplitOptions
+    ScoreStats
 } from '../types';
-import { DealerScoreStatsTable } from './dealer-score-stats-table';
-import { PlayerScoreStatsTable } from './player-score-stats-table';
-import { ScoreStatsChoicesTable } from './score-stats-choices-table';
-
-const parseBustingThreshold = (bustingThreshold: string) => {
-    const parsedThreshold = parseFloat(bustingThreshold) ?? 50;
-    const effectiveThreshold = Math.min(100, Math.max(0, parsedThreshold));
-    return effectiveThreshold;
-};
-
-const parseStandThreshold = (standThreshold: string) => {
-    const parsedThreshold = parseInt(standThreshold) || 16;
-    const effectiveThreshold = Math.min(maximumScore, Math.max(4, parsedThreshold));
-    return effectiveThreshold;
-};
+import { CasinoRulesComponent } from './casino-rules';
+import { DealerCards } from './dealer-cards';
+import { Legend } from './legend';
+import { NavBar } from './nav-bar';
+import { PlayerDecisionsComponent } from './player-decisions';
+import { PlayerScores } from './player-scores';
+import { PlayerStrategyComponent } from './player-strategy';
 
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
-    const [blackjackPayout, setBlackjackPayout] = useState(true);
-    const [bustingThreshold, setBustingThreshold] = useState('50');
+    const [casinoRules, setCasinoRules] = useState(getDefaultCasinoRues());
     const [dealerProbabilities, setDealerProbabilities] = useState<FinalScoresDictionary>();
-    const [doublingMode, setDoublingMode] = useState<DoublingMode>(
-        DoublingMode.nine_ten_eleven_plus_soft
-    );
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
     const [playerChoices, setPlayerChoices] = useState<AllScoreStatsChoicesSummary>();
-    const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
-    const [playerDecisionsOverrides, setPlayerDecisionsOverrides] =
-        useState<PlayerDecisionsOverrides>({});
-    const [playerStrategy, setPlayerStrategy] = useState<PlayerStrategy>(
-        PlayerStrategy.maximumPayout_hit_stand_double_split
-    );
     const [processing, setProcessing] = useState(true);
-    const [splitOptions, setSplitOptions] = useState<SplitOptions>({
-        allowed: true,
-        blackjackAfterSplit: false,
-        hitSplitAces: false
-    });
-    const [standThreshold, setStandThreshold] = useState('16');
+    const [playerSettings, setPlayerSettings] = useState(getDefaultPlayerSettings());
 
     // outcomesSet and dealerProbabilities are constant regardless the active settings
     useEffect(() => {
@@ -83,35 +60,22 @@ export const App: React.FC = () => {
     // (could be done with a setTimeout, but safer to trigger an additional render cycle)
     useEffect(() => {
         setProcessing(true);
-    }, [
-        blackjackPayout,
-        bustingThreshold,
-        doublingMode,
-        playerStrategy,
-        playerDecisionsOverrides,
-        splitOptions,
-        standThreshold
-    ]);
+    }, [casinoRules, playerSettings]);
 
     // allScoreStats and playerChoices must be recomputed upon settings change
     useEffect(() => {
         if (processing && outcomesSet !== undefined && dealerProbabilities !== undefined) {
-            const nextAllHands = getAllHands(outcomesSet, splitOptions);
+            const nextAllHands = getAllHands(outcomesSet, casinoRules.splitOptions);
             const nextAllScoreStats = getAllScoreStats({
                 allHands: nextAllHands,
                 outcomesSet
             });
             const nextPlayerChoices = getAllScoresStatsChoicesSummary({
+                ...casinoRules,
+                ...playerSettings,
                 allScoreStats: nextAllScoreStats,
-                blackjackPayout,
-                bustingThreshold: parseBustingThreshold(bustingThreshold),
                 dealerProbabilities,
-                doublingMode,
-                outcomesSet,
-                playerDecisionsOverrides,
-                playerStrategy,
-                splitOptions,
-                standThreshold: parseStandThreshold(standThreshold)
+                outcomesSet
             });
 
             setAllScoreStats(nextAllScoreStats);
@@ -122,182 +86,72 @@ export const App: React.FC = () => {
 
     return (
         <div>
-            <h3>Settings</h3>
-            <p>Player strategy:</p>
-            {Object.values(PlayerStrategy).map((playerStrategyOption) => (
-                <React.Fragment key={playerStrategyOption}>
-                    <input
-                        checked={playerStrategy === playerStrategyOption}
-                        disabled={processing}
-                        name="player-strategy"
-                        onChange={(option) =>
-                            setPlayerStrategy(option.target.value as PlayerStrategy)
-                        }
-                        type="radio"
-                        value={playerStrategyOption}
-                    />
-                    {playerStrategyLegend[playerStrategyOption]}
-
-                    {playerStrategyOption === PlayerStrategy.standThreshold && (
-                        <React.Fragment>
-                            <input
-                                disabled={
-                                    processing || playerStrategy !== PlayerStrategy.standThreshold
-                                }
-                                onBlur={() => {
-                                    setStandThreshold(String(parseStandThreshold(standThreshold)));
-                                }}
-                                onChange={(event) => {
-                                    setStandThreshold(event.target.value);
-                                }}
-                                type="number"
-                                value={standThreshold}
-                                style={{ width: 40 }}
-                            />{' '}
-                            (4 to 21)
-                        </React.Fragment>
-                    )}
-
-                    {playerStrategyOption === PlayerStrategy.bustingThreshold && (
-                        <React.Fragment>
-                            <input
-                                disabled={
-                                    processing || playerStrategy !== PlayerStrategy.bustingThreshold
-                                }
-                                onBlur={() => {
-                                    setBustingThreshold(
-                                        String(parseBustingThreshold(bustingThreshold))
-                                    );
-                                }}
-                                onChange={(event) => {
-                                    setBustingThreshold(event.target.value);
-                                }}
-                                step={10}
-                                type="number"
-                                value={bustingThreshold}
-                                style={{ width: 40 }}
+            <BrowserRouter basename="/blackjack-odds">
+                <NavBar />
+                <Routes>
+                    <Route
+                        path={Paths.casinoRules}
+                        element={
+                            <CasinoRulesComponent
+                                casinoRules={casinoRules}
+                                casinoRulesSetter={setCasinoRules}
+                                processing={processing}
                             />
-                            % (0 to 100)
-                        </React.Fragment>
-                    )}
-
-                    <br />
-                </React.Fragment>
-            ))}
-            <br />
-            Doubling mode:{' '}
-            <select
-                disabled={processing}
-                onChange={(event) => {
-                    const nextDoublingMode = event.target.value as DoublingMode;
-                    setDoublingMode(nextDoublingMode);
-                }}
-                value={doublingMode}
-            >
-                {Object.values(DoublingMode).map((doublingMode) => (
-                    <option key={doublingMode} value={doublingMode}>
-                        {doublingMode}
-                    </option>
-                ))}
-            </select>
-            <br />
-            <input
-                checked={splitOptions.allowed}
-                disabled={processing}
-                onChange={(event) => {
-                    const nextSplitAllowed = event.target.checked;
-                    setSplitOptions({
-                        allowed: nextSplitAllowed,
-                        blackjackAfterSplit: nextSplitAllowed
-                            ? splitOptions.blackjackAfterSplit
-                            : false,
-                        hitSplitAces: nextSplitAllowed ? splitOptions.hitSplitAces : false
-                    });
-                }}
-                type="checkbox"
-            />
-            Split allowed
-            <br />
-            <div style={{ paddingLeft: 24 }}>
-                <input
-                    checked={splitOptions.blackjackAfterSplit}
-                    disabled={processing || !splitOptions.allowed}
-                    onChange={(event) =>
-                        setSplitOptions({
-                            ...splitOptions,
-                            blackjackAfterSplit: event.target.checked
-                        })
-                    }
-                    type="checkbox"
-                />
-                Blackjack after split allowed (considered 21 otherwise)
-                <br />
-                <input
-                    checked={splitOptions.hitSplitAces}
-                    disabled={processing || !splitOptions.allowed}
-                    onChange={(event) =>
-                        setSplitOptions({ ...splitOptions, hitSplitAces: event.target.checked })
-                    }
-                    type="checkbox"
-                />
-                Hit split spaces allowed (limiting to Stand or Split otherwise)
-                <br />
-            </div>
-            <input
-                checked={blackjackPayout}
-                disabled={processing}
-                onChange={(event) => setBlackjackPayout(event.target.checked)}
-                type="checkbox"
-            />
-            Blackjack pays 3 to 2
-            <br />
-            <input
-                checked={playerDecisionsEdit}
-                disabled={processing}
-                onChange={(event) => setPlayerDecisionsEdit(event.target.checked)}
-                type="checkbox"
-            />
-            Edit player decisions{' '}
-            <button
-                disabled={processing || Object.keys(playerDecisionsOverrides).length === 0}
-                onClick={() => {
-                    setPlayerDecisionsOverrides({});
-                }}
-                type="button"
-            >
-                Clear edits
-            </button>
-            <br />
-            <h3>Dealer card based decisions table</h3>
-            {allScoreStats !== undefined &&
-            outcomesSet !== undefined &&
-            playerChoices !== undefined ? (
-                <ScoreStatsChoicesTable
-                    allScoreStats={allScoreStats}
-                    outcomesSet={outcomesSet}
-                    playerChoices={playerChoices}
-                    playerDecisionsEdit={!processing && playerDecisionsEdit}
-                    playerDecisionsOverrides={playerDecisionsOverrides}
-                    playerDecisionsOverridesSetter={setPlayerDecisionsOverrides}
-                />
-            ) : (
-                'Processing...'
-            )}
-            <h3>Dealer cards</h3>
-            {dealerProbabilities !== undefined && outcomesSet !== undefined ? (
-                <DealerScoreStatsTable
-                    dealerProbabilities={dealerProbabilities}
-                    outcomeSet={outcomesSet}
-                />
-            ) : (
-                'Processing...'
-            )}
-            <h3>Player scores</h3>
-            {allScoreStats !== undefined ? (
-                <PlayerScoreStatsTable allScoreStats={allScoreStats} />
-            ) : (
-                'Processing...'
-            )}
+                        }
+                    />
+                    <Route
+                        path={Paths.dealerCards}
+                        element={
+                            <React.Fragment>
+                                <h3>Dealer cards</h3>
+                                {dealerProbabilities !== undefined && outcomesSet !== undefined ? (
+                                    <DealerCards
+                                        dealerProbabilities={dealerProbabilities}
+                                        outcomesSet={outcomesSet}
+                                    />
+                                ) : (
+                                    'Processing...'
+                                )}
+                            </React.Fragment>
+                        }
+                    />
+                    <Route path={Paths.legend} element={<Legend />} />
+                    <Route
+                        path={Paths.playerDecisions}
+                        element={
+                            <React.Fragment>
+                                <PlayerStrategyComponent
+                                    playerSettings={playerSettings}
+                                    playerSettingsSetter={setPlayerSettings}
+                                    processing={processing}
+                                />
+                                <PlayerDecisionsComponent
+                                    allScoreStats={allScoreStats}
+                                    outcomesSet={outcomesSet}
+                                    playerChoices={playerChoices}
+                                    playerSettings={playerSettings}
+                                    playerSettingsSetter={setPlayerSettings}
+                                    processing={processing}
+                                />
+                            </React.Fragment>
+                        }
+                    />
+                    <Route
+                        path={Paths.playerScores}
+                        element={
+                            <React.Fragment>
+                                <h3>Player scores</h3>
+                                {allScoreStats !== undefined ? (
+                                    <PlayerScores allScoreStats={allScoreStats} />
+                                ) : (
+                                    'Processing...'
+                                )}
+                            </React.Fragment>
+                        }
+                    />
+                    <Route path="*" element={<Navigate to={Paths.playerDecisions} />} />
+                </Routes>
+            </BrowserRouter>
         </div>
     );
 };

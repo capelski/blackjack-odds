@@ -5,11 +5,11 @@ import { ExpandedRows, ScoreStats } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
-interface PlayerScoreStatsTableProps {
+interface PlayerScoresProps {
     allScoreStats: ScoreStats[];
 }
 
-export const PlayerScoreStatsTable = (props: PlayerScoreStatsTableProps) => {
+export const PlayerScores = (props: PlayerScoresProps) => {
     const [expandedRows, setExpandedRows] = useState<ExpandedRows>({});
 
     const { columns, data } = useMemo(() => {
