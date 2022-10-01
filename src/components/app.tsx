@@ -17,13 +17,14 @@ import {
     OutcomesSet,
     ScoreStats
 } from '../types';
+import { AllPlayerDecisionsComponent } from './all-player-decisions';
 import { CasinoRulesComponent } from './casino-rules';
 import { DealerCards } from './dealer-cards';
 import { Legend } from './legend';
 import { NavBar } from './nav-bar';
-import { PlayerDecisionsComponent } from './player-decisions';
 import { PlayerScores } from './player-scores';
 import { PlayerStrategyComponent } from './player-strategy';
+import { ScorePlayerDecisionsComponent } from './score-player-decisions';
 
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
@@ -125,7 +126,7 @@ export const App: React.FC = () => {
                                     playerSettingsSetter={setPlayerSettings}
                                     processing={processing}
                                 />
-                                <PlayerDecisionsComponent
+                                <AllPlayerDecisionsComponent
                                     allScoreStats={allScoreStats}
                                     outcomesSet={outcomesSet}
                                     playerChoices={playerChoices}
@@ -147,6 +148,19 @@ export const App: React.FC = () => {
                                     'Processing...'
                                 )}
                             </React.Fragment>
+                        }
+                    />
+                    <Route
+                        path={Paths.scorePlayerDecisions}
+                        element={
+                            <ScorePlayerDecisionsComponent
+                                allScoreStats={allScoreStats}
+                                outcomesSet={outcomesSet}
+                                playerChoices={playerChoices}
+                                playerSettings={playerSettings}
+                                playerSettingsSetter={setPlayerSettings}
+                                processing={processing}
+                            />
                         }
                     />
                     <Route path="*" element={<Navigate to={Paths.playerDecisions} />} />

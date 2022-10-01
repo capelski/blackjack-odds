@@ -3,5 +3,6 @@ export enum Paths {
     dealerCards = '/dealer-cards',
     legend = '/legend',
     playerDecisions = '/player-decisions',
-    playerScores = '/player-scores'
+    playerScores = '/player-scores',
+    scorePlayerDecisions = '/player-decisions/:scoreKey'
 }
