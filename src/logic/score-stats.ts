@@ -1,4 +1,5 @@
-import { handKeySeparator, ScoreKey, scoreKeySeparator } from '../models';
+import { handKeySeparator, scoreKeySeparator } from '../constants';
+import { ScoreKey } from '../models';
 import { Dictionary, Hand, OutcomesSet, ScoreStats } from '../types';
 
 /**

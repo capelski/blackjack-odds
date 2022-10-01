@@ -1,13 +1,6 @@
 import toposort from 'toposort';
-import { blackjackScore, maximumScore } from '../constants';
-import {
-    CardSymbol,
-    DoublingMode,
-    doublingModeSeparator,
-    handKeySeparator,
-    ScoreKey,
-    scoreKeySeparator
-} from '../models';
+import { blackjackScore, handKeySeparator, maximumScore, scoreKeySeparator } from '../constants';
+import { CardSymbol, DoublingMode, doublingModeSeparator, ScoreKey } from '../models';
 import { CardOutcome, Dictionary, Hand, OutcomesSet, SplitOptions } from '../types';
 import { cartesianProduct, removeDuplicates } from '../utils';
 

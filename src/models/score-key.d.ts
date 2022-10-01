@@ -1,6 +1,3 @@
-export const handKeySeparator = ',';
-export const scoreKeySeparator = '/';
-
 export enum ScoreKey {
     hard2 = '2',
     hard3 = '3',
@@ -22,20 +19,19 @@ export enum ScoreKey {
     hard19 = '19',
     hard20 = '20',
     hard21 = '21',
-    // Required to compute correct dealer's blackjack probabilities
-    figure = 'F',
+    figure = 'F', // Required to compute correct dealer's blackjack probabilities
     blackjack = 'BJ',
-    soft11 = '1/11',
-    soft12 = '2/12',
-    soft13 = '3/13',
-    soft14 = '4/14',
-    soft15 = '5/15',
-    soft16 = '6/16',
-    soft17 = '7/17',
-    soft18 = '8/18',
-    soft19 = '9/19',
-    soft20 = '10/20',
-    soft21 = '11/21',
+    soft11 = '1-11',
+    soft12 = '2-12',
+    soft13 = '3-13',
+    soft14 = '4-14',
+    soft15 = '5-15',
+    soft16 = '6-16',
+    soft17 = '7-17',
+    soft18 = '8-18',
+    soft19 = '9-19',
+    soft20 = '10-20',
+    soft21 = '11-21',
     split2s = '2,2',
     split3s = '3,3',
     split4s = '4,4',
