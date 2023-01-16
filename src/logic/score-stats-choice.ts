@@ -2,6 +2,7 @@ import { DoublingMode, PlayerStrategy, ScoreKey } from '../models';
 import {
     AllScoreStatsChoices,
     AllScoreStatsChoicesSummary,
+    FinalScoreProbabilities,
     FinalScoresDictionary,
     OutcomesSet,
     PlayerDecisionsOverrides,
@@ -13,6 +14,7 @@ import {
 } from '../types';
 import { getAllDecisionsData, getPlayerChoice } from './decision-data';
 import { mergeOutcomesByOutcomeSet, mergeOutcomesByInitialHands } from './decision-outcome';
+import { mergeProbabilities, weightProbabilities } from './final-score-probabilities';
 
 type ScoreStatsChoiceBaseParameters = {
     blackjackPayout: boolean;
@@ -47,7 +49,8 @@ const getScoreStatsDealerCardChoice = (
 
     return {
         choice,
-        decisions
+        decisions,
+        finalScoreProbabilities: decisions[choice].finalProbabilities
     };
 };
 
@@ -76,7 +79,15 @@ const getScoreStatsChoice = (
 
     return {
         decisionOutcome,
-        dealerCardChoices
+        dealerCardChoices,
+        finalScoreProbabilities: Object.keys(dealerCardChoices)
+            .map((dealerCardKey: ScoreKey) =>
+                weightProbabilities(
+                    dealerCardChoices[dealerCardKey].finalScoreProbabilities,
+                    params.outcomesSet.allWeights[dealerCardKey]
+                )
+            )
+            .reduce(mergeProbabilities, <FinalScoreProbabilities>{})
     };
 };
 

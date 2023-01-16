@@ -6,7 +6,7 @@ interface RoundedFloatProps {
     value: number;
 }
 
-const getRoundedFloat = (value: number, isPercentage = true): string => {
+export const getRoundedFloat = (value: number, isPercentage = true): string => {
     const scale = Math.pow(10, decimalsNumber);
     const roundedValue = Math.round(value * scale * (isPercentage ? 100 : 1)) / scale;
     const prefix = value > 0 && roundedValue === 0 ? '~' : '';

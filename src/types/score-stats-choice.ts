@@ -2,6 +2,7 @@ import { PlayerDecision, ScoreKey } from '../models';
 import { AllDecisionsData } from './decision-data';
 import { DecisionOutcome } from './decision-outcome';
 import { Dictionary } from './dictionary';
+import { FinalScoreProbabilities } from './final-score-probabilities';
 
 /**
  * A dictionary containing an aggregated decision outcome for each possible score
@@ -23,10 +24,10 @@ export type AllScoreStatsChoicesSummary = {
  *
  * For example:
  * {
- *      1/11: { choice: 'Hit', decisions: { ... } },
- *      2: { choice: 'Hit', decisions: { ... } },
+ *      1/11: { choice: 'Hit', decisions: { ... }, finalScoreProbabilities: { ... } },
+ *      2: { choice: 'Hit', decisions: { ... }, finalScoreProbabilities: { ... } },
  *      ...
- *      10: { choice: 'Hit', decisions: { ... } },
+ *      10: { choice: 'Hit', decisions: { ... }, finalScoreProbabilities: { ... } },
  * }
  */
 export type ScoreStatsAllDealerCardChoices = Dictionary<ScoreStatsDealerCardChoice, ScoreKey>;
@@ -38,6 +39,7 @@ export type ScoreStatsAllDealerCardChoices = Dictionary<ScoreStatsDealerCardChoi
 export type ScoreStatsChoice = {
     dealerCardChoices: ScoreStatsAllDealerCardChoices;
     decisionOutcome: DecisionOutcome;
+    finalScoreProbabilities: FinalScoreProbabilities;
 };
 
 /**
@@ -51,10 +53,16 @@ export type ScoreStatsChoice = {
  *          Hit: { ... },
  *          Stand: { ... },
  *          ...
+ *      },
+ *      finalScoreProbabilities:  * {
+ *          17: 0.0769,
+ *          18: 0.0769,
+ *          ...
  *      }
  * }
  */
 export type ScoreStatsDealerCardChoice = {
     choice: PlayerDecision;
     decisions: AllDecisionsData;
+    finalScoreProbabilities: FinalScoreProbabilities;
 };

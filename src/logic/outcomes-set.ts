@@ -1,5 +1,5 @@
 import { CardSymbol, ScoreKey } from '../models';
-import { CardOutcome, OutcomesSet } from '../types';
+import { CardOutcome, Dictionary, OutcomesSet } from '../types';
 
 /**
  * Returns the set of outcomes available (i.e. cards and weights)
@@ -19,9 +19,16 @@ export const getOutcomesSet = (): OutcomesSet => {
         { key: ScoreKey.soft11, symbol: CardSymbol.ace, values: [1, 11], weight: 1 }
     ];
     const totalWeight = allOutcomes.reduce((reduced, next) => reduced + next.weight, 0);
+    const allWeights = allOutcomes.reduce((reduced, cardOutcome) => {
+        return {
+            ...reduced,
+            [cardOutcome.key]: cardOutcome.weight / totalWeight
+        };
+    }, <Dictionary<number, ScoreKey>>{});
 
     return {
         allOutcomes,
+        allWeights,
         totalWeight
     };
 };
