@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { maximumScore } from '../constants';
 import { playerStrategyLegend } from '../logic';
 import { PlayerStrategy } from '../models';
@@ -23,8 +23,17 @@ const parseStandThreshold = (standThreshold: string) => {
 };
 
 export const PlayerStrategyComponent: React.FC<PlayerStrategyComponentProps> = (props) => {
-    const [bustingThreshold, setBustingThreshold] = useState('50');
-    const [standThreshold, setStandThreshold] = useState('16');
+    const [bustingThreshold, setBustingThreshold] = useState(
+        String(props.playerSettings.bustingThreshold)
+    );
+    const [standThreshold, setStandThreshold] = useState(
+        String(props.playerSettings.standThreshold)
+    );
+
+    useEffect(() => {
+        setBustingThreshold(String(props.playerSettings.bustingThreshold));
+        setStandThreshold(String(props.playerSettings.standThreshold));
+    }, [props.playerSettings]);
 
     return (
         <React.Fragment>
