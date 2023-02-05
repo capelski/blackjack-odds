@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { maximumScore } from '../constants';
+import { defaultBustingThreshold, defaultStandThreshold, maximumScore } from '../constants';
 import { playerStrategyLegend } from '../logic';
-import { PlayerStrategy } from '../models';
+import { PlayerDecision, PlayerStrategy } from '../models';
 import { PlayerSettings } from '../types';
 
 interface PlayerStrategyComponentProps {
@@ -10,29 +10,35 @@ interface PlayerStrategyComponentProps {
     processing: boolean;
 }
 
+const getHitLimit = (standThreshold: number) => standThreshold - 1;
+
 const parseBustingThreshold = (bustingThreshold: string) => {
-    const parsedThreshold = parseFloat(bustingThreshold) ?? 50;
+    const parsedThreshold = parseFloat(bustingThreshold) ?? defaultBustingThreshold;
     const effectiveThreshold = Math.min(100, Math.max(0, parsedThreshold));
     return effectiveThreshold;
 };
 
-const parseStandThreshold = (standThreshold: string) => {
-    const parsedThreshold = parseInt(standThreshold) || 16;
-    const effectiveThreshold = Math.min(maximumScore, Math.max(4, parsedThreshold));
-    return effectiveThreshold;
+const parseStandThreshold = (hitLimit: string) => {
+    const parsedHitLimit = parseInt(hitLimit) || getHitLimit(defaultStandThreshold);
+    const hitLimitMax = maximumScore - 1;
+    const hitLimitMin = 3;
+    const effectiveHitLimit = Math.min(hitLimitMax, Math.max(hitLimitMin, parsedHitLimit));
+    return effectiveHitLimit + 1;
 };
 
 export const PlayerStrategyComponent: React.FC<PlayerStrategyComponentProps> = (props) => {
     const [bustingThreshold, setBustingThreshold] = useState(
         String(props.playerSettings.bustingThreshold)
     );
-    const [standThreshold, setStandThreshold] = useState(
-        String(props.playerSettings.standThreshold)
+    const [hitLimit, setHitLimit] = useState(
+        String(getHitLimit(props.playerSettings.standThreshold))
     );
+    const [pendingChanges, setPendingChanges] = useState(false);
 
     useEffect(() => {
         setBustingThreshold(String(props.playerSettings.bustingThreshold));
-        setStandThreshold(String(props.playerSettings.standThreshold));
+        setHitLimit(String(getHitLimit(props.playerSettings.standThreshold)));
+        setPendingChanges(false);
     }, [props.playerSettings]);
 
     return (
@@ -53,10 +59,10 @@ export const PlayerStrategyComponent: React.FC<PlayerStrategyComponentProps> = (
                         type="radio"
                         value={playerStrategyOption}
                     />
-                    {playerStrategyLegend[playerStrategyOption]}
 
-                    {playerStrategyOption === PlayerStrategy.standThreshold && (
+                    {playerStrategyOption === PlayerStrategy.standThreshold ? (
                         <React.Fragment>
+                            {PlayerDecision.hit} until{' '}
                             <input
                                 disabled={
                                     props.processing ||
@@ -66,21 +72,24 @@ export const PlayerStrategyComponent: React.FC<PlayerStrategyComponentProps> = (
                                 onBlur={() => {
                                     props.playerSettingsSetter({
                                         ...props.playerSettings,
-                                        standThreshold: parseStandThreshold(standThreshold)
+                                        standThreshold: parseStandThreshold(hitLimit)
                                     });
                                 }}
                                 onChange={(event) => {
-                                    setStandThreshold(event.target.value);
+                                    setHitLimit(event.target.value);
+                                    setPendingChanges(true);
                                 }}
                                 type="number"
-                                value={standThreshold}
+                                value={hitLimit}
                                 style={{ width: 40 }}
                             />{' '}
-                            (4 to 21)
+                            {props.playerSettings.playerStrategy ===
+                                PlayerStrategy.standThreshold &&
+                                pendingChanges &&
+                                '⌛️ '}
+                            (inclusive) then {PlayerDecision.stand}
                         </React.Fragment>
-                    )}
-
-                    {playerStrategyOption === PlayerStrategy.bustingThreshold && (
+                    ) : playerStrategyOption === PlayerStrategy.bustingThreshold ? (
                         <React.Fragment>
                             <input
                                 disabled={
@@ -96,14 +105,22 @@ export const PlayerStrategyComponent: React.FC<PlayerStrategyComponentProps> = (
                                 }}
                                 onChange={(event) => {
                                     setBustingThreshold(event.target.value);
+                                    setPendingChanges(true);
                                 }}
                                 step={10}
                                 type="number"
                                 value={bustingThreshold}
                                 style={{ width: 40 }}
                             />
-                            % (0 to 100)
+                            %{' '}
+                            {props.playerSettings.playerStrategy ===
+                                PlayerStrategy.bustingThreshold &&
+                                pendingChanges &&
+                                '⌛️ '}
+                            (0 to 100)
                         </React.Fragment>
+                    ) : (
+                        playerStrategyLegend[playerStrategyOption]
                     )}
 
                     <br />
