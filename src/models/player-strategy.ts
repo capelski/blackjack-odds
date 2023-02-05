@@ -1,6 +1,5 @@
 export enum PlayerStrategy {
     standThreshold = 'standThreshold',
-    bustingThreshold = 'bustingThreshold',
     hitBusting_standLessThanDealer = 'hitBusting_standLessThanDealer',
     hitBustingOrLower_standLessThanDealer = 'hitBustingOrLower_standLessThanDealer',
     minimumLoss_hit_stand = 'minimumLoss_hit_stand',

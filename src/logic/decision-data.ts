@@ -37,7 +37,6 @@ const hitStandComparison = ({ hit, stand }: { hit: DecisionData; stand: Decision
 
 const playerStrategyPredicates: Dictionary<
     ({
-        bustingThreshold,
         double,
         effectiveScore,
         hit,
@@ -45,7 +44,6 @@ const playerStrategyPredicates: Dictionary<
         stand,
         standThreshold
     }: {
-        bustingThreshold: number;
         double: DecisionData;
         effectiveScore: number;
         hit: DecisionData;
@@ -57,11 +55,6 @@ const playerStrategyPredicates: Dictionary<
 > = {
     [PlayerStrategy.standThreshold]: ({ effectiveScore, standThreshold }) => {
         return effectiveScore < standThreshold ? PlayerDecision.hit : PlayerDecision.stand;
-    },
-    [PlayerStrategy.bustingThreshold]: ({ bustingThreshold, hit }) => {
-        return hit.probabilityBreakdown.playerBusting < bustingThreshold / 100 && hit.available
-            ? PlayerDecision.hit
-            : PlayerDecision.stand;
     },
     [PlayerStrategy.hitBusting_standLessThanDealer]: ({ hit, stand }) => {
         return hit.probabilityBreakdown.playerBusting <
@@ -360,13 +353,11 @@ export const getAllDecisionsData = ({
 
 export const getPlayerChoice = ({
     allDecisionsData,
-    bustingThreshold,
     effectiveScore,
     playerStrategy,
     standThreshold
 }: {
     allDecisionsData: AllDecisionsData;
-    bustingThreshold: number;
     effectiveScore: number;
     playerStrategy: PlayerStrategy;
     standThreshold: number;
@@ -377,7 +368,6 @@ export const getPlayerChoice = ({
     const stand = allDecisionsData[PlayerDecision.stand];
 
     return playerStrategyPredicates[playerStrategy]({
-        bustingThreshold,
         double,
         effectiveScore,
         hit,
