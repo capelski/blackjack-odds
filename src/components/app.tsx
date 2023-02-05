@@ -10,7 +10,7 @@ import {
     getOutcomesSet,
     getStandThresholdProbabilities
 } from '../logic';
-import { Paths } from '../models';
+import { Paths, PlayerStrategy } from '../models';
 import {
     AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
@@ -66,7 +66,17 @@ export const App: React.FC = () => {
     // allScoreStats and playerChoices must be recomputed upon settings change
     useEffect(() => {
         if (processing && outcomesSet !== undefined && dealerProbabilities !== undefined) {
-            const nextAllHands = getAllHands(outcomesSet, casinoRules.splitOptions);
+            const effectiveSplitOptions = {
+                ...casinoRules.splitOptions,
+                allowed:
+                    casinoRules.splitOptions.allowed &&
+                    (playerSettings.playerStrategy ===
+                        PlayerStrategy.maximumPayout_hit_stand_split ||
+                        playerSettings.playerStrategy ===
+                            PlayerStrategy.maximumPayout_hit_stand_double_split)
+            };
+
+            const nextAllHands = getAllHands(outcomesSet, effectiveSplitOptions);
             const nextAllScoreStats = getAllScoreStats({
                 allHands: nextAllHands,
                 outcomesSet
@@ -76,7 +86,8 @@ export const App: React.FC = () => {
                 ...playerSettings,
                 allScoreStats: nextAllScoreStats,
                 dealerProbabilities,
-                outcomesSet
+                outcomesSet,
+                splitOptions: effectiveSplitOptions
             });
 
             setAllScoreStats(nextAllScoreStats);
