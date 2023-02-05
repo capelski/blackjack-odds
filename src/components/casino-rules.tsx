@@ -88,7 +88,7 @@ export const CasinoRulesComponent: React.FC<CasinoRulesComponentProps> = (props)
                     }}
                     type="checkbox"
                 />
-                Hit split spaces allowed (limiting to Stand or Split otherwise)
+                Hit split Aces allowed (limiting to Stand or Split otherwise)
                 <br />
                 <br />
             </div>
