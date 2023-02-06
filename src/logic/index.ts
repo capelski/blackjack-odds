@@ -13,7 +13,7 @@ export {
 export { canDouble, canSplit, getAllHands, isBlackjack, isBustScore } from './hand';
 export { getOutcomesSet } from './outcomes-set';
 export { getScorePlayerDecisionPath } from './paths';
-export { getDisplayPlayerDecision, isVisibleDecision } from './player-decision';
+export { getDisplayPlayerDecision, getPrimaryPlayerDecisions } from './player-decision';
 export { getDefaultPlayerSettings } from './player-settings';
 export { playerStrategyLegend } from './player-strategy';
 export { getAllScoreStats, getPlayerScoreStats } from './score-stats';

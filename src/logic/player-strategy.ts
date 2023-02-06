@@ -11,13 +11,13 @@ export const playerStrategyLegend: Dictionary<string, PlayerStrategy> = {
     [PlayerStrategy.maximumPayout_hit_stand]: `Maximize payout: ${PlayerDecision.hit}, ${PlayerDecision.stand}`,
     [PlayerStrategy.maximumPayout_hit_stand_double]: `Maximize payout: ${PlayerDecision.hit}, ${
         PlayerDecision.stand
-    }, ${getDisplayPlayerDecision(PlayerDecision.doubleHit)}`,
+    }, ${getDisplayPlayerDecision(PlayerDecision.doubleHit, { simplify: true })}`,
     [PlayerStrategy.maximumPayout_hit_stand_split]: `Maximize payout: ${PlayerDecision.hit}, ${
         PlayerDecision.stand
-    }, ${getDisplayPlayerDecision(PlayerDecision.splitHit)}`,
+    }, ${getDisplayPlayerDecision(PlayerDecision.splitHit, { simplify: true })}`,
     [PlayerStrategy.maximumPayout_hit_stand_double_split]: `Maximize payout: ${
         PlayerDecision.hit
-    }, ${PlayerDecision.stand}, ${getDisplayPlayerDecision(
-        PlayerDecision.doubleHit
-    )}, ${getDisplayPlayerDecision(PlayerDecision.splitHit)}`
+    }, ${PlayerDecision.stand}, ${getDisplayPlayerDecision(PlayerDecision.doubleHit, {
+        simplify: true
+    })}, ${getDisplayPlayerDecision(PlayerDecision.splitHit, { simplify: true })}`
 };

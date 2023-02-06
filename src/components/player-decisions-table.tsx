@@ -1,6 +1,8 @@
 import React, { CSSProperties, useMemo, useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
 import { Column, CellProps } from 'react-table';
+import { desktopBreakpoint } from '../constants';
 import { getPlayerScoreStats, getScorePlayerDecisionPath } from '../logic';
 import { ScoreKey, PlayerDecision } from '../models';
 import { ScoreStats, OutcomesSet, AllScoreStatsChoicesSummary, PlayerSettings } from '../types';
@@ -21,6 +23,7 @@ interface PlayerDecisionsTableProps {
 
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
     const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
+    const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
     const { columns, data } = useMemo(() => {
         const columns: Column<ScoreStats>[] = [];
@@ -31,23 +34,15 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
                     return (
                         <div>
-                            {cellProps.value}{' '}
-                            <span
-                                style={{
-                                    cursor: 'pointer'
-                                }}
+                            <Link
+                                to={getScorePlayerDecisionPath(cellProps.value)}
+                                style={{ color: 'black' }}
                             >
-                                <Link
-                                    to={getScorePlayerDecisionPath(cellProps.value)}
-                                    style={{ color: 'black', textDecoration: 'unset' }}
-                                >
-                                    👁️
-                                </Link>
-                            </span>
+                                {cellProps.value}
+                            </Link>
                         </div>
                     );
                 },
-                Header: 'Score',
                 id: 'score'
             });
         }
@@ -56,6 +51,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
             ...props.outcomesSet.allOutcomes.map((cardOutcome) => ({
                 Cell: ScoreStatsDealerCardChoiceCell({
                     dealerCard: cardOutcome,
+                    isDesktop,
                     isExpanded: props.expandedCells,
                     playerChoices: props.playerChoices,
                     playerDecisionsEdit,
@@ -72,6 +68,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
 
         return { columns, data };
     }, [
+        isDesktop,
         playerDecisionsEdit,
         props.allScoreStats,
         props.outcomesSet,
@@ -86,7 +83,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 columnStyle={(cellProps) => {
                     const baseStyles: CSSProperties = {
                         border: '1px solid black',
-                        padding: 0
+                        padding: '4px 0'
                     };
                     const { key } = cellProps.row.original;
                     const dealerCardKey =

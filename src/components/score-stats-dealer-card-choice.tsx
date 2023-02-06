@@ -1,13 +1,14 @@
 import React from 'react';
 import { CellProps } from 'react-table';
 import { probabilityLabels, displayProbabilityTotals } from '../constants';
-import { isVisibleDecision, getDisplayPlayerDecision } from '../logic';
+import { getDisplayPlayerDecision, getPrimaryPlayerDecisions } from '../logic';
 import { PlayerDecision } from '../models';
 import { AllScoreStatsChoicesSummary, CardOutcome, PlayerSettings, ScoreStats } from '../types';
 import { RoundedFloat } from './rounded-float';
 
 interface ScoreStatsDealerCardChoiceCellProps {
     dealerCard: CardOutcome;
+    isDesktop: boolean;
     isExpanded: boolean;
     playerChoices: AllScoreStatsChoicesSummary;
     playerDecisionsEdit: boolean;
@@ -62,7 +63,7 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
                                 ))}
                         </select>
                     ) : (
-                        choice
+                        getDisplayPlayerDecision(choice, { isDesktop: props.isDesktop })
                     )}
                 </div>
                 {props.isExpanded && (
@@ -73,17 +74,15 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
                             textAlign: 'left'
                         }}
                     >
-                        {Object.keys(decisions)
-                            .filter(
-                                (playerDecision: PlayerDecision) =>
-                                    decisions[playerDecision].available &&
-                                    isVisibleDecision(playerDecision)
-                            )
-                            .map((playerDecision: PlayerDecision) => {
+                        {getPrimaryPlayerDecisions(decisions).map(
+                            (playerDecision: PlayerDecision) => {
                                 const { outcome, probabilityBreakdown } = decisions[playerDecision];
                                 return (
                                     <React.Fragment key={playerDecision}>
-                                        {getDisplayPlayerDecision(playerDecision)} -------
+                                        {getDisplayPlayerDecision(playerDecision, {
+                                            simplify: true
+                                        })}{' '}
+                                        -------
                                         <br />
                                         {`${probabilityLabels.playerBusting}: `}
                                         <RoundedFloat value={probabilityBreakdown.playerBusting} />
@@ -152,7 +151,8 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
                                         <br />
                                     </React.Fragment>
                                 );
-                            })}
+                            }
+                        )}
                     </div>
                 )}
             </div>
