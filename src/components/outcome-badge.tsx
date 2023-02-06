@@ -1,4 +1,6 @@
 import React from 'react';
+import { useMediaQuery } from 'react-responsive';
+import { desktopBreakpoint } from '../constants';
 import { RoundedFloat } from './rounded-float';
 
 interface BadgeProps {
@@ -10,6 +12,8 @@ interface BadgeProps {
 
 export const OutcomeBadge: React.FC<BadgeProps> = (props) => {
     const color = props.color || 'white';
+    const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
+
     return (
         <div
             style={{
@@ -18,8 +22,11 @@ export const OutcomeBadge: React.FC<BadgeProps> = (props) => {
                 borderRadius: 8,
                 color,
                 flexGrow: 1,
-                margin: 8,
+                marginBottom: isDesktop ? 8 : 4,
+                marginRight: isDesktop ? 8 : 4,
                 paddingBottom: 8,
+                paddingLeft: 4,
+                paddingRight: 4,
                 paddingTop: 8,
                 textAlign: 'center'
             }}

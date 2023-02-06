@@ -8,6 +8,8 @@ export const blackjackScore = maximumScore + 0.5;
 
 export const defaultStandThreshold = 16;
 
+export const desktopBreakpoint = 768;
+
 export const handKeySeparator = ',';
 export const scoreKeySeparator = '-';
 
