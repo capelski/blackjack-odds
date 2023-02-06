@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
 import { dealerStandThreshold } from '../constants';
 import {
     getAllHands,
@@ -25,6 +25,16 @@ import { NavBar } from './nav-bar';
 import { PlayerScores } from './player-scores';
 import { PlayerStrategyComponent } from './player-strategy';
 import { ScorePlayerDecisionsComponent } from './score-player-decisions';
+
+export const ScrollToTop: React.FC = () => {
+    const { pathname } = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [pathname]);
+
+    return null;
+};
 
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
@@ -99,6 +109,7 @@ export const App: React.FC = () => {
     return (
         <div>
             <BrowserRouter basename="/blackjack-odds">
+                <ScrollToTop />
                 <NavBar />
                 <Routes>
                     <Route
