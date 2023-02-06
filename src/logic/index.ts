@@ -12,6 +12,7 @@ export {
 } from './final-score-probabilities';
 export { canDouble, canSplit, getAllHands, isBlackjack, isBustScore } from './hand';
 export { getOutcomesSet } from './outcomes-set';
+export { getScorePlayerDecisionPath } from './paths';
 export { getDisplayPlayerDecision, isVisibleDecision } from './player-decision';
 export { getDefaultPlayerSettings } from './player-settings';
 export { playerStrategyLegend } from './player-strategy';

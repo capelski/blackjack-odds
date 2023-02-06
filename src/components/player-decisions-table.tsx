@@ -1,11 +1,11 @@
-import React, { useMemo, CSSProperties } from 'react';
+import React, { CSSProperties, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Column, CellProps } from 'react-table';
-import { getPlayerScoreStats } from '../logic';
-import { getScorePlayerDecisionPath } from '../logic/paths';
+import { getPlayerScoreStats, getScorePlayerDecisionPath } from '../logic';
 import { ScoreKey, PlayerDecision } from '../models';
 import { ScoreStats, OutcomesSet, AllScoreStatsChoicesSummary, PlayerSettings } from '../types';
 import { CustomTable } from './custom-table';
+import { EditPlayerDecisions } from './edit-player-decisions';
 import { ScoreStatsDealerCardChoiceCell } from './score-stats-dealer-card-choice';
 
 interface PlayerDecisionsTableProps {
@@ -13,7 +13,6 @@ interface PlayerDecisionsTableProps {
     expandedCells: boolean;
     outcomesSet: OutcomesSet;
     playerChoices: AllScoreStatsChoicesSummary;
-    playerDecisionsEdit: boolean;
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
@@ -21,6 +20,8 @@ interface PlayerDecisionsTableProps {
 }
 
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
+    const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
+
     const { columns, data } = useMemo(() => {
         const columns: Column<ScoreStats>[] = [];
 
@@ -57,7 +58,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                     dealerCard: cardOutcome,
                     isExpanded: props.expandedCells,
                     playerChoices: props.playerChoices,
-                    playerDecisionsEdit: props.playerDecisionsEdit,
+                    playerDecisionsEdit,
                     playerSettings: props.playerSettings,
                     playerSettingsSetter: props.playerSettingsSetter,
                     processing: props.processing
@@ -71,75 +72,89 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
 
         return { columns, data };
     }, [
+        playerDecisionsEdit,
         props.allScoreStats,
         props.outcomesSet,
         props.playerChoices,
-        props.playerDecisionsEdit,
         props.playerSettings
     ]);
 
     return (
-        <CustomTable
-            columns={columns}
-            columnStyle={(cellProps) => {
-                const baseStyles: CSSProperties = {
-                    border: '1px solid black',
-                    padding: 0
-                };
-                const { key } = cellProps.row.original;
-                const dealerCardKey =
-                    cellProps.column.id === 'score' ? undefined : (cellProps.column.id as ScoreKey);
-                const scoreStatsChoice = props.playerChoices.choices[key];
+        <React.Fragment>
+            <CustomTable
+                columns={columns}
+                columnStyle={(cellProps) => {
+                    const baseStyles: CSSProperties = {
+                        border: '1px solid black',
+                        padding: 0
+                    };
+                    const { key } = cellProps.row.original;
+                    const dealerCardKey =
+                        cellProps.column.id === 'score'
+                            ? undefined
+                            : (cellProps.column.id as ScoreKey);
+                    const scoreStatsChoice = props.playerChoices.choices[key];
 
-                /* scoreStatsChoice might be undefined during settings re-processing */
-                if (!scoreStatsChoice || !dealerCardKey) {
-                    return baseStyles;
-                }
+                    /* scoreStatsChoice might be undefined during settings re-processing */
+                    if (!scoreStatsChoice || !dealerCardKey) {
+                        return baseStyles;
+                    }
 
-                if (props.playerSettings.playerDecisionsOverrides[key]?.[dealerCardKey]) {
-                    baseStyles.border = '2px solid coral';
-                }
+                    if (props.playerSettings.playerDecisionsOverrides[key]?.[dealerCardKey]) {
+                        baseStyles.border = '2px solid coral';
+                    }
 
-                const { choice } = scoreStatsChoice.dealerCardChoices[dealerCardKey];
-                const actionStyles: CSSProperties =
-                    choice === PlayerDecision.doubleHit
-                        ? {
-                              backgroundColor: 'goldenrod',
-                              color: 'black'
-                          }
-                        : choice === PlayerDecision.doubleStand
-                        ? {
-                              backgroundColor: 'darkgoldenrod',
-                              color: 'black'
-                          }
-                        : choice === PlayerDecision.hit
-                        ? {
-                              backgroundColor: 'rgb(66, 139, 202)',
-                              color: 'white'
-                          }
-                        : choice === PlayerDecision.splitHit
-                        ? {
-                              backgroundColor: '#9A6F93',
-                              color: 'white'
-                          }
-                        : choice === PlayerDecision.splitStand
-                        ? {
-                              backgroundColor: '#80567A',
-                              color: 'white'
-                          }
-                        : choice === PlayerDecision.stand
-                        ? {
-                              backgroundColor: 'rgb(92, 184, 92)'
-                          }
-                        : {};
+                    const { choice } = scoreStatsChoice.dealerCardChoices[dealerCardKey];
+                    const actionStyles: CSSProperties =
+                        choice === PlayerDecision.doubleHit
+                            ? {
+                                  backgroundColor: 'goldenrod',
+                                  color: 'black'
+                              }
+                            : choice === PlayerDecision.doubleStand
+                            ? {
+                                  backgroundColor: 'darkgoldenrod',
+                                  color: 'black'
+                              }
+                            : choice === PlayerDecision.hit
+                            ? {
+                                  backgroundColor: 'rgb(66, 139, 202)',
+                                  color: 'white'
+                              }
+                            : choice === PlayerDecision.splitHit
+                            ? {
+                                  backgroundColor: '#9A6F93',
+                                  color: 'white'
+                              }
+                            : choice === PlayerDecision.splitStand
+                            ? {
+                                  backgroundColor: '#80567A',
+                                  color: 'white'
+                              }
+                            : choice === PlayerDecision.stand
+                            ? {
+                                  backgroundColor: 'rgb(92, 184, 92)'
+                              }
+                            : {};
 
-                return {
-                    ...baseStyles,
-                    ...actionStyles
-                };
-            }}
-            data={data}
-            width="100%"
-        />
+                    return {
+                        ...baseStyles,
+                        ...actionStyles
+                    };
+                }}
+                data={data}
+                width="100%"
+            />
+            <br />
+            <EditPlayerDecisions
+                playerDecisionsEdit={playerDecisionsEdit}
+                playerDecisionsEditSetter={setPlayerDecisionsEdit}
+                playerSettings={props.playerSettings}
+                playerSettingsSetter={props.playerSettingsSetter}
+                processing={props.processing}
+            />
+            <br />
+            <br />
+        </React.Fragment>
     );
 };
