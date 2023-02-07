@@ -2,8 +2,9 @@ const PrerenderSPAPlugin = require('@dreysolano/prerender-spa-plugin');
 const path = require('path');
 const { merge } = require('webpack-merge');
 const baseConfig = require('./base.config');
-const { Paths } = require('../src/models/paths.js');
-const { ScoreKey } = require('../src/models/score-key.js');
+// The following files are generated via npm script from the corresponding TS version
+const { Paths } = require('../src/models/webpack-paths');
+const { ScoreKey } = require('../src/models/webpack-score-key');
 
 const routes = [
     Paths.casinoRules,
