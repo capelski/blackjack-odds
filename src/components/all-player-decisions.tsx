@@ -1,6 +1,5 @@
 import React from 'react';
 import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
-import { OutcomeComponent } from './outcome';
 import { PlayerDecisionsTable } from './player-decisions-table';
 
 interface AllPlayerDecisionsComponentProps {
@@ -16,8 +15,6 @@ export const AllPlayerDecisionsComponent: React.FC<AllPlayerDecisionsComponentPr
     return (
         <div>
             <h3>Player decisions</h3>
-            <OutcomeComponent outcome={props.playerChoices?.outcome} />
-            <br />
             {props.outcomesSet !== undefined && props.playerChoices !== undefined ? (
                 <PlayerDecisionsTable
                     {...props}

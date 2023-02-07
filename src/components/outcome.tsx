@@ -13,7 +13,7 @@ export const OutcomeComponent: React.FC<OutcomeComponentProps> = (props) => {
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
     return (
-        <React.Fragment>
+        <div style={{ marginTop: 16 }}>
             <div
                 style={{
                     display: 'grid',
@@ -53,6 +53,6 @@ export const OutcomeComponent: React.FC<OutcomeComponentProps> = (props) => {
                     <RoundedFloat value={props.outcome?.totalProbability || 0} />
                 </p>
             )}
-        </React.Fragment>
+        </div>
     );
 };

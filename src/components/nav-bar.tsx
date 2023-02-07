@@ -31,8 +31,8 @@ export const NavBar: React.FC = () => {
             <StyledLink location={location} to={Paths.playerDecisions}>
                 Player decisions
             </StyledLink>
-            <StyledLink location={location} to={Paths.casinoRules}>
-                Casino rules
+            <StyledLink location={location} to={Paths.strategyAndRules}>
+                Strategy/Rules
             </StyledLink>
             <StyledLink location={location} to={Paths.playerScores}>
                 Player scores

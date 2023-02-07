@@ -7,10 +7,10 @@ const { Paths } = require('../src/models/webpack-paths');
 const { ScoreKey } = require('../src/models/webpack-score-key');
 
 const routes = [
-    Paths.casinoRules,
     Paths.dealerCards,
     Paths.legend,
     Paths.playerDecisions,
+    Paths.strategyAndRules,
     ...Object.values(ScoreKey).map((scoreKey) => {
         return Paths.scorePlayerDecisions.replace(':scoreKey', scoreKey);
     })
