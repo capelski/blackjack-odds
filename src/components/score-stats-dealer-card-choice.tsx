@@ -56,11 +56,18 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
                                     (playerDecision: PlayerDecision) =>
                                         decisions[playerDecision].available
                                 )
-                                .map((playerDecision) => (
-                                    <option key={playerDecision} value={playerDecision}>
-                                        {playerDecision}
-                                    </option>
-                                ))}
+                                .map((playerDecision) => {
+                                    const option = getDisplayPlayerDecision(
+                                        playerDecision as PlayerDecision,
+                                        { isDesktop: props.isDesktop }
+                                    );
+
+                                    return (
+                                        <option key={option} value={playerDecision}>
+                                            {option}
+                                        </option>
+                                    );
+                                })}
                         </select>
                     ) : (
                         getDisplayPlayerDecision(choice, { isDesktop: props.isDesktop })
