@@ -4,12 +4,10 @@
     "description": "",
     "main": "index.js",
     "scripts": {
-        "build": "npm run clean:build && npm run compile:enums && npm run compile",
+        "build": "npm run clean:build && npm run compile:routes && npm run compile",
         "clean:build": "rm -rf docs",
         "compile": "webpack --config webpack/production.config.js",
-        "compile:enums": "npm run compile:paths && npm run compile:score-key",
-        "compile:paths": "tsc src/models/paths.ts && mv src/models/paths.js src/models/webpack-paths.js",
-        "compile:score-key": "tsc src/models/score-key.ts && mv src/models/score-key.js src/models/webpack-score-key.js",
+        "compile:routes": "rm -rf webpack/routes && tsc src/logic/paths.ts --outDir webpack/routes",
         "compile:ts": "tsc --noEmit -p tsconfig.json",
         "start": "node index.js",
         "start:dev": "webpack serve --config webpack/development.config.js"
