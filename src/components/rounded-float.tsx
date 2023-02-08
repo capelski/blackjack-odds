@@ -1,7 +1,8 @@
 import React from 'react';
-import { decimalsNumber } from '../constants';
+import { decimalsNumber as defaultDecimalsNumber } from '../constants';
 
 interface RoundedFloatProps {
+    decimalsNumber?: number;
     displayPercent?: boolean;
     isPercentage?: boolean;
     value: number;
@@ -10,7 +11,8 @@ interface RoundedFloatProps {
 export const getRoundedFloat = (
     value: number,
     isPercentage = true,
-    displayPercent = true
+    displayPercent = true,
+    decimalsNumber = defaultDecimalsNumber
 ): string => {
     const scale = Math.pow(10, decimalsNumber);
     const roundedValue = Math.round(value * scale * (isPercentage ? 100 : 1)) / scale;
@@ -23,7 +25,12 @@ export const getRoundedFloat = (
 export const RoundedFloat: React.FC<RoundedFloatProps> = (props) => {
     const displayPercent = props.displayPercent === undefined || props.displayPercent;
     const isPercentage = props.isPercentage === undefined || props.isPercentage;
-    const roundedValue = getRoundedFloat(props.value, isPercentage, displayPercent);
+    const roundedValue = getRoundedFloat(
+        props.value,
+        isPercentage,
+        displayPercent,
+        props.decimalsNumber
+    );
 
     return <React.Fragment>{roundedValue}</React.Fragment>;
 };
