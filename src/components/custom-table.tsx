@@ -1,16 +1,60 @@
 import React, { CSSProperties } from 'react';
-import { Cell, Column, Row, useTable } from 'react-table';
+import { Cell, Column, Row, TableInstance, TableOptions, useTable } from 'react-table';
 
-interface CustomTableProps<T extends {}> {
-    columns: Column<T>[];
-    columnStyle?: (cell: Cell<T>) => CSSProperties | undefined;
-    data: T[];
-    rowStyle?: (row: Row<T>) => CSSProperties | undefined;
+export type CustomCell<TData extends {}, TColumn extends Column<TData>> = Omit<
+    Cell<TData>,
+    'column'
+> & {
+    column: TColumn;
+};
+
+export type CustomColumn<TData extends object, TAdditionalProps extends object> = Column<TData> &
+    TAdditionalProps;
+
+export type CustomRow<TData extends {}, TColumn extends Column<TData>> = Omit<
+    Omit<Row<TData>, 'cells'>,
+    'column'
+> & {
+    cells: CustomCell<TData, TColumn>[];
+    column: TColumn;
+};
+
+export type CustomTableInstance<TData extends {}, TColumn extends Column<TData>> = Omit<
+    Omit<TableInstance, 'prepareRow'>,
+    'rows'
+> & {
+    prepareRow: (row: CustomRow<TData, TColumn>) => void;
+    rows: CustomRow<TData, TColumn>[];
+};
+
+export type CustomTableOptions<TData extends {}, TColumn extends Column<TData>> = Omit<
+    TableOptions<TData>,
+    'columns'
+> & {
+    columns: TColumn[];
+};
+
+function customUseTable<TData extends {}, TColumn extends Column<TData>>(
+    options: CustomTableOptions<TData, TColumn>
+) {
+    return useTable(options as TableOptions<TData>) as unknown as CustomTableInstance<
+        TData,
+        TColumn
+    >;
+}
+
+interface CustomTableProps<TData extends {}, TColumn extends Column<TData>> {
+    columns: TColumn[];
+    columnStyle?: (cell: CustomCell<TData, TColumn>) => CSSProperties | undefined;
+    data: TData[];
+    rowStyle?: (row: CustomRow<TData, TColumn>) => CSSProperties | undefined;
     width?: string | number;
 }
 
-export const CustomTable = <T extends {}>(props: CustomTableProps<T>) => {
-    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = useTable({
+export const CustomTable = <TData extends {}, TColumn extends Column<TData>>(
+    props: CustomTableProps<TData, TColumn>
+) => {
+    const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = customUseTable({
         columns: props.columns,
         data: props.data
     });
