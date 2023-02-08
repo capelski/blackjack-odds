@@ -7,7 +7,6 @@ export * from './legend';
 export * from './outcome';
 export * from './outcome-badge';
 export * from './player-decisions-table';
-export * from './player-scores';
 export * from './player-strategy';
 export * from './rounded-float';
 export * from './score-stats-dealer-card-choice';

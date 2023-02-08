@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { DealerCards, Legend, PlayerScores } from './components';
+import { DealerCards, Legend } from './components';
 import { dealerStandThreshold } from './constants';
 import {
     getAllHands,
@@ -134,19 +134,6 @@ export const App: React.FC = () => {
                                 playerSettingsSetter={setPlayerSettings}
                                 processing={processing}
                             />
-                        }
-                    />
-                    <Route
-                        path={Paths.playerScores}
-                        element={
-                            <React.Fragment>
-                                <h3>Player scores</h3>
-                                {allScoreStats !== undefined ? (
-                                    <PlayerScores allScoreStats={allScoreStats} />
-                                ) : (
-                                    'Processing...'
-                                )}
-                            </React.Fragment>
                         }
                     />
                     <Route

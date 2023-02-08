@@ -1,13 +1,14 @@
 import React, { CSSProperties, useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
-import { Column, CellProps } from 'react-table';
+import { CellProps } from 'react-table';
 import { desktopBreakpoint } from '../constants';
 import { getPlayerScoreStats, getScorePlayerDecisionPath } from '../logic';
 import { ScoreKey, PlayerDecision } from '../models';
 import { ScoreStats, OutcomesSet, AllScoreStatsChoicesSummary, PlayerSettings } from '../types';
-import { CustomTable } from './custom-table';
+import { CustomColumn, CustomTable } from './custom-table';
 import { EditPlayerDecisions } from './edit-player-decisions';
+import { RoundedFloat } from './rounded-float';
 import { ScoreStatsDealerCardChoiceCell } from './score-stats-dealer-card-choice';
 
 interface PlayerDecisionsTableProps {
@@ -21,17 +22,26 @@ interface PlayerDecisionsTableProps {
     skipIndexColumn?: boolean;
 }
 
+type ScoreStatsColumn = CustomColumn<
+    ScoreStats,
+    {
+        dealerCardKey?: ScoreKey;
+    }
+>;
+
+type ScoreStatsCellProps<T extends keyof ScoreStats> = CellProps<ScoreStats, ScoreStats[T]>;
+
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
     const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
     const { columns, data } = useMemo(() => {
-        const columns: Column<ScoreStats>[] = [];
+        const columns: ScoreStatsColumn[] = [];
 
         if (!props.skipIndexColumn) {
             columns.push({
                 accessor: 'key',
-                Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
+                Cell: (cellProps: ScoreStatsCellProps<'key'>) => {
                     return (
                         <div>
                             <Link
@@ -47,8 +57,21 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
             });
         }
 
+        columns.push({
+            accessor: 'initialHandProbability',
+            Cell: (cellProps: ScoreStatsCellProps<'initialHandProbability'>) => {
+                return (
+                    <div>
+                        <RoundedFloat displayPercent={false} value={cellProps.value} />
+                    </div>
+                );
+            },
+            Header: '%',
+            id: 'initialHandProbability'
+        });
+
         columns.push(
-            ...props.outcomesSet.allOutcomes.map((cardOutcome) => ({
+            ...props.outcomesSet.allOutcomes.map<ScoreStatsColumn>((cardOutcome) => ({
                 Cell: ScoreStatsDealerCardChoiceCell({
                     dealerCard: cardOutcome,
                     isDesktop,
@@ -60,7 +83,8 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                     processing: props.processing
                 }),
                 Header: cardOutcome.symbol,
-                id: cardOutcome.key // The column id must be the dealer card key for columnStyle to have access to it below
+                id: cardOutcome.key,
+                dealerCardKey: cardOutcome.key
             }))
         );
 
@@ -86,10 +110,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                         padding: '4px 0'
                     };
                     const { key } = cellProps.row.original;
-                    const dealerCardKey =
-                        cellProps.column.id === 'score'
-                            ? undefined
-                            : (cellProps.column.id as ScoreKey);
+                    const { dealerCardKey } = cellProps.column;
                     const scoreStatsChoice = props.playerChoices.choices[key];
 
                     /* scoreStatsChoice might be undefined during settings re-processing */
