@@ -1,12 +1,10 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
+import { OutcomeComponent, FinalProbabilitiesGraph, PlayerDecisionsTable } from '../components';
 import { ScoreKey } from '../models';
 import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
-import { FinalProbabilitiesGraph } from './final-probabilities-graph';
-import { OutcomeComponent } from './outcome';
-import { PlayerDecisionsTable } from './player-decisions-table';
 
-interface ScorePlayerDecisionsComponentProps {
+interface PlayerDecisionsScoreProps {
     allScoreStats?: ScoreStats[];
     outcomesSet?: OutcomesSet;
     playerChoices?: AllScoreStatsChoicesSummary;
@@ -15,9 +13,7 @@ interface ScorePlayerDecisionsComponentProps {
     processing: boolean;
 }
 
-export const ScorePlayerDecisionsComponent: React.FC<ScorePlayerDecisionsComponentProps> = (
-    props
-) => {
+export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props) => {
     const { scoreKey } = useParams() as { scoreKey: ScoreKey };
     const scoreStats = props.allScoreStats?.find((scoreStats) => scoreStats.key === scoreKey);
     const finalProbabilities = props.playerChoices?.choices[scoreKey]?.finalScoreProbabilities;

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { dealerStandThreshold } from '../constants';
+import { DealerCards, Legend, PlayerScores } from './components';
+import { dealerStandThreshold } from './constants';
 import {
     getAllHands,
     getAllScoresStatsChoicesSummary,
@@ -9,23 +10,15 @@ import {
     getDefaultPlayerSettings,
     getOutcomesSet,
     getStandThresholdProbabilities
-} from '../logic';
-import { Paths, PlayerStrategy } from '../models';
+} from './logic';
+import { Paths, PlayerStrategy } from './models';
 import {
     AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
     OutcomesSet,
     ScoreStats
-} from '../types';
-import { AllPlayerDecisionsComponent } from './all-player-decisions';
-import { CasinoRulesComponent } from './casino-rules';
-import { DealerCards } from './dealer-cards';
-import { Legend } from './legend';
-import { NavBar } from './nav-bar';
-import { OutcomeComponent } from './outcome';
-import { PlayerScores } from './player-scores';
-import { PlayerStrategyComponent } from './player-strategy';
-import { ScorePlayerDecisionsComponent } from './score-player-decisions';
+} from './types';
+import { NavBar, PlayerDecisionsAll, PlayerDecisionsScore, StrategyAndRules } from './views';
 
 export const ScrollToTop: React.FC = () => {
     const { pathname } = useLocation();
@@ -133,17 +126,14 @@ export const App: React.FC = () => {
                     <Route
                         path={Paths.playerDecisions}
                         element={
-                            <React.Fragment>
-                                <OutcomeComponent outcome={playerChoices?.outcome} />
-                                <AllPlayerDecisionsComponent
-                                    allScoreStats={allScoreStats}
-                                    outcomesSet={outcomesSet}
-                                    playerChoices={playerChoices}
-                                    playerSettings={playerSettings}
-                                    playerSettingsSetter={setPlayerSettings}
-                                    processing={processing}
-                                />
-                            </React.Fragment>
+                            <PlayerDecisionsAll
+                                allScoreStats={allScoreStats}
+                                outcomesSet={outcomesSet}
+                                playerChoices={playerChoices}
+                                playerSettings={playerSettings}
+                                playerSettingsSetter={setPlayerSettings}
+                                processing={processing}
+                            />
                         }
                     />
                     <Route
@@ -162,7 +152,7 @@ export const App: React.FC = () => {
                     <Route
                         path={Paths.scorePlayerDecisions}
                         element={
-                            <ScorePlayerDecisionsComponent
+                            <PlayerDecisionsScore
                                 allScoreStats={allScoreStats}
                                 outcomesSet={outcomesSet}
                                 playerChoices={playerChoices}
@@ -175,19 +165,14 @@ export const App: React.FC = () => {
                     <Route
                         path={Paths.strategyAndRules}
                         element={
-                            <React.Fragment>
-                                <OutcomeComponent outcome={playerChoices?.outcome} />
-                                <CasinoRulesComponent
-                                    casinoRules={casinoRules}
-                                    casinoRulesSetter={setCasinoRules}
-                                    processing={processing}
-                                />
-                                <PlayerStrategyComponent
-                                    playerSettings={playerSettings}
-                                    playerSettingsSetter={setPlayerSettings}
-                                    processing={processing}
-                                />
-                            </React.Fragment>
+                            <StrategyAndRules
+                                casinoRules={casinoRules}
+                                casinoRulesSetter={setCasinoRules}
+                                outcome={playerChoices?.outcome}
+                                playerSettings={playerSettings}
+                                playerSettingsSetter={setPlayerSettings}
+                                processing={processing}
+                            />
                         }
                     />
                     <Route path="*" element={<Navigate to={Paths.playerDecisions} />} />
