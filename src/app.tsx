@@ -10,16 +10,11 @@ import {
     getDefaultCasinoRues,
     getDefaultPlayerSettings,
     getDisabledSplitOptions,
-    getOutcomesSet,
-    getStandThresholdProbabilities
+    getStandThresholdProbabilities,
+    outcomesSet
 } from './logic';
 import { Paths } from './models';
-import {
-    AllScoreStatsChoicesSummary,
-    FinalScoresDictionary,
-    OutcomesSet,
-    ScoreStats
-} from './types';
+import { AllScoreStatsChoicesSummary, FinalScoresDictionary, ScoreStats } from './types';
 import { NavBar, PlayerDecisionsAll, PlayerDecisionsScore, StrategyAndRules } from './views';
 
 export const ScrollToTop: React.FC = () => {
@@ -36,14 +31,13 @@ export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
     const [casinoRules, setCasinoRules] = useState(getDefaultCasinoRues(defaultPlayerStrategy));
     const [dealerProbabilities, setDealerProbabilities] = useState<FinalScoresDictionary>();
-    const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
     const [playerChoices, setPlayerChoices] = useState<AllScoreStatsChoicesSummary>();
     const [processing, setProcessing] = useState(true);
     const [playerSettings, setPlayerSettings] = useState(getDefaultPlayerSettings());
 
-    // outcomesSet and dealerProbabilities are constant regardless the active settings
+    // dealerProbabilities are constant regardless the active settings,
+    // but they are computed in a useEffect for faster first render cycle
     useEffect(() => {
-        const outcomesSet = getOutcomesSet();
         const allHands = getAllHands(outcomesSet, getDisabledSplitOptions());
         const allScoreStats = getAllScoreStats({
             allHands,
@@ -56,7 +50,6 @@ export const App: React.FC = () => {
         });
 
         setDealerProbabilities(dealerProbabilities);
-        setOutcomesSet(outcomesSet);
     }, []);
 
     // A change in settings disables further changes in settings until re-processing data

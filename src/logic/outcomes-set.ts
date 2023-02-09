@@ -1,10 +1,7 @@
 import { CardSymbol, ScoreKey } from '../models';
 import { CardOutcome, Dictionary, OutcomesSet } from '../types';
 
-/**
- * Returns the set of outcomes available (i.e. cards and weights)
- */
-export const getOutcomesSet = (): OutcomesSet => {
+const getOutcomesSet = (): OutcomesSet => {
     const allOutcomes: CardOutcome[] = [
         { key: ScoreKey.hard2, symbol: CardSymbol.two, values: [2], weight: 1 },
         { key: ScoreKey.hard3, symbol: CardSymbol.three, values: [3], weight: 1 },
@@ -32,3 +29,6 @@ export const getOutcomesSet = (): OutcomesSet => {
         totalWeight
     };
 };
+
+/** The set of outcomes available (i.e. cards and weights) */
+export const outcomesSet = getOutcomesSet();
