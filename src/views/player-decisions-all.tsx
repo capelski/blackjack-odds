@@ -1,6 +1,12 @@
 import React from 'react';
 import { OutcomeComponent, PlayerDecisionsTable } from '../components';
-import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
+import {
+    AllScoreStatsChoicesSummary,
+    OutcomesSet,
+    PlayerSettings,
+    ScoreStats,
+    SplitOptions
+} from '../types';
 
 interface PlayerDecisionsAllProps {
     allScoreStats?: ScoreStats[];
@@ -9,6 +15,7 @@ interface PlayerDecisionsAllProps {
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
+    splitOptions: SplitOptions;
 }
 
 export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => {

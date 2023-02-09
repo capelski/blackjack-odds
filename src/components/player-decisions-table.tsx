@@ -5,10 +5,16 @@ import { CellProps } from 'react-table';
 import { desktopBreakpoint } from '../constants';
 import { getPlayerScoreStats, getScorePlayerDecisionPath } from '../logic';
 import { ScoreKey, PlayerDecision } from '../models';
-import { ScoreStats, OutcomesSet, AllScoreStatsChoicesSummary, PlayerSettings } from '../types';
+import {
+    AllScoreStatsChoicesSummary,
+    OutcomesSet,
+    PlayerSettings,
+    ScoreStats,
+    SplitOptions
+} from '../types';
 import { CustomColumn, CustomTable } from './custom-table';
 import { EditPlayerDecisions } from './edit-player-decisions';
-import { RoundedFloat } from './rounded-float';
+import { InitialHandProbability } from './initial-hand-probability';
 import { ScoreStatsDealerCardChoiceCell } from './score-stats-dealer-card-choice';
 
 interface PlayerDecisionsTableProps {
@@ -19,7 +25,8 @@ interface PlayerDecisionsTableProps {
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
-    skipIndexColumn?: boolean;
+    skipInitialColumns?: boolean;
+    splitOptions: SplitOptions;
 }
 
 type ScoreStatsColumn = CustomColumn<
@@ -29,8 +36,6 @@ type ScoreStatsColumn = CustomColumn<
     }
 >;
 
-type ScoreStatsCellProps<T extends keyof ScoreStats> = CellProps<ScoreStats, ScoreStats[T]>;
-
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
     const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
@@ -38,10 +43,10 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
     const { columns, data } = useMemo(() => {
         const columns: ScoreStatsColumn[] = [];
 
-        if (!props.skipIndexColumn) {
+        if (!props.skipInitialColumns) {
             columns.push({
                 accessor: 'key',
-                Cell: (cellProps: ScoreStatsCellProps<'key'>) => {
+                Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
                     return (
                         <div>
                             <Link
@@ -55,20 +60,24 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 },
                 id: 'score'
             });
-        }
 
-        columns.push({
-            accessor: 'initialHandProbability',
-            Cell: (cellProps: ScoreStatsCellProps<'initialHandProbability'>) => {
-                return (
-                    <div>
-                        <RoundedFloat displayPercent={false} value={cellProps.value} />
-                    </div>
-                );
-            },
-            Header: '%',
-            id: 'initialHandProbability'
-        });
+            columns.push({
+                Cell: (cellProps: CellProps<ScoreStats>) => {
+                    return (
+                        <div>
+                            <InitialHandProbability
+                                allScoreStats={props.allScoreStats}
+                                displayPercent={false}
+                                scoreStats={cellProps.row.original}
+                                splitOptions={props.splitOptions}
+                            />
+                        </div>
+                    );
+                },
+                Header: '%',
+                id: 'initialHandProbability'
+            });
+        }
 
         columns.push(
             ...props.outcomesSet.allOutcomes.map<ScoreStatsColumn>((cardOutcome) => ({

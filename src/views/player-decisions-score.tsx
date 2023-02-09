@@ -1,13 +1,19 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
 import {
-    OutcomeComponent,
     FinalProbabilitiesGraph,
-    PlayerDecisionsTable,
-    RoundedFloat
+    InitialHandProbability,
+    OutcomeComponent,
+    PlayerDecisionsTable
 } from '../components';
 import { ScoreKey } from '../models';
-import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
+import {
+    AllScoreStatsChoicesSummary,
+    OutcomesSet,
+    PlayerSettings,
+    ScoreStats,
+    SplitOptions
+} from '../types';
 
 interface PlayerDecisionsScoreProps {
     allScoreStats?: ScoreStats[];
@@ -16,6 +22,7 @@ interface PlayerDecisionsScoreProps {
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
+    splitOptions: SplitOptions;
 }
 
 export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props) => {
@@ -32,7 +39,11 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
             <p>
                 Initial hand probability:{' '}
                 <span style={{ fontWeight: 'bold' }}>
-                    <RoundedFloat value={scoreStats?.initialHandProbability || 0} />
+                    <InitialHandProbability
+                        allScoreStats={props.allScoreStats}
+                        scoreStats={scoreStats}
+                        splitOptions={props.splitOptions}
+                    />
                 </span>
             </p>
             <p>
@@ -74,7 +85,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                     expandedCells={true}
                     outcomesSet={props.outcomesSet}
                     playerChoices={props.playerChoices}
-                    skipIndexColumn={true}
+                    skipInitialColumns={true}
                 />
             ) : (
                 'Processing...'
