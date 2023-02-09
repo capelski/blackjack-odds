@@ -20,6 +20,7 @@ import {
     mergeProbabilities
 } from './final-score-probabilities';
 import { canDouble, canSplit, isBlackjack } from './hand';
+import { isSplitEnabled } from './split-options';
 
 type SplitFollowingDecision = {
     decision: PlayerDecision;
@@ -165,7 +166,8 @@ export const getAllDecisionsData = ({
         dealerCardKey
     );
     const _canDouble = canDouble(scoreStats.representativeHand, doublingMode);
-    const _canSplit = canSplit(scoreStats.representativeHand.cardSymbols, splitOptions.allowed);
+    const _isSplitEnabled = isSplitEnabled(splitOptions);
+    const _canSplit = canSplit(scoreStats.representativeHand.cardSymbols, _isSplitEnabled);
 
     const doubleFinalProbabilities: FinalScoreProbabilities =
         scoreStats.representativeHand.hitDescendants

@@ -14,7 +14,8 @@ export { canDouble, canSplit, getAllHands, isBlackjack, isBustScore } from './ha
 export { getOutcomesSet } from './outcomes-set';
 export { getScorePlayerDecisionPath } from './paths';
 export { getDisplayPlayerDecision, getPrimaryPlayerDecisions } from './player-decision';
-export { getDefaultPlayerSettings } from './player-settings';
+export { defaultPlayerStrategy, getDefaultPlayerSettings } from './player-settings';
 export { playerStrategyLegend } from './player-strategy';
 export { getAllScoreStats, getPlayerScoreStats } from './score-stats';
 export { getAllScoresStatsChoicesSummary } from './score-stats-choice';
+export { getDefaultSplitOptions, getDisabledSplitOptions, isSplitEnabled } from './split-options';

@@ -3,15 +3,17 @@ import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-route
 import { DealerCards, Legend } from './components';
 import { dealerStandThreshold } from './constants';
 import {
+    defaultPlayerStrategy,
     getAllHands,
     getAllScoresStatsChoicesSummary,
     getAllScoreStats,
     getDefaultCasinoRues,
     getDefaultPlayerSettings,
+    getDisabledSplitOptions,
     getOutcomesSet,
     getStandThresholdProbabilities
 } from './logic';
-import { Paths, PlayerStrategy } from './models';
+import { Paths } from './models';
 import {
     AllScoreStatsChoicesSummary,
     FinalScoresDictionary,
@@ -32,7 +34,7 @@ export const ScrollToTop: React.FC = () => {
 
 export const App: React.FC = () => {
     const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
-    const [casinoRules, setCasinoRules] = useState(getDefaultCasinoRues());
+    const [casinoRules, setCasinoRules] = useState(getDefaultCasinoRues(defaultPlayerStrategy));
     const [dealerProbabilities, setDealerProbabilities] = useState<FinalScoresDictionary>();
     const [outcomesSet, setOutcomesSet] = useState<OutcomesSet>();
     const [playerChoices, setPlayerChoices] = useState<AllScoreStatsChoicesSummary>();
@@ -42,11 +44,7 @@ export const App: React.FC = () => {
     // outcomesSet and dealerProbabilities are constant regardless the active settings
     useEffect(() => {
         const outcomesSet = getOutcomesSet();
-        const allHands = getAllHands(outcomesSet, {
-            allowed: false,
-            blackjackAfterSplit: false,
-            hitSplitAces: false
-        });
+        const allHands = getAllHands(outcomesSet, getDisabledSplitOptions());
         const allScoreStats = getAllScoreStats({
             allHands,
             outcomesSet
@@ -70,17 +68,7 @@ export const App: React.FC = () => {
     // allScoreStats and playerChoices must be recomputed upon settings change
     useEffect(() => {
         if (processing && outcomesSet !== undefined && dealerProbabilities !== undefined) {
-            const effectiveSplitOptions = {
-                ...casinoRules.splitOptions,
-                allowed:
-                    casinoRules.splitOptions.allowed &&
-                    (playerSettings.playerStrategy ===
-                        PlayerStrategy.maximumPayout_hit_stand_split ||
-                        playerSettings.playerStrategy ===
-                            PlayerStrategy.maximumPayout_hit_stand_double_split)
-            };
-
-            const nextAllHands = getAllHands(outcomesSet, effectiveSplitOptions);
+            const nextAllHands = getAllHands(outcomesSet, casinoRules.splitOptions);
             const nextAllScoreStats = getAllScoreStats({
                 allHands: nextAllHands,
                 outcomesSet
@@ -90,8 +78,7 @@ export const App: React.FC = () => {
                 ...playerSettings,
                 allScoreStats: nextAllScoreStats,
                 dealerProbabilities,
-                outcomesSet,
-                splitOptions: effectiveSplitOptions
+                outcomesSet
             });
 
             setAllScoreStats(nextAllScoreStats);

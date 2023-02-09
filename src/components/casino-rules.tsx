@@ -47,7 +47,8 @@ export const CasinoRulesComponent: React.FC<CasinoRulesComponentProps> = (props)
                                 : false,
                             hitSplitAces: nextSplitAllowed
                                 ? props.casinoRules.splitOptions.hitSplitAces
-                                : false
+                                : false,
+                            inUse: props.casinoRules.splitOptions.inUse
                         }
                     });
                 }}

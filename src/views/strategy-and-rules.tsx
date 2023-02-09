@@ -1,5 +1,6 @@
 import React from 'react';
 import { CasinoRulesComponent, PlayerStrategyComponent, OutcomeComponent } from '../components';
+import { isSplitInUse } from '../logic/split-options';
 import { CasinoRules, DecisionOutcome, PlayerSettings } from '../types';
 
 interface StrategyAndRulesProps {
@@ -12,6 +13,17 @@ interface StrategyAndRulesProps {
 }
 
 export const StrategyAndRules: React.FC<StrategyAndRulesProps> = (props) => {
+    const playerSettingsSetter = (playerSettings: PlayerSettings) => {
+        props.playerSettingsSetter(playerSettings);
+        props.casinoRulesSetter({
+            ...props.casinoRules,
+            splitOptions: {
+                ...props.casinoRules.splitOptions,
+                inUse: isSplitInUse(playerSettings.playerStrategy)
+            }
+        });
+    };
+
     return (
         <React.Fragment>
             <CasinoRulesComponent
@@ -21,7 +33,7 @@ export const StrategyAndRules: React.FC<StrategyAndRulesProps> = (props) => {
             />
             <PlayerStrategyComponent
                 playerSettings={props.playerSettings}
-                playerSettingsSetter={props.playerSettingsSetter}
+                playerSettingsSetter={playerSettingsSetter}
                 processing={props.processing}
             />
             <br />

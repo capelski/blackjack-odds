@@ -3,6 +3,7 @@ import { blackjackScore, handKeySeparator, maximumScore, scoreKeySeparator } fro
 import { CardSymbol, DoublingMode, doublingModeSeparator, ScoreKey } from '../models';
 import { CardOutcome, Dictionary, Hand, OutcomesSet, SplitOptions } from '../types';
 import { cartesianProduct, removeDuplicates } from '../utils';
+import { isSplitEnabled } from './split-options';
 
 export const canDouble = (hand: Hand, doublingMode: DoublingMode) => {
     return (
@@ -55,6 +56,7 @@ export const getAllHands = (outcomesSet: OutcomesSet, splitOptions: SplitOptions
     const allHandsDictionary: Dictionary<Hand> = {};
     const handsQueue = outcomesSet.allOutcomes.map((cardOutcome) => createHand(cardOutcome));
     const handDependencies: [string, string][] = [];
+    const _isSplitEnabled = isSplitEnabled(splitOptions);
 
     while (handsQueue.length > 0) {
         const hand = handsQueue.pop()!;
@@ -64,10 +66,10 @@ export const getAllHands = (outcomesSet: OutcomesSet, splitOptions: SplitOptions
         if (allHandsDictionary[hand.key] === undefined) {
             allHandsDictionary[hand.key] = hand;
             const splitHand =
-                canSplit(hand.cardSymbols, splitOptions.allowed) && createHand(hand.lastCard);
+                canSplit(hand.cardSymbols, _isSplitEnabled) && createHand(hand.lastCard);
 
             outcomesSet.allOutcomes.forEach((cardOutcome) => {
-                const hitDescendant = createHand(cardOutcome, hand, splitOptions.allowed);
+                const hitDescendant = createHand(cardOutcome, hand, _isSplitEnabled);
                 hand.hitDescendants.push(hitDescendant);
 
                 if (!isBustScore(hitDescendant.effectiveScore)) {
