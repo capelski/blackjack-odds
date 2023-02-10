@@ -1,6 +1,7 @@
 export * from './casino-rules';
 export * from './custom-table';
 export * from './dealer-cards';
+export * from './decisions-probability-breakdown';
 export * from './edit-player-decisions';
 export * from './final-probabilities-graph';
 export * from './initial-hand-probability';
