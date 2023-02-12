@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { CellProps } from 'react-table';
 import { getDisplayPlayerDecision, getPlayerDecisionDealerCardPath } from '../logic';
@@ -15,6 +15,10 @@ interface ScoreStatsDealerCardChoiceCellProps {
     processing: boolean;
 }
 
+const baseStyles: CSSProperties = {
+    padding: '4px 0'
+};
+
 export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoiceCellProps) => {
     return (cellProps: CellProps<ScoreStats>) => {
         const { key: scoreKey } = cellProps.row.original;
@@ -22,13 +26,60 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
 
         /* scoreStatsChoice might be undefined during settings re-processing */
         if (!scoreStatsChoice) {
-            return <div key={props.dealerCard.symbol}>-</div>;
+            return (
+                <div style={baseStyles} key={props.dealerCard.symbol}>
+                    -
+                </div>
+            );
         }
 
         const { choice, decisions } = scoreStatsChoice.dealerCardChoices[props.dealerCard.key];
 
+        const actionStyles: CSSProperties =
+            choice === PlayerDecision.doubleHit
+                ? {
+                      backgroundColor: 'goldenrod',
+                      color: 'black'
+                  }
+                : choice === PlayerDecision.doubleStand
+                ? {
+                      backgroundColor: 'darkgoldenrod',
+                      color: 'black'
+                  }
+                : choice === PlayerDecision.hit
+                ? {
+                      backgroundColor: 'rgb(66, 139, 202)',
+                      color: 'white'
+                  }
+                : choice === PlayerDecision.splitHit
+                ? {
+                      backgroundColor: '#9A6F93',
+                      color: 'white'
+                  }
+                : choice === PlayerDecision.splitStand
+                ? {
+                      backgroundColor: '#80567A',
+                      color: 'white'
+                  }
+                : choice === PlayerDecision.stand
+                ? {
+                      backgroundColor: 'rgb(92, 184, 92)'
+                  }
+                : {};
+
         return (
-            <div key={props.dealerCard.symbol}>
+            <div
+                style={{
+                    ...baseStyles,
+                    ...actionStyles,
+                    opacity: props.playerSettings.playerDecisionsOverrides[scoreKey]?.[
+                        props.dealerCard.key
+                    ]
+                        ? 0.7
+                        : undefined
+                }}
+                key={props.dealerCard.symbol}
+            >
                 <div>
                     {!props.processing && props.playerDecisionsEdit ? (
                         <select

@@ -1,10 +1,10 @@
-import React, { CSSProperties, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
 import { CellProps } from 'react-table';
 import { desktopBreakpoint } from '../constants';
 import { getPlayerDecisionScorePath, getPlayerScoreStats } from '../logic';
-import { ScoreKey, PlayerDecision } from '../models';
+import { ScoreKey } from '../models';
 import {
     AllScoreStatsChoicesSummary,
     OutcomesSet,
@@ -50,7 +50,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                         <div>
                             <Link
                                 to={getPlayerDecisionScorePath(cellProps.value)}
-                                style={{ color: 'black' }}
+                                style={{ color: 'black', textDecoration: 'none' }}
                             >
                                 {cellProps.value}
                             </Link>
@@ -110,63 +110,20 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
     return (
         <React.Fragment>
             <CustomTable
-                columns={columns}
-                columnStyle={(cellProps) => {
-                    const baseStyles: CSSProperties = {
-                        border: '1px solid black',
-                        padding: '4px 0'
-                    };
-                    const { key } = cellProps.row.original;
+                cellStyle={(cellProps) => {
                     const { dealerCardKey } = cellProps.column;
-                    const scoreStatsChoice = props.playerChoices.choices[key];
-
-                    /* scoreStatsChoice might be undefined during settings re-processing */
-                    if (!scoreStatsChoice || !dealerCardKey) {
-                        return baseStyles;
-                    }
-
-                    if (props.playerSettings.playerDecisionsOverrides[key]?.[dealerCardKey]) {
-                        baseStyles.border = '2px solid coral';
-                    }
-
-                    const { choice } = scoreStatsChoice.dealerCardChoices[dealerCardKey];
-                    const actionStyles: CSSProperties =
-                        choice === PlayerDecision.doubleHit
-                            ? {
-                                  backgroundColor: 'goldenrod',
-                                  color: 'black'
-                              }
-                            : choice === PlayerDecision.doubleStand
-                            ? {
-                                  backgroundColor: 'darkgoldenrod',
-                                  color: 'black'
-                              }
-                            : choice === PlayerDecision.hit
-                            ? {
-                                  backgroundColor: 'rgb(66, 139, 202)',
-                                  color: 'white'
-                              }
-                            : choice === PlayerDecision.splitHit
-                            ? {
-                                  backgroundColor: '#9A6F93',
-                                  color: 'white'
-                              }
-                            : choice === PlayerDecision.splitStand
-                            ? {
-                                  backgroundColor: '#80567A',
-                                  color: 'white'
-                              }
-                            : choice === PlayerDecision.stand
-                            ? {
-                                  backgroundColor: 'rgb(92, 184, 92)'
-                              }
-                            : {};
-
+                    const { key: scoreKey } = cellProps.row.original;
                     return {
-                        ...baseStyles,
-                        ...actionStyles
+                        borderColor:
+                            dealerCardKey &&
+                            props.playerSettings.playerDecisionsOverrides[scoreKey]?.[
+                                dealerCardKey
+                            ] !== undefined
+                                ? 'coral'
+                                : 'black'
                     };
                 }}
+                columns={columns}
                 data={data}
                 width="100%"
             />

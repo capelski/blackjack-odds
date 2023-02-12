@@ -44,12 +44,18 @@ function customUseTable<TData extends {}, TColumn extends Column<TData>>(
 }
 
 interface CustomTableProps<TData extends {}, TColumn extends Column<TData>> {
+    cellStyle?: (cell: CustomCell<TData, TColumn>) => CSSProperties | undefined;
     columns: TColumn[];
-    columnStyle?: (cell: CustomCell<TData, TColumn>) => CSSProperties | undefined;
     data: TData[];
-    rowStyle?: (row: CustomRow<TData, TColumn>) => CSSProperties | undefined;
     width?: string | number;
 }
+
+const baseCellProps: CSSProperties = {
+    borderColor: 'black',
+    borderWidth: 1,
+    borderStyle: 'solid',
+    textAlign: 'center'
+};
 
 export const CustomTable = <TData extends {}, TColumn extends Column<TData>>(
     props: CustomTableProps<TData, TColumn>
@@ -71,7 +77,7 @@ export const CustomTable = <TData extends {}, TColumn extends Column<TData>>(
                                     {...column.getHeaderProps()}
                                     style={{
                                         ...headerProps.style,
-                                        border: '1px solid black',
+                                        ...baseCellProps,
                                         fontWeight: 'bold',
                                         padding: '2px 4px'
                                     }}
@@ -88,14 +94,14 @@ export const CustomTable = <TData extends {}, TColumn extends Column<TData>>(
                 {rows.map((row) => {
                     prepareRow(row);
                     return (
-                        <tr style={props.rowStyle && props.rowStyle(row)} {...row.getRowProps()}>
+                        <tr {...row.getRowProps()}>
                             {row.cells.map((cell) => {
                                 const cellProps = cell.getCellProps();
                                 const columnStyle: CSSProperties = {
                                     ...cellProps.style,
-                                    padding: '8px 4px',
-                                    textAlign: 'center',
-                                    ...(props.columnStyle ? props.columnStyle(cell) : {})
+                                    ...baseCellProps,
+                                    padding: 0,
+                                    ...(props.cellStyle ? props.cellStyle(cell) : {})
                                 };
 
                                 return (
