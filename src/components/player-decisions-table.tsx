@@ -3,7 +3,7 @@ import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
 import { CellProps } from 'react-table';
 import { desktopBreakpoint } from '../constants';
-import { getPlayerScoreStats, getScorePlayerDecisionPath } from '../logic';
+import { getPlayerDecisionScorePath, getPlayerScoreStats } from '../logic';
 import { ScoreKey, PlayerDecision } from '../models';
 import {
     AllScoreStatsChoicesSummary,
@@ -19,7 +19,6 @@ import { ScoreStatsDealerCardChoiceCell } from './score-stats-dealer-card-choice
 
 interface PlayerDecisionsTableProps {
     allScoreStats: ScoreStats[];
-    expandedCells: boolean;
     outcomesSet: OutcomesSet;
     playerChoices: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
@@ -50,7 +49,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                     return (
                         <div>
                             <Link
-                                to={getScorePlayerDecisionPath(cellProps.value)}
+                                to={getPlayerDecisionScorePath(cellProps.value)}
                                 style={{ color: 'black' }}
                             >
                                 {cellProps.value}
@@ -84,7 +83,6 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 Cell: ScoreStatsDealerCardChoiceCell({
                     dealerCard: cardOutcome,
                     isDesktop,
-                    isExpanded: props.expandedCells,
                     playerChoices: props.playerChoices,
                     playerDecisionsEdit,
                     playerSettings: props.playerSettings,

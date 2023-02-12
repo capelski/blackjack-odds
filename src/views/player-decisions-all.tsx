@@ -27,7 +27,6 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
                 <PlayerDecisionsTable
                     {...props}
                     allScoreStats={props.allScoreStats || []}
-                    expandedCells={false}
                     outcomesSet={props.outcomesSet}
                     playerChoices={props.playerChoices}
                 />

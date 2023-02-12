@@ -1,6 +1,11 @@
 import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { InitialHandProbability, OutcomeComponent, PlayerDecisionsTable } from '../components';
+import {
+    DecisionsProbabilityBreakdown,
+    FinalProbabilitiesGraph,
+    InitialHandProbability,
+    OutcomeComponent
+} from '../components';
 import { ScoreKey } from '../models';
 import {
     AllScoreStatsChoicesSummary,
@@ -10,7 +15,7 @@ import {
     SplitOptions
 } from '../types';
 
-interface PlayerDecisionsScoreProps {
+interface PlayerDecisionsDealerCardProps {
     allScoreStats?: ScoreStats[];
     outcomesSet?: OutcomesSet;
     playerChoices?: AllScoreStatsChoicesSummary;
@@ -20,17 +25,25 @@ interface PlayerDecisionsScoreProps {
     splitOptions: SplitOptions;
 }
 
-export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props) => {
-    const { scoreKey } = useParams() as { scoreKey: ScoreKey };
+export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps> = (props) => {
+    const { dealerCardKey, scoreKey } = useParams() as {
+        dealerCardKey: ScoreKey;
+        scoreKey: ScoreKey;
+    };
     const scoreStats = props.allScoreStats?.find((scoreStats) => scoreStats.key === scoreKey);
-    const scoreStatsChoice = props.playerChoices?.choices[scoreKey];
+    const scoreStatsChoice =
+        props.playerChoices?.choices[scoreKey].dealerCardChoices[dealerCardKey];
+
+    const asd = scoreStatsChoice?.decisions[scoreStatsChoice.choice];
 
     const [displayCombinations, setDisplayCombinations] = useState(false);
 
     return (
         <div>
-            <h3>{scoreKey} player decisions</h3>
-            <OutcomeComponent outcome={scoreStatsChoice?.decisionOutcome} />
+            <h3>
+                {scoreKey} vs {dealerCardKey} player decisions
+            </h3>
+            <OutcomeComponent outcome={asd?.outcome} />
             <p>
                 Initial hand probability:{' '}
                 <span style={{ fontWeight: 'bold' }}>
@@ -61,18 +74,24 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                     ))}
                 </ul>
             )}
-            <h4>Dealer card based decisions</h4>
-            {props.outcomesSet !== undefined && props.playerChoices !== undefined ? (
-                <PlayerDecisionsTable
-                    {...props}
-                    allScoreStats={scoreStats ? [scoreStats] : []}
-                    outcomesSet={props.outcomesSet}
-                    playerChoices={props.playerChoices}
-                    skipInitialColumns={true}
+            {scoreStats && scoreStatsChoice && (
+                <DecisionsProbabilityBreakdown
+                    decisions={scoreStatsChoice.decisions}
+                    scoreStats={scoreStats}
                 />
-            ) : (
-                'Processing...'
             )}
+            {props.allScoreStats !== undefined &&
+                scoreStatsChoice?.finalScoreProbabilities !== undefined && (
+                    <React.Fragment>
+                        <FinalProbabilitiesGraph
+                            allScoreStats={props.allScoreStats}
+                            finalProbabilities={scoreStatsChoice?.finalScoreProbabilities}
+                            scoreKey={scoreKey}
+                        />
+                        <br />
+                        <br />
+                    </React.Fragment>
+                )}
         </div>
     );
 };

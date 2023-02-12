@@ -15,7 +15,13 @@ import {
 } from './logic';
 import { Paths } from './models';
 import { AllScoreStatsChoicesSummary, FinalScoresDictionary, ScoreStats } from './types';
-import { NavBar, PlayerDecisionsAll, PlayerDecisionsScore, StrategyAndRules } from './views';
+import {
+    NavBar,
+    PlayerDecisionsAll,
+    PlayerDecisionsDealerCard,
+    PlayerDecisionsScore,
+    StrategyAndRules
+} from './views';
 
 export const ScrollToTop: React.FC = () => {
     const { pathname } = useLocation();
@@ -118,7 +124,21 @@ export const App: React.FC = () => {
                         }
                     />
                     <Route
-                        path={Paths.scorePlayerDecisions}
+                        path={Paths.playerDecisionsDealerCard}
+                        element={
+                            <PlayerDecisionsDealerCard
+                                allScoreStats={allScoreStats}
+                                outcomesSet={outcomesSet}
+                                playerChoices={playerChoices}
+                                playerSettings={playerSettings}
+                                playerSettingsSetter={setPlayerSettings}
+                                processing={processing}
+                                splitOptions={casinoRules.splitOptions}
+                            />
+                        }
+                    />
+                    <Route
+                        path={Paths.playerDecisionsScore}
                         element={
                             <PlayerDecisionsScore
                                 allScoreStats={allScoreStats}

@@ -1,14 +1,13 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { CellProps } from 'react-table';
-import { getDisplayPlayerDecision } from '../logic';
+import { getDisplayPlayerDecision, getPlayerDecisionDealerCardPath } from '../logic';
 import { PlayerDecision } from '../models';
 import { AllScoreStatsChoicesSummary, CardOutcome, PlayerSettings, ScoreStats } from '../types';
-import { DecisionsProbabilityBreakdown } from './decisions-probability-breakdown';
 
 interface ScoreStatsDealerCardChoiceCellProps {
     dealerCard: CardOutcome;
     isDesktop: boolean;
-    isExpanded: boolean;
     playerChoices: AllScoreStatsChoicesSummary;
     playerDecisionsEdit: boolean;
     playerSettings: PlayerSettings;
@@ -69,23 +68,14 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
                                 })}
                         </select>
                     ) : (
-                        getDisplayPlayerDecision(choice, { isDesktop: props.isDesktop })
+                        <Link
+                            to={getPlayerDecisionDealerCardPath(scoreKey, props.dealerCard.key)}
+                            style={{ color: 'inherit', textDecoration: 'none' }}
+                        >
+                            {getDisplayPlayerDecision(choice, { isDesktop: props.isDesktop })}
+                        </Link>
                     )}
                 </div>
-                {props.isExpanded && (
-                    <div
-                        style={{
-                            paddingLeft: 4,
-                            paddingTop: 16,
-                            textAlign: 'left'
-                        }}
-                    >
-                        <DecisionsProbabilityBreakdown
-                            decisions={decisions}
-                            scoreStats={cellProps.row.original}
-                        />
-                    </div>
-                )}
             </div>
         );
     };
