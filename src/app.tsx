@@ -133,7 +133,6 @@ export const App: React.FC = () => {
                                 playerSettings={playerSettings}
                                 playerSettingsSetter={setPlayerSettings}
                                 processing={processing}
-                                splitOptions={casinoRules.splitOptions}
                             />
                         }
                     />

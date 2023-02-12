@@ -14,15 +14,15 @@ export const handKeySeparator = ',';
 export const scoreKeySeparator = '-';
 
 export const probabilityLabels = {
-    dealerBusting: `P (d > ${maximumScore})`,
+    dealerBusting: `D > ${maximumScore}`,
     playerAdvantageHands: 'PA (hands)',
     playerAdvantagePayout: 'PA (payout)',
-    playerBusting: `P (p > ${maximumScore})`,
-    playerEqualToDealer: 'P (p = d)',
-    playerLessThanCurrent: (current: string | number) => `P (p < ${current})`,
-    playerLessThanDealer: 'P (p < d)',
+    playerBusting: `P > ${maximumScore}`,
+    playerEqualToDealer: 'P = D',
+    playerLessThanCurrent: (current: string | number) => `P < ${current}`,
+    playerLessThanDealer: 'P < D',
     playerLoss: 'P (loss)',
-    playerMoreThanDealer: 'P (p > d)',
+    playerMoreThanDealer: 'P > D',
     playerPush: 'P (push)',
     playerWin: 'P (win)',
     playerTotal: 'P (total)'
