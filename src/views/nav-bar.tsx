@@ -37,9 +37,6 @@ export const NavBar: React.FC = () => {
             <StyledLink location={location} to={Paths.dealerCards}>
                 Dealer cards
             </StyledLink>
-            <StyledLink location={location} to={Paths.legend}>
-                Legend
-            </StyledLink>
         </nav>
     );
 };

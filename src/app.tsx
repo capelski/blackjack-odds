@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { DealerCards, Legend } from './components';
+import { DealerCards } from './components';
 import { dealerStandThreshold } from './constants';
 import {
     defaultPlayerStrategy,
@@ -108,7 +108,6 @@ export const App: React.FC = () => {
                             </React.Fragment>
                         }
                     />
-                    <Route path={Paths.legend} element={<Legend />} />
                     <Route
                         path={Paths.playerDecisions}
                         element={

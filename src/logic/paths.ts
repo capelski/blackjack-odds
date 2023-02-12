@@ -14,7 +14,6 @@ export const getPlayerDecisionScorePath = (scoreKey: ScoreKey) => {
 
 const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {
     [Paths.dealerCards]: [Paths.dealerCards],
-    [Paths.legend]: [Paths.legend],
     [Paths.playerDecisions]: [Paths.playerDecisions],
     [Paths.playerDecisionsDealerCard]: Object.values(ScoreKey).reduce<string[]>(
         (reduced, scoreKey) => {

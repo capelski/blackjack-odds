@@ -5,7 +5,6 @@ export * from './decisions-probability-breakdown';
 export * from './edit-player-decisions';
 export * from './final-probabilities-graph';
 export * from './initial-hand-probability';
-export * from './legend';
 export * from './outcome';
 export * from './outcome-badge';
 export * from './player-decisions-table';
