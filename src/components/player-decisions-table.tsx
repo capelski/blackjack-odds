@@ -113,14 +113,20 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 cellStyle={(cellProps) => {
                     const { dealerCardKey } = cellProps.column;
                     const { key: scoreKey } = cellProps.row.original;
+
+                    const choiceIsOverride =
+                        dealerCardKey &&
+                        props.playerChoices.choices[scoreKey].dealerCardChoices[dealerCardKey]
+                            .choiceIsOverride;
+                    const playerOverride =
+                        dealerCardKey &&
+                        props.playerSettings.playerDecisionsOverrides[scoreKey]?.[dealerCardKey];
+
+                    const hasPlayerOverride = choiceIsOverride && playerOverride !== undefined;
+
                     return {
-                        borderColor:
-                            dealerCardKey &&
-                            props.playerSettings.playerDecisionsOverrides[scoreKey]?.[
-                                dealerCardKey
-                            ] !== undefined
-                                ? 'coral'
-                                : 'black'
+                        borderColor: hasPlayerOverride ? 'coral' : 'black',
+                        opacity: hasPlayerOverride ? 0.7 : undefined
                     };
                 }}
                 columns={columns}

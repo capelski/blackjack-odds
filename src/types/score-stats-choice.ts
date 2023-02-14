@@ -63,6 +63,7 @@ export type ScoreStatsChoice = {
  */
 export type ScoreStatsDealerCardChoice = {
     choice: PlayerDecision;
+    choiceIsOverride: boolean;
     decisions: AllDecisionsData;
     finalScoreProbabilities: FinalScoreProbabilities;
 };

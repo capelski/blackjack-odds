@@ -71,12 +71,7 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
             <div
                 style={{
                     ...baseStyles,
-                    ...actionStyles,
-                    opacity: props.playerSettings.playerDecisionsOverrides[scoreKey]?.[
-                        props.dealerCard.key
-                    ]
-                        ? 0.7
-                        : undefined
+                    ...actionStyles
                 }}
                 key={props.dealerCard.symbol}
             >

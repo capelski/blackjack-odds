@@ -36,17 +36,20 @@ const getScoreStatsDealerCardChoice = (
 ): ScoreStatsDealerCardChoice => {
     const decisions = getAllDecisionsData(params);
 
-    const choice =
-        params.playerDecisionsOverrides[params.scoreStats.key]?.[params.dealerCardKey] ||
-        getPlayerChoice({
-            allDecisionsData: decisions,
-            effectiveScore: params.scoreStats.representativeHand.effectiveScore,
-            playerStrategy: params.playerStrategy,
-            standThreshold: params.standThreshold
-        });
+    const strategyChoice = getPlayerChoice({
+        allDecisionsData: decisions,
+        effectiveScore: params.scoreStats.representativeHand.effectiveScore,
+        playerStrategy: params.playerStrategy,
+        standThreshold: params.standThreshold
+    });
+    const playerChoice =
+        params.playerDecisionsOverrides[params.scoreStats.key]?.[params.dealerCardKey];
+
+    const choice = playerChoice || strategyChoice;
 
     return {
         choice,
+        choiceIsOverride: choice != strategyChoice,
         decisions,
         finalScoreProbabilities: decisions[choice].finalProbabilities
     };
