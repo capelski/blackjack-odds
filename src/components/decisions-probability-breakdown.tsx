@@ -298,6 +298,17 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
 
     return (
         <React.Fragment>
+            <h4>Hand outcome probability</h4>
+            <CustomTable
+                cellStyle={(cellProps) => {
+                    return {
+                        borderColor: cellProps.value === props.playerChoice ? 'coral' : 'black'
+                    };
+                }}
+                columns={outcomeColumns}
+                data={data}
+                width={width}
+            />
             <h4>Hand probability breakdown</h4>
             <CustomTable
                 cellStyle={(cellProps) => {
@@ -332,17 +343,6 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                     {effectiveScore}
                 </p>
             )}
-            <h4>Hand outcome probability</h4>
-            <CustomTable
-                cellStyle={(cellProps) => {
-                    return {
-                        borderColor: cellProps.value === props.playerChoice ? 'coral' : 'black'
-                    };
-                }}
-                columns={outcomeColumns}
-                data={data}
-                width={width}
-            />
         </React.Fragment>
     );
 };
