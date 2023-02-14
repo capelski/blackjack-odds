@@ -19,6 +19,7 @@ import { ScoreStatsDealerCardChoiceCell } from './score-stats-dealer-card-choice
 
 interface PlayerDecisionsTableProps {
     allScoreStats: ScoreStats[];
+    direction?: 'horizontal' | 'vertical';
     outcomesSet: OutcomesSet;
     playerChoices: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
@@ -81,8 +82,8 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
         columns.push(
             ...props.outcomesSet.allOutcomes.map<ScoreStatsColumn>((cardOutcome) => ({
                 Cell: ScoreStatsDealerCardChoiceCell({
+                    abbreviate: !isDesktop && props.direction !== 'vertical',
                     dealerCard: cardOutcome,
-                    isDesktop,
                     playerChoices: props.playerChoices,
                     playerDecisionsEdit,
                     playerSettings: props.playerSettings,
@@ -102,6 +103,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
         isDesktop,
         playerDecisionsEdit,
         props.allScoreStats,
+        props.direction,
         props.outcomesSet,
         props.playerChoices,
         props.playerSettings
@@ -131,6 +133,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 }}
                 columns={columns}
                 data={data}
+                direction={props.direction}
                 width="100%"
             />
             <br />

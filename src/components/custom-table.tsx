@@ -47,6 +47,7 @@ interface CustomTableProps<TData extends {}, TColumn extends Column<TData>> {
     cellStyle?: (cell: CustomCell<TData, TColumn>) => CSSProperties | undefined;
     columns: TColumn[];
     data: TData[];
+    direction?: 'horizontal' | 'vertical';
     width?: string | number;
 }
 
@@ -60,6 +61,7 @@ const baseCellProps: CSSProperties = {
 export const CustomTable = <TData extends {}, TColumn extends Column<TData>>(
     props: CustomTableProps<TData, TColumn>
 ) => {
+    const direction = props.direction === undefined ? 'horizontal' : props.direction;
     const { getTableProps, getTableBodyProps, headerGroups, rows, prepareRow } = customUseTable({
         columns: props.columns,
         data: props.data
@@ -111,8 +113,16 @@ export const CustomTable = <TData extends {}, TColumn extends Column<TData>>(
             };
         });
 
-        return { headers, data };
-    }, [headerGroups, rows]);
+        return direction === 'horizontal'
+            ? { headers, data }
+            : {
+                  headers: [],
+                  data: headers[0].cells.map((headerCell, index) => ({
+                      cells: [headerCell].concat(data.map((d) => d.cells[index])),
+                      rowProps: undefined
+                  }))
+              };
+    }, [direction, headerGroups, rows]);
 
     return (
         <table width={props.width} {...getTableProps()}>

@@ -6,8 +6,8 @@ import { PlayerDecision } from '../models';
 import { AllScoreStatsChoicesSummary, CardOutcome, PlayerSettings, ScoreStats } from '../types';
 
 interface ScoreStatsDealerCardChoiceCellProps {
+    abbreviate: boolean;
     dealerCard: CardOutcome;
-    isDesktop: boolean;
     playerChoices: AllScoreStatsChoicesSummary;
     playerDecisionsEdit: boolean;
     playerSettings: PlayerSettings;
@@ -103,7 +103,7 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
                                 .map((playerDecision) => {
                                     const option = getDisplayPlayerDecision(
                                         playerDecision as PlayerDecision,
-                                        { isDesktop: props.isDesktop }
+                                        { abbreviate: props.abbreviate }
                                     );
 
                                     return (
@@ -118,7 +118,7 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
                             to={getPlayerDecisionDealerCardPath(scoreKey, props.dealerCard.key)}
                             style={{ color: 'inherit', textDecoration: 'none' }}
                         >
-                            {getDisplayPlayerDecision(choice, { isDesktop: props.isDesktop })}
+                            {getDisplayPlayerDecision(choice, { abbreviate: props.abbreviate })}
                         </Link>
                     )}
                 </div>

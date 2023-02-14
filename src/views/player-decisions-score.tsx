@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
+import { useMediaQuery } from 'react-responsive';
 import { useParams } from 'react-router-dom';
 import { InitialHandProbability, OutcomeComponent, PlayerDecisionsTable } from '../components';
+import { desktopBreakpoint } from '../constants';
 import { ScoreKey } from '../models';
 import {
     AllScoreStatsChoicesSummary,
@@ -25,6 +27,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
     const scoreStats = props.allScoreStats?.find((scoreStats) => scoreStats.key === scoreKey);
     const scoreStatsChoice = props.playerChoices?.choices[scoreKey];
 
+    const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
     const [displayCombinations, setDisplayCombinations] = useState(false);
 
     return (
@@ -36,6 +39,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                 <PlayerDecisionsTable
                     {...props}
                     allScoreStats={scoreStats ? [scoreStats] : []}
+                    direction={isDesktop ? 'horizontal' : 'vertical'}
                     outcomesSet={props.outcomesSet}
                     playerChoices={props.playerChoices}
                     skipInitialColumns={true}
