@@ -2,10 +2,10 @@ import React, { CSSProperties, useMemo } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { CellProps, Column } from 'react-table';
 import { desktopBreakpoint, displayProbabilityTotals, probabilityLabels } from '../constants';
-import { getPrimaryPlayerDecisions } from '../logic';
+import { getDisplayPlayerDecision, getPrimaryPlayerDecisions } from '../logic';
 import { PlayerDecision } from '../models';
 import { AllDecisionsData, DecisionData, ScoreStats } from '../types';
-import { CustomTable } from './custom-table';
+import { CustomCell, CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface DecisionsProbabilityBreakdownProps {
@@ -16,6 +16,7 @@ interface DecisionsProbabilityBreakdownProps {
 
 interface RowData {
     decisionData: DecisionData;
+    isSelectedDecision: boolean;
     playerDecision: PlayerDecision;
 }
 
@@ -289,33 +290,33 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
         const data = getPrimaryPlayerDecisions(props.decisions).map(
             (playerDecision: PlayerDecision) => ({
                 decisionData: props.decisions[playerDecision],
-                playerDecision
+                isSelectedDecision: playerDecision === props.playerChoice,
+                playerDecision: getDisplayPlayerDecision(playerDecision, { simplify: true })
             })
         );
 
         return { breakdownColumns, data, outcomeColumns };
     }, [props.decisions, props.playerChoice, props.scoreStats]);
 
+    const playerDecisionRow = (cellProps: CustomCell<RowData, Column<RowData>>) => {
+        return {
+            borderColor: cellProps.row.original.isSelectedDecision ? 'coral' : 'black',
+            borderWidth: cellProps.row.original.isSelectedDecision ? 2 : 1
+        };
+    };
+
     return (
         <React.Fragment>
             <h4>Hand outcome probability</h4>
             <CustomTable
-                cellStyle={(cellProps) => {
-                    return {
-                        borderColor: cellProps.value === props.playerChoice ? 'coral' : 'black'
-                    };
-                }}
+                cellStyle={playerDecisionRow}
                 columns={outcomeColumns}
                 data={data}
                 width={width}
             />
             <h4>Hand probability breakdown</h4>
             <CustomTable
-                cellStyle={(cellProps) => {
-                    return {
-                        borderColor: cellProps.value === props.playerChoice ? 'coral' : 'black'
-                    };
-                }}
+                cellStyle={playerDecisionRow}
                 columns={breakdownColumns}
                 data={data}
                 width={width}
