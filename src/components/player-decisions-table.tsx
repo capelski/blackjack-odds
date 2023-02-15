@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
 import { CellProps } from 'react-table';
-import { desktopBreakpoint } from '../constants';
+import { colors, desktopBreakpoint } from '../constants';
 import { getPlayerDecisionScorePath, getPlayerScoreStats } from '../logic';
 import { ScoreKey } from '../models';
 import {
@@ -51,7 +51,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                         <div>
                             <Link
                                 to={getPlayerDecisionScorePath(cellProps.value)}
-                                style={{ color: 'black', textDecoration: 'none' }}
+                                style={{ color: colors.link.default, textDecoration: 'none' }}
                             >
                                 {cellProps.value}
                             </Link>
@@ -127,7 +127,9 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                     const hasPlayerOverride = choiceIsOverride && playerOverride !== undefined;
 
                     return {
-                        borderColor: hasPlayerOverride ? 'coral' : 'black',
+                        borderColor: hasPlayerOverride
+                            ? colors.border.highlight
+                            : colors.border.regular,
                         opacity: hasPlayerOverride ? 0.7 : undefined
                     };
                 }}

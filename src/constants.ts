@@ -1,3 +1,59 @@
+export const colors = {
+    border: {
+        highlight: 'coral',
+        regular: 'black'
+    },
+    link: {
+        default: 'black'
+    },
+    // Outcomes
+    advantage: {
+        backgroundColor: 'white',
+        color: 'black'
+    },
+    loss: {
+        backgroundColor: '#d9534f',
+        color: 'white'
+    },
+    payout: {
+        backgroundColor: '#428bca',
+        color: 'white'
+    },
+    push: {
+        backgroundColor: '#f0ad4e',
+        color: 'white'
+    },
+    win: {
+        backgroundColor: '#5cb85c',
+        color: 'white'
+    },
+    // Player decision
+    doubleHit: {
+        backgroundColor: '#daa520',
+        color: 'black'
+    },
+    doubleStand: {
+        backgroundColor: '#b8860b',
+        color: 'black'
+    },
+    hit: {
+        backgroundColor: '#428bca',
+        color: 'white'
+    },
+    splitHit: {
+        backgroundColor: '#9a6f93',
+        color: 'white'
+    },
+    splitStand: {
+        backgroundColor: '#80567a',
+        color: 'white'
+    },
+    stand: {
+        backgroundColor: '#5cb85c',
+        color: 'black'
+    }
+};
+
 export const dealerStandThreshold = 17;
 
 export const decimalsNumber = 2;

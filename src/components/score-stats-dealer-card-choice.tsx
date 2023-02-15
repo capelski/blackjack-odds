@@ -1,6 +1,7 @@
 import React, { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
 import { CellProps } from 'react-table';
+import { colors } from '../constants';
 import { getDisplayPlayerDecision, getPlayerDecisionDealerCardPath } from '../logic';
 import { PlayerDecision } from '../models';
 import { AllScoreStatsChoicesSummary, CardOutcome, PlayerSettings, ScoreStats } from '../types';
@@ -37,44 +38,21 @@ export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoice
 
         const actionStyles: CSSProperties =
             choice === PlayerDecision.doubleHit
-                ? {
-                      backgroundColor: 'goldenrod',
-                      color: 'black'
-                  }
+                ? colors.doubleHit
                 : choice === PlayerDecision.doubleStand
-                ? {
-                      backgroundColor: 'darkgoldenrod',
-                      color: 'black'
-                  }
+                ? colors.doubleStand
                 : choice === PlayerDecision.hit
-                ? {
-                      backgroundColor: 'rgb(66, 139, 202)',
-                      color: 'white'
-                  }
+                ? colors.hit
                 : choice === PlayerDecision.splitHit
-                ? {
-                      backgroundColor: '#9A6F93',
-                      color: 'white'
-                  }
+                ? colors.splitHit
                 : choice === PlayerDecision.splitStand
-                ? {
-                      backgroundColor: '#80567A',
-                      color: 'white'
-                  }
+                ? colors.splitStand
                 : choice === PlayerDecision.stand
-                ? {
-                      backgroundColor: 'rgb(92, 184, 92)'
-                  }
+                ? colors.stand
                 : {};
 
         return (
-            <div
-                style={{
-                    ...baseStyles,
-                    ...actionStyles
-                }}
-                key={props.dealerCard.symbol}
-            >
+            <div style={{ ...baseStyles, ...actionStyles }} key={props.dealerCard.symbol}>
                 <div>
                     {!props.processing && props.playerDecisionsEdit ? (
                         <select

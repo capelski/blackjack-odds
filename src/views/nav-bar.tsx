@@ -1,5 +1,6 @@
 import React from 'react';
 import { Link, Location, useLocation } from 'react-router-dom';
+import { colors } from '../constants';
 import { Paths } from '../models';
 
 interface StyledLinkProps {
@@ -11,7 +12,7 @@ const StyledLink: React.FC<StyledLinkProps> = (props) => {
     return (
         <Link
             style={{
-                color: 'black',
+                color: colors.link.default,
                 fontWeight: props.location.pathname === props.to ? 'bold' : undefined,
                 paddingRight: 16,
                 textDecoration: props.location.pathname === props.to ? 'unset' : 'underline'

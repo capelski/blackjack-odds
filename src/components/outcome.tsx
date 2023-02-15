@@ -1,6 +1,11 @@
 import React from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { probabilityLabels, displayProbabilityTotals, desktopBreakpoint } from '../constants';
+import {
+    probabilityLabels,
+    displayProbabilityTotals,
+    desktopBreakpoint,
+    colors
+} from '../constants';
 import { DecisionOutcome } from '../types';
 import { OutcomeBadge } from './outcome-badge';
 import { RoundedFloat } from './rounded-float';
@@ -21,27 +26,27 @@ export const OutcomeComponent: React.FC<OutcomeComponentProps> = (props) => {
                 }}
             >
                 <OutcomeBadge
-                    backgroundColor="#428bca"
+                    {...colors.payout}
                     name="payout (€)"
                     value={props.outcome?.playerAdvantage.payout || 0}
                 />
                 <OutcomeBadge
-                    color="black"
+                    {...colors.advantage}
                     name="advantage (win - loss)"
                     value={props.outcome?.playerAdvantage.hands || 0}
                 />
                 <OutcomeBadge
-                    backgroundColor="#5cb85c"
+                    {...colors.win}
                     name="winning hands"
                     value={props.outcome?.winProbability || 0}
                 />
                 <OutcomeBadge
-                    backgroundColor="#d9534f"
+                    {...colors.loss}
                     name="losing hands"
                     value={props.outcome?.lossProbability || 0}
                 />
                 <OutcomeBadge
-                    backgroundColor="#f0ad4e"
+                    {...colors.push}
                     name="pushing hands"
                     value={props.outcome?.pushProbability || 0}
                 />

@@ -1,5 +1,6 @@
 import cytoscape from 'cytoscape';
 import React, { useEffect, useRef } from 'react';
+import { colors } from '../constants';
 import { ScoreKey } from '../models';
 import { FinalScoreProbabilities, ScoreStats } from '../types';
 import { getRoundedFloat } from './rounded-float';
@@ -31,7 +32,9 @@ export const FinalProbabilitiesGraph: React.FC<FinalProbabilitiesGraphProps> = (
                     return {
                         data: {
                             id: scoreKey,
-                            nodeColor: validScore ? '#11479e' : 'red'
+                            nodeColor: validScore
+                                ? colors.payout.backgroundColor
+                                : colors.loss.backgroundColor
                         }
                     };
                 }),
@@ -39,7 +42,9 @@ export const FinalProbabilitiesGraph: React.FC<FinalProbabilitiesGraphProps> = (
                 const validScore = props.allScoreStats!.find((x) => x.key === target);
                 return {
                     data: {
-                        edgeColor: !validScore ? 'red' : 'rgb(66, 139, 202)',
+                        edgeColor: !validScore
+                            ? colors.loss.backgroundColor
+                            : colors.payout.backgroundColor,
                         source: props.scoreKey,
                         target,
                         label: getRoundedFloat(props.finalProbabilities[target as any])
@@ -66,7 +71,8 @@ export const FinalProbabilitiesGraph: React.FC<FinalProbabilitiesGraphProps> = (
                         'text-valign': 'center',
                         'text-halign': 'center',
                         'background-color': 'white',
-                        'border-color': 'black',
+                        color: 'data(nodeColor)',
+                        'border-color': 'data(nodeColor)',
                         'border-width': 1,
                         'font-size': 16
                     }

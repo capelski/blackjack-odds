@@ -1,5 +1,6 @@
 import React, { CSSProperties, useMemo } from 'react';
 import { Cell, Column, Row, TableInstance, TableOptions, useTable } from 'react-table';
+import { colors } from '../constants';
 
 export type CustomCell<TData extends {}, TColumn extends Column<TData>> = Omit<
     Cell<TData>,
@@ -52,7 +53,7 @@ interface CustomTableProps<TData extends {}, TColumn extends Column<TData>> {
 }
 
 const baseCellProps: CSSProperties = {
-    borderColor: 'black',
+    borderColor: colors.border.regular,
     borderWidth: 1,
     borderStyle: 'solid',
     textAlign: 'center'
