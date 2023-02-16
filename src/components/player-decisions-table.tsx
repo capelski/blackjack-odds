@@ -24,6 +24,7 @@ interface PlayerDecisionsTableProps {
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
+    selectedScore?: ScoreKey;
 }
 
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
@@ -110,6 +111,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 playerSettings={props.playerSettings}
                 playerSettingsSetter={props.playerSettingsSetter}
                 processing={props.processing}
+                selectedScore={props.selectedScore}
             />
             <br />
             <br />

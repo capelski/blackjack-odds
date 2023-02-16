@@ -41,6 +41,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                     data={[scoreStats]}
                     direction={isDesktop ? 'horizontal' : 'vertical'}
                     playerChoices={props.playerChoices}
+                    selectedScore={scoreKey}
                 />
             ) : (
                 'Processing...'

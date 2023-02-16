@@ -1,4 +1,5 @@
 import React from 'react';
+import { ScoreKey } from '../models';
 import { PlayerSettings } from '../types';
 
 interface PlayerDecisionsEditProps {
@@ -7,6 +8,7 @@ interface PlayerDecisionsEditProps {
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
+    selectedScore?: ScoreKey;
 }
 
 export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) => {
@@ -26,14 +28,20 @@ export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) =
                     Object.keys(props.playerSettings.playerDecisionsOverrides).length === 0
                 }
                 onClick={() => {
+                    const nextPlayerDecisionsOverrides = props.selectedScore
+                        ? {
+                              ...props.playerSettings.playerDecisionsOverrides,
+                              [props.selectedScore]: {}
+                          }
+                        : {};
                     props.playerSettingsSetter({
                         ...props.playerSettings,
-                        playerDecisionsOverrides: {}
+                        playerDecisionsOverrides: nextPlayerDecisionsOverrides
                     });
                 }}
                 type="button"
             >
-                Clear edits
+                Clear {props.selectedScore ? 'this' : 'all'} edits
             </button>
         </React.Fragment>
     );
