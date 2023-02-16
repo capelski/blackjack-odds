@@ -66,7 +66,7 @@ export const App: React.FC = () => {
 
     // allScoreStats and playerChoices must be recomputed upon settings change
     useEffect(() => {
-        if (processing && outcomesSet !== undefined && dealerProbabilities !== undefined) {
+        if (processing && dealerProbabilities !== undefined) {
             const nextAllHands = getAllHands(outcomesSet, casinoRules.splitOptions);
             const nextAllScoreStats = getAllScoreStats({
                 allHands: nextAllHands,
@@ -84,7 +84,7 @@ export const App: React.FC = () => {
             setPlayerChoices(nextPlayerChoices);
             setProcessing(false);
         }
-    }, [dealerProbabilities, outcomesSet, processing]);
+    }, [dealerProbabilities, processing]);
 
     return (
         <div>
@@ -97,7 +97,7 @@ export const App: React.FC = () => {
                         element={
                             <React.Fragment>
                                 <h3>Dealer cards</h3>
-                                {dealerProbabilities !== undefined && outcomesSet !== undefined ? (
+                                {dealerProbabilities !== undefined ? (
                                     <DealerCards
                                         dealerProbabilities={dealerProbabilities}
                                         outcomesSet={outcomesSet}
@@ -127,7 +127,6 @@ export const App: React.FC = () => {
                         element={
                             <PlayerDecisionsDealerCard
                                 allScoreStats={allScoreStats}
-                                outcomesSet={outcomesSet}
                                 playerChoices={playerChoices}
                                 playerSettings={playerSettings}
                                 playerSettingsSetter={setPlayerSettings}

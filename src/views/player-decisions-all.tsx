@@ -10,7 +10,7 @@ import {
 
 interface PlayerDecisionsAllProps {
     allScoreStats?: ScoreStats[];
-    outcomesSet?: OutcomesSet;
+    outcomesSet: OutcomesSet;
     playerChoices?: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
@@ -23,7 +23,7 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
         <div>
             <h3>Player decisions</h3>
             <OutcomeComponent outcome={props.playerChoices?.outcome} />
-            {props.outcomesSet !== undefined && props.playerChoices !== undefined ? (
+            {props.playerChoices !== undefined ? (
                 <PlayerDecisionsTable
                     {...props}
                     allScoreStats={props.allScoreStats || []}

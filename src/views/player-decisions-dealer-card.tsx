@@ -6,11 +6,10 @@ import {
     OutcomeComponent
 } from '../components';
 import { ScoreKey } from '../models';
-import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
+import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats } from '../types';
 
 interface PlayerDecisionsDealerCardProps {
     allScoreStats?: ScoreStats[];
-    outcomesSet?: OutcomesSet;
     playerChoices?: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;

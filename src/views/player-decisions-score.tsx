@@ -14,7 +14,7 @@ import {
 
 interface PlayerDecisionsScoreProps {
     allScoreStats?: ScoreStats[];
-    outcomesSet?: OutcomesSet;
+    outcomesSet: OutcomesSet;
     playerChoices?: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
@@ -35,7 +35,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
             <h3>{scoreKey} player decisions</h3>
             <OutcomeComponent outcome={scoreStatsChoice?.decisionOutcome} />
             <h4>Dealer card based decisions</h4>
-            {props.outcomesSet !== undefined && props.playerChoices !== undefined ? (
+            {props.playerChoices !== undefined ? (
                 <PlayerDecisionsTable
                     {...props}
                     allScoreStats={scoreStats ? [scoreStats] : []}
