@@ -1,113 +1,78 @@
 import React, { useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
-import { Link } from 'react-router-dom';
-import { CellProps } from 'react-table';
 import { colors, desktopBreakpoint } from '../constants';
-import { getPlayerDecisionScorePath, getPlayerScoreStats } from '../logic';
 import { ScoreKey } from '../models';
-import {
-    AllScoreStatsChoicesSummary,
-    OutcomesSet,
-    PlayerSettings,
-    ScoreStats,
-    SplitOptions
-} from '../types';
-import { CustomColumn, CustomTable } from './custom-table';
+import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
+import { CustomColumn, CustomTableDirection, CustomTable } from './custom-table';
 import { EditPlayerDecisions } from './edit-player-decisions';
-import { InitialHandProbability } from './initial-hand-probability';
+import { RoundedFloat } from './rounded-float';
 import { ScoreStatsDealerCardChoiceCell } from './score-stats-dealer-card-choice';
 
-interface PlayerDecisionsTableProps {
-    allScoreStats: ScoreStats[];
-    direction?: 'horizontal' | 'vertical';
-    outcomesSet: OutcomesSet;
-    playerChoices: AllScoreStatsChoicesSummary;
-    playerSettings: PlayerSettings;
-    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
-    processing: boolean;
-    skipInitialColumns?: boolean;
-    splitOptions: SplitOptions;
-}
-
-type ScoreStatsColumn = CustomColumn<
+export type ScoreStatsColumn = CustomColumn<
     ScoreStats,
     {
         dealerCardKey?: ScoreKey;
     }
 >;
 
+interface PlayerDecisionsTableProps {
+    additionalColumns?: ScoreStatsColumn[];
+    data: ScoreStats[];
+    direction?: CustomTableDirection;
+    outcomesSet: OutcomesSet;
+    playerChoices: AllScoreStatsChoicesSummary;
+    playerSettings: PlayerSettings;
+    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
+    processing: boolean;
+}
+
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
     const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
-    const { columns, data } = useMemo(() => {
-        const columns: ScoreStatsColumn[] = [];
-
-        if (!props.skipInitialColumns) {
-            columns.push({
-                accessor: 'key',
-                Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
-                    return (
-                        <div>
-                            <Link
-                                to={getPlayerDecisionScorePath(cellProps.value)}
-                                style={{ color: colors.link.default, textDecoration: 'none' }}
-                            >
-                                {cellProps.value}
-                            </Link>
-                        </div>
-                    );
-                },
-                id: 'score'
-            });
-
-            columns.push({
-                Cell: (cellProps: CellProps<ScoreStats>) => {
-                    return (
-                        <div>
-                            <InitialHandProbability
-                                allScoreStats={props.allScoreStats}
-                                displayPercent={false}
-                                scoreStats={cellProps.row.original}
-                                splitOptions={props.splitOptions}
-                            />
-                        </div>
-                    );
-                },
-                Header: '%',
-                id: 'initialHandProbability'
-            });
-        }
-
-        columns.push(
-            ...props.outcomesSet.allOutcomes.map<ScoreStatsColumn>((cardOutcome) => ({
+    const columns = useMemo(() => {
+        const abbreviate = !isDesktop && props.direction !== 'vertical';
+        const columns: ScoreStatsColumn[] = [
+            ...(props.additionalColumns || []),
+            ...props.outcomesSet.allOutcomes.map<ScoreStatsColumn>((dealerCard) => ({
                 Cell: ScoreStatsDealerCardChoiceCell({
-                    abbreviate: !isDesktop && props.direction !== 'vertical',
-                    dealerCard: cardOutcome,
+                    abbreviate,
+                    dealerCard,
                     playerChoices: props.playerChoices,
                     playerDecisionsEdit,
                     playerSettings: props.playerSettings,
                     playerSettingsSetter: props.playerSettingsSetter,
                     processing: props.processing
                 }),
-                Header: cardOutcome.symbol,
-                id: cardOutcome.key,
-                dealerCardKey: cardOutcome.key
+                Header: () => {
+                    return (
+                        <React.Fragment>
+                            {dealerCard.symbol}
+                            {!abbreviate && (
+                                <span
+                                    style={{
+                                        fontSize: 12,
+                                        fontStyle: 'italic',
+                                        fontWeight: 'normal'
+                                    }}
+                                >
+                                    {' '}
+                                    (
+                                    <RoundedFloat
+                                        value={props.outcomesSet.allWeights[dealerCard.key]}
+                                    />
+                                    )
+                                </span>
+                            )}
+                        </React.Fragment>
+                    );
+                },
+                id: dealerCard.key,
+                dealerCardKey: dealerCard.key
             }))
-        );
-
-        const data = getPlayerScoreStats(props.allScoreStats);
-
-        return { columns, data };
-    }, [
-        isDesktop,
-        playerDecisionsEdit,
-        props.allScoreStats,
-        props.direction,
-        props.outcomesSet,
-        props.playerChoices,
-        props.playerSettings
-    ]);
+        ];
+        return columns;
+    }, [isDesktop, playerDecisionsEdit, props.additionalColumns]);
 
     return (
         <React.Fragment>
@@ -134,7 +99,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                     };
                 }}
                 columns={columns}
-                data={data}
+                data={props.data}
                 direction={props.direction}
                 width="100%"
             />

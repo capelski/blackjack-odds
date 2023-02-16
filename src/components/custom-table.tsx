@@ -51,11 +51,13 @@ function zip<T>(arrays: T[][]) {
         .map((_, i) => arrays.map((a) => a[i]).filter((x) => x !== undefined));
 }
 
+export type CustomTableDirection = 'horizontal' | 'vertical';
+
 interface CustomTableProps<TData extends {}, TColumn extends Column<TData>> {
     cellStyle?: (cell: CustomCell<TData, TColumn>) => CSSProperties | undefined;
     columns: TColumn[];
     data: TData[];
-    direction?: 'horizontal' | 'vertical';
+    direction?: CustomTableDirection;
     width?: string | number;
 }
 

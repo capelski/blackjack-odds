@@ -35,14 +35,12 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
             <h3>{scoreKey} player decisions</h3>
             <OutcomeComponent outcome={scoreStatsChoice?.decisionOutcome} />
             <h4>Dealer card based decisions</h4>
-            {props.playerChoices !== undefined ? (
+            {scoreStats && props.playerChoices !== undefined ? (
                 <PlayerDecisionsTable
                     {...props}
-                    allScoreStats={scoreStats ? [scoreStats] : []}
+                    data={[scoreStats]}
                     direction={isDesktop ? 'horizontal' : 'vertical'}
-                    outcomesSet={props.outcomesSet}
                     playerChoices={props.playerChoices}
-                    skipInitialColumns={true}
                 />
             ) : (
                 'Processing...'
