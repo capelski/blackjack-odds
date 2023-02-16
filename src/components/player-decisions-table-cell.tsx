@@ -6,7 +6,7 @@ import { getDisplayPlayerDecision, getPlayerDecisionDealerCardPath } from '../lo
 import { PlayerDecision } from '../models';
 import { AllScoreStatsChoicesSummary, CardOutcome, PlayerSettings, ScoreStats } from '../types';
 
-interface ScoreStatsDealerCardChoiceCellProps {
+interface PlayerDecisionsTableCellProps {
     abbreviate: boolean;
     dealerCard: CardOutcome;
     playerChoices: AllScoreStatsChoicesSummary;
@@ -20,7 +20,7 @@ const baseStyles: CSSProperties = {
     padding: '4px 0'
 };
 
-export const ScoreStatsDealerCardChoiceCell = (props: ScoreStatsDealerCardChoiceCellProps) => {
+export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) => {
     return (cellProps: CellProps<ScoreStats>) => {
         const { key: scoreKey } = cellProps.row.original;
         const scoreStatsChoice = props.playerChoices.choices[scoreKey];

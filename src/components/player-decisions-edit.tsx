@@ -1,7 +1,7 @@
 import React from 'react';
 import { PlayerSettings } from '../types';
 
-interface EditPlayerDecisionsProps {
+interface PlayerDecisionsEditProps {
     playerDecisionsEdit: boolean;
     playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     playerSettings: PlayerSettings;
@@ -9,7 +9,7 @@ interface EditPlayerDecisionsProps {
     processing: boolean;
 }
 
-export const EditPlayerDecisions: React.FC<EditPlayerDecisionsProps> = (props) => {
+export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) => {
     return (
         <React.Fragment>
             {' '}

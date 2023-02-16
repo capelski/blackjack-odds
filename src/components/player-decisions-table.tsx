@@ -4,9 +4,9 @@ import { colors, desktopBreakpoint } from '../constants';
 import { ScoreKey } from '../models';
 import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
 import { CustomColumn, CustomTableDirection, CustomTable } from './custom-table';
-import { EditPlayerDecisions } from './edit-player-decisions';
+import { PlayerDecisionsEdit } from './player-decisions-edit';
+import { PlayerDecisionsTableCell } from './player-decisions-table-cell';
 import { RoundedFloat } from './rounded-float';
-import { ScoreStatsDealerCardChoiceCell } from './score-stats-dealer-card-choice';
 
 export type ScoreStatsColumn = CustomColumn<
     ScoreStats,
@@ -35,7 +35,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
         const columns: ScoreStatsColumn[] = [
             ...(props.additionalColumns || []),
             ...props.outcomesSet.allOutcomes.map<ScoreStatsColumn>((dealerCard) => ({
-                Cell: ScoreStatsDealerCardChoiceCell({
+                Cell: PlayerDecisionsTableCell({
                     abbreviate,
                     dealerCard,
                     playerChoices: props.playerChoices,
@@ -104,7 +104,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 width="100%"
             />
             <br />
-            <EditPlayerDecisions
+            <PlayerDecisionsEdit
                 playerDecisionsEdit={playerDecisionsEdit}
                 playerDecisionsEditSetter={setPlayerDecisionsEdit}
                 playerSettings={props.playerSettings}
