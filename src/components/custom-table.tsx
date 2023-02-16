@@ -44,6 +44,13 @@ function customUseTable<TData extends {}, TColumn extends Column<TData>>(
     >;
 }
 
+function zip<T>(arrays: T[][]) {
+    const maxLength = Math.max(...arrays.map((a) => a.length));
+    return Array(maxLength)
+        .fill(undefined)
+        .map((_, i) => arrays.map((a) => a[i]).filter((x) => x !== undefined));
+}
+
 interface CustomTableProps<TData extends {}, TColumn extends Column<TData>> {
     cellStyle?: (cell: CustomCell<TData, TColumn>) => CSSProperties | undefined;
     columns: TColumn[];
@@ -114,12 +121,14 @@ export const CustomTable = <TData extends {}, TColumn extends Column<TData>>(
             };
         });
 
+        const joinedHeaderCells = zip(headers.map((header) => header.cells));
+
         return direction === 'horizontal'
             ? { headers, data }
             : {
                   headers: [],
-                  data: headers[0].cells.map((headerCell, index) => ({
-                      cells: [headerCell].concat(data.map((d) => d.cells[index])),
+                  data: joinedHeaderCells.map((headerCells, index) => ({
+                      cells: headerCells.concat(data.map((d) => d.cells[index])),
                       rowProps: undefined
                   }))
               };
