@@ -5,7 +5,8 @@ import {
     FinalProbabilitiesGraph,
     OutcomeComponent
 } from '../components';
-import { ScoreKey } from '../models';
+import { getDisplayPlayerDecision, getPrimaryPlayerDecisions } from '../logic';
+import { PlayerDecision, ScoreKey } from '../models';
 import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats } from '../types';
 
 interface PlayerDecisionsDealerCardProps {
@@ -25,14 +26,23 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
     const scoreStatsChoice =
         props.playerChoices?.choices[scoreKey].dealerCardChoices[dealerCardKey];
 
-    const asd = scoreStatsChoice?.decisions[scoreStatsChoice.choice];
+    const decisionData = scoreStatsChoice?.decisions[scoreStatsChoice.choice];
+
+    const allDecisionsData = scoreStatsChoice
+        ? getPrimaryPlayerDecisions(scoreStatsChoice.decisions)
+              .filter((x) => x !== PlayerDecision.stand)
+              .map((playerDecision: PlayerDecision) => ({
+                  decisionData: scoreStatsChoice.decisions[playerDecision],
+                  playerDecision: getDisplayPlayerDecision(playerDecision, { simplify: true })
+              }))
+        : [];
 
     return (
         <div>
             <h3>
                 {scoreKey} vs {dealerCardKey} player decisions
             </h3>
-            <OutcomeComponent outcome={asd?.outcome} />
+            <OutcomeComponent outcome={decisionData?.outcome} />
             {scoreStats && scoreStatsChoice && (
                 <React.Fragment>
                     <DecisionsProbabilityBreakdown
@@ -45,17 +55,19 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
                 </React.Fragment>
             )}
             {props.allScoreStats !== undefined &&
-                scoreStatsChoice?.finalScoreProbabilities !== undefined && (
-                    <React.Fragment>
+                allDecisionsData.length > 0 &&
+                allDecisionsData.map((decision) => (
+                    <React.Fragment key={decision.playerDecision}>
+                        <h4>{decision.playerDecision} final score probabilities</h4>
                         <FinalProbabilitiesGraph
-                            allScoreStats={props.allScoreStats}
-                            finalProbabilities={scoreStatsChoice?.finalScoreProbabilities}
+                            allScoreStats={props.allScoreStats!}
+                            finalProbabilities={decision.decisionData.finalProbabilities}
                             scoreKey={scoreKey}
                         />
                         <br />
                         <br />
                     </React.Fragment>
-                )}
+                ))}
         </div>
     );
 };
