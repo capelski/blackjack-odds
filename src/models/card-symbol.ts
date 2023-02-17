@@ -7,6 +7,6 @@ export enum CardSymbol {
     seven = '7',
     eight = '8',
     nine = '9',
-    figure = 10,
+    figure = '10',
     ace = 'A'
 }
