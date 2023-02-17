@@ -1,19 +1,15 @@
 import { handKeySeparator, scoreKeySeparator } from '../constants';
 import { ScoreKey } from '../models';
-import { Dictionary, Hand, OutcomesSet, ScoreStats } from '../types';
+import { Dictionary, Hand, ScoreStats } from '../types';
+import { getOutcomesSet } from './outcomes-set';
 
 /**
  * Returns a list of all possible valid scores' stats
  */
-export const getAllScoreStats = ({
-    allHands,
-    outcomesSet
-}: {
-    allHands: Hand[];
-    outcomesSet: OutcomesSet;
-}): ScoreStats[] => {
+export const getAllScoreStats = (allHands: Hand[]): ScoreStats[] => {
     const allScoresStatsMap = <Dictionary<ScoreStats>>{};
     const allScoreStats: ScoreStats[] = [];
+    const outcomesSet = getOutcomesSet();
 
     allHands.forEach((hand) => {
         const handSymbols = hand.cardSymbols.join(handKeySeparator);

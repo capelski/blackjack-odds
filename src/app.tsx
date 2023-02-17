@@ -10,8 +10,7 @@ import {
     getDefaultCasinoRues,
     getDefaultPlayerSettings,
     getDisabledSplitOptions,
-    getStandThresholdProbabilities,
-    outcomesSet
+    getStandThresholdProbabilities
 } from './logic';
 import { Paths } from './models';
 import { AllScoreStatsChoicesSummary, FinalScoresDictionary, ScoreStats } from './types';
@@ -44,14 +43,10 @@ export const App: React.FC = () => {
     // dealerProbabilities are constant regardless the active settings,
     // but they are computed in a useEffect for faster first render cycle
     useEffect(() => {
-        const allHands = getAllHands(outcomesSet, getDisabledSplitOptions());
-        const allScoreStats = getAllScoreStats({
-            allHands,
-            outcomesSet
-        });
+        const allHands = getAllHands(getDisabledSplitOptions());
+        const allScoreStats = getAllScoreStats(allHands);
         const dealerProbabilities = getStandThresholdProbabilities({
             allScoreStats: allScoreStats,
-            outcomesSet,
             standThreshold: dealerStandThreshold
         });
 
@@ -67,17 +62,13 @@ export const App: React.FC = () => {
     // allScoreStats and playerChoices must be recomputed upon settings change
     useEffect(() => {
         if (processing && dealerProbabilities !== undefined) {
-            const nextAllHands = getAllHands(outcomesSet, casinoRules.splitOptions);
-            const nextAllScoreStats = getAllScoreStats({
-                allHands: nextAllHands,
-                outcomesSet
-            });
+            const nextAllHands = getAllHands(casinoRules.splitOptions);
+            const nextAllScoreStats = getAllScoreStats(nextAllHands);
             const nextPlayerChoices = getAllScoresStatsChoicesSummary({
                 ...casinoRules,
                 ...playerSettings,
                 allScoreStats: nextAllScoreStats,
-                dealerProbabilities,
-                outcomesSet
+                dealerProbabilities
             });
 
             setAllScoreStats(nextAllScoreStats);
@@ -98,10 +89,7 @@ export const App: React.FC = () => {
                             <React.Fragment>
                                 <h3>Dealer cards</h3>
                                 {dealerProbabilities !== undefined ? (
-                                    <DealerCards
-                                        dealerProbabilities={dealerProbabilities}
-                                        outcomesSet={outcomesSet}
-                                    />
+                                    <DealerCards dealerProbabilities={dealerProbabilities} />
                                 ) : (
                                     'Processing...'
                                 )}
@@ -113,7 +101,6 @@ export const App: React.FC = () => {
                         element={
                             <PlayerDecisionsAll
                                 allScoreStats={allScoreStats}
-                                outcomesSet={outcomesSet}
                                 playerChoices={playerChoices}
                                 playerSettings={playerSettings}
                                 playerSettingsSetter={setPlayerSettings}
@@ -139,7 +126,6 @@ export const App: React.FC = () => {
                         element={
                             <PlayerDecisionsScore
                                 allScoreStats={allScoreStats}
-                                outcomesSet={outcomesSet}
                                 playerChoices={playerChoices}
                                 playerSettings={playerSettings}
                                 playerSettingsSetter={setPlayerSettings}

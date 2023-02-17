@@ -4,17 +4,10 @@ import { useParams } from 'react-router-dom';
 import { InitialHandProbability, OutcomeComponent, PlayerDecisionsTable } from '../components';
 import { desktopBreakpoint } from '../constants';
 import { ScoreKey } from '../models';
-import {
-    AllScoreStatsChoicesSummary,
-    OutcomesSet,
-    PlayerSettings,
-    ScoreStats,
-    SplitOptions
-} from '../types';
+import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats, SplitOptions } from '../types';
 
 interface PlayerDecisionsScoreProps {
     allScoreStats?: ScoreStats[];
-    outcomesSet: OutcomesSet;
     playerChoices?: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;

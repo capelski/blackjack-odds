@@ -1,8 +1,9 @@
 import toposort from 'toposort';
 import { blackjackScore, handKeySeparator, maximumScore, scoreKeySeparator } from '../constants';
 import { CardSymbol, DoublingMode, doublingModeSeparator, ScoreKey } from '../models';
-import { CardOutcome, Dictionary, Hand, OutcomesSet, SplitOptions } from '../types';
+import { CardOutcome, Dictionary, Hand, SplitOptions } from '../types';
 import { cartesianProduct, removeDuplicates } from '../utils';
+import { getOutcomesSet } from './outcomes-set';
 import { isSplitEnabled } from './split-options';
 
 export const canDouble = (hand: Hand, doublingMode: DoublingMode) => {
@@ -52,7 +53,8 @@ const createHand = (
 /**
  * Returns a list of all non-bust hands, topologically sorted by descendants
  */
-export const getAllHands = (outcomesSet: OutcomesSet, splitOptions: SplitOptions): Hand[] => {
+export const getAllHands = (splitOptions: SplitOptions): Hand[] => {
+    const outcomesSet = getOutcomesSet();
     const allHandsDictionary: Dictionary<Hand> = {};
     const handsQueue = outcomesSet.allOutcomes.map((cardOutcome) => createHand(cardOutcome));
     const handDependencies: [string, string][] = [];

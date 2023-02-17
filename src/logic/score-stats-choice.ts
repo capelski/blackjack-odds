@@ -4,7 +4,6 @@ import {
     AllScoreStatsChoicesSummary,
     FinalScoreProbabilities,
     FinalScoresDictionary,
-    OutcomesSet,
     PlayerDecisionsOverrides,
     ScoreStats,
     ScoreStatsAllDealerCardChoices,
@@ -15,12 +14,12 @@ import {
 import { getAllDecisionsData, getPlayerChoice } from './decision-data';
 import { mergeOutcomesByOutcomeSet, mergeOutcomesByInitialHands } from './decision-outcome';
 import { mergeProbabilities, weightProbabilities } from './final-score-probabilities';
+import { getOutcomesSet } from './outcomes-set';
 
 type ScoreStatsChoiceBaseParameters = {
     blackjackPayout: boolean;
     dealerProbabilities: FinalScoresDictionary;
     doublingMode: DoublingMode;
-    outcomesSet: OutcomesSet;
     playerDecisionsOverrides: PlayerDecisionsOverrides;
     playerStrategy: PlayerStrategy;
     splitOptions: SplitOptions;
@@ -61,7 +60,9 @@ const getScoreStatsChoice = (
         scoreStatsDealerCardsDictionary: AllScoreStatsChoices;
     }
 ): ScoreStatsChoice => {
-    const dealerCardChoices = params.outcomesSet.allOutcomes
+    const outcomesSet = getOutcomesSet();
+
+    const dealerCardChoices = outcomesSet.allOutcomes
         .map((cardOutcome) => cardOutcome.key)
         .reduce((dealerCardReduced, dealerCardKey) => {
             return {
@@ -74,7 +75,7 @@ const getScoreStatsChoice = (
         }, <ScoreStatsAllDealerCardChoices>{});
 
     const decisionOutcome = mergeOutcomesByOutcomeSet({
-        outcomesSet: params.outcomesSet,
+        outcomesSet: outcomesSet,
         scoreStatsAllChoices: dealerCardChoices
     });
 
@@ -85,7 +86,7 @@ const getScoreStatsChoice = (
             .map((dealerCardKey: ScoreKey) =>
                 weightProbabilities(
                     dealerCardChoices[dealerCardKey].finalScoreProbabilities,
-                    params.outcomesSet.allWeights[dealerCardKey]
+                    outcomesSet.allWeights[dealerCardKey]
                 )
             )
             .reduce(mergeProbabilities, <FinalScoreProbabilities>{})

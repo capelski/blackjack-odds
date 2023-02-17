@@ -1,6 +1,6 @@
 import { Paths, ScoreKey } from '../models';
 import { Dictionary } from '../types';
-import { outcomesSet } from './outcomes-set';
+import { getOutcomesSet } from './outcomes-set';
 
 export const getPlayerDecisionDealerCardPath = (scoreKey: ScoreKey, dealerCardKey: ScoreKey) => {
     return Paths.playerDecisionsDealerCard
@@ -18,7 +18,7 @@ const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {
     [Paths.playerDecisionsDealerCard]: Object.values(ScoreKey).reduce<string[]>(
         (reduced, scoreKey) => {
             return reduced.concat(
-                outcomesSet.allOutcomes.map((outcome) => {
+                getOutcomesSet().allOutcomes.map((outcome) => {
                     return getPlayerDecisionDealerCardPath(scoreKey, outcome.key);
                 })
             );

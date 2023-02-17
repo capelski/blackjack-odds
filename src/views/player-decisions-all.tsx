@@ -10,17 +10,10 @@ import {
 } from '../components';
 import { desktopBreakpoint, colors } from '../constants';
 import { getPlayerDecisionScorePath, getPlayerScoreStats } from '../logic';
-import {
-    AllScoreStatsChoicesSummary,
-    OutcomesSet,
-    PlayerSettings,
-    ScoreStats,
-    SplitOptions
-} from '../types';
+import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats, SplitOptions } from '../types';
 
 interface PlayerDecisionsAllProps {
     allScoreStats?: ScoreStats[];
-    outcomesSet: OutcomesSet;
     playerChoices?: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;

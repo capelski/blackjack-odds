@@ -1,6 +1,7 @@
 import { ScoreKey } from '../models';
-import { FinalScoresDictionary, FinalScoreProbabilities, OutcomesSet, ScoreStats } from '../types';
+import { FinalScoresDictionary, FinalScoreProbabilities, ScoreStats } from '../types';
 import { isBustScore } from './hand';
+import { getOutcomesSet } from './outcomes-set';
 
 export const getApplicableDealerProbabilities = (
     dealerProbabilities: FinalScoresDictionary,
@@ -37,13 +38,13 @@ export const getRangeProbability = (
  */
 export const getStandThresholdProbabilities = ({
     allScoreStats,
-    outcomesSet,
     standThreshold
 }: {
     allScoreStats: ScoreStats[];
-    outcomesSet: OutcomesSet;
     standThreshold: number;
 }): FinalScoresDictionary => {
+    const outcomesSet = getOutcomesSet();
+
     return allScoreStats.reduce((reduced, scoreStats) => {
         return {
             ...reduced,

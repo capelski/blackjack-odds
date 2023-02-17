@@ -7,7 +7,6 @@ import {
     Dictionary,
     FinalScoreProbabilities,
     FinalScoresDictionary,
-    OutcomesSet,
     ScoreStats,
     SplitHand,
     SplitOptions
@@ -20,6 +19,7 @@ import {
     mergeProbabilities
 } from './final-score-probabilities';
 import { canDouble, canSplit, isBlackjack } from './hand';
+import { getOutcomesSet } from './outcomes-set';
 import { isSplitEnabled } from './split-options';
 
 type SplitFollowingDecision = {
@@ -147,7 +147,6 @@ export const getAllDecisionsData = ({
     dealerCardKey,
     dealerProbabilities,
     doublingMode,
-    outcomesSet,
     scoreStats,
     scoreStatsDealerCardsDictionary,
     splitOptions
@@ -156,11 +155,11 @@ export const getAllDecisionsData = ({
     dealerCardKey: ScoreKey;
     dealerProbabilities: FinalScoresDictionary;
     doublingMode: DoublingMode;
-    outcomesSet: OutcomesSet;
     scoreStats: ScoreStats;
     scoreStatsDealerCardsDictionary: AllScoreStatsChoices;
     splitOptions: SplitOptions;
 }): AllDecisionsData => {
+    const outcomesSet = getOutcomesSet();
     const applicableDealerProbabilities = getApplicableDealerProbabilities(
         dealerProbabilities,
         dealerCardKey

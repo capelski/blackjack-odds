@@ -4,15 +4,15 @@ import { blackjackScore, dealerStandThreshold, maximumScore } from '../constants
 import {
     getApplicableDealerProbabilities,
     getBustingProbability,
+    getOutcomesSet,
     getRangeProbability
 } from '../logic';
-import { CardOutcome, FinalScoresDictionary, OutcomesSet, ScoreStats } from '../types';
+import { CardOutcome, FinalScoresDictionary, ScoreStats } from '../types';
 import { CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface DealerCardsProps {
     dealerProbabilities: FinalScoresDictionary;
-    outcomesSet: OutcomesSet;
 }
 
 export const DealerCards = (props: DealerCardsProps) => {
@@ -86,10 +86,10 @@ export const DealerCards = (props: DealerCardsProps) => {
             }
         ];
 
-        const data = props.outcomesSet.allOutcomes;
+        const data = getOutcomesSet().allOutcomes;
 
         return { columns, data };
-    }, [props.dealerProbabilities, props.outcomesSet]);
+    }, [props.dealerProbabilities]);
 
     return <CustomTable columns={columns} data={data} />;
 };

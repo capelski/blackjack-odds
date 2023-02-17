@@ -1,8 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { colors, desktopBreakpoint } from '../constants';
+import { getOutcomesSet } from '../logic';
 import { ScoreKey } from '../models';
-import { AllScoreStatsChoicesSummary, OutcomesSet, PlayerSettings, ScoreStats } from '../types';
+import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats } from '../types';
 import { CustomColumn, CustomTableDirection, CustomTable } from './custom-table';
 import { PlayerDecisionsEdit } from './player-decisions-edit';
 import { PlayerDecisionsTableCell } from './player-decisions-table-cell';
@@ -19,7 +20,6 @@ interface PlayerDecisionsTableProps {
     additionalColumns?: ScoreStatsColumn[];
     data: ScoreStats[];
     direction?: CustomTableDirection;
-    outcomesSet: OutcomesSet;
     playerChoices: AllScoreStatsChoicesSummary;
     playerSettings: PlayerSettings;
     playerSettingsSetter: (playerSettings: PlayerSettings) => void;
@@ -32,10 +32,11 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
     const columns = useMemo(() => {
+        const outcomesSet = getOutcomesSet();
         const abbreviate = !isDesktop && props.direction !== 'vertical';
         const columns: ScoreStatsColumn[] = [
             ...(props.additionalColumns || []),
-            ...props.outcomesSet.allOutcomes.map<ScoreStatsColumn>((dealerCard) => ({
+            ...outcomesSet.allOutcomes.map<ScoreStatsColumn>((dealerCard) => ({
                 Cell: PlayerDecisionsTableCell({
                     abbreviate,
                     dealerCard,
@@ -59,10 +60,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                                 >
                                     {' '}
                                     (
-                                    <RoundedFloat
-                                        value={props.outcomesSet.allWeights[dealerCard.key]}
-                                    />
-                                    )
+                                    <RoundedFloat value={outcomesSet.allWeights[dealerCard.key]} />)
                                 </span>
                             )}
                         </React.Fragment>
