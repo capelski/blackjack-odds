@@ -1,5 +1,5 @@
 import { handKeySeparator, scoreKeySeparator } from '../constants';
-import { ScoreKey } from '../models';
+import { CardSymbol, ScoreKey } from '../models';
 import { Dictionary, Hand, ScoreStats } from '../types';
 import { getOutcomesSet } from './outcomes-set';
 
@@ -45,9 +45,30 @@ export const getAllScoreStats = (allHands: Hand[]): ScoreStats[] => {
     });
 
     allScoreStats.forEach((scoreStats) => {
-        scoreStats.combinations.sort(
-            (a, b) => a.split(handKeySeparator).length - b.split(handKeySeparator).length
-        );
+        scoreStats.combinations.sort((a, b) => {
+            const aSymbols = a.split(',');
+            const bSymbols = b.split(',');
+            const maxLength = Math.max(aSymbols.length, bSymbols.length);
+            for (let i = 0; i < maxLength; ++i) {
+                const aSymbol = aSymbols[i];
+                const bSymbol = bSymbols[i];
+
+                if (aSymbol === bSymbol && aSymbols.length !== bSymbols.length) {
+                    return aSymbols.length - bSymbols.length;
+                } else if (aSymbol === CardSymbol.ace && bSymbol !== CardSymbol.ace) {
+                    return 1;
+                } else if (aSymbol !== CardSymbol.ace && bSymbol === CardSymbol.ace) {
+                    return -1;
+                } else if (aSymbol !== CardSymbol.ace && bSymbol !== CardSymbol.ace) {
+                    const aNumber = parseInt(aSymbol);
+                    const bNumber = parseInt(bSymbol);
+                    if (aNumber !== bNumber) {
+                        return bNumber - aNumber;
+                    }
+                }
+            }
+            return 0;
+        });
     });
 
     // const totalProbability = allScoreStats.reduce((x, y) => x + y.initialHandProbability, 0);

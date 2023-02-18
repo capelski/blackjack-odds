@@ -104,7 +104,20 @@ export const getAllHands = (splitOptions: SplitOptions): Hand[] => {
 };
 
 const getHandKey = (cardSymbols: CardSymbol[]) => {
-    return [...cardSymbols].sort().join(handKeySeparator);
+    return [...cardSymbols]
+        .sort((a, b) => {
+            const numericA = parseInt(a);
+            const numericB = parseInt(b);
+
+            return isNaN(numericA) && isNaN(numericB)
+                ? 0
+                : isNaN(numericA)
+                ? -1
+                : isNaN(numericB)
+                ? 1
+                : numericB - numericA;
+        })
+        .join(handKeySeparator);
 };
 
 const getHandNextScores = (previousScores: number[], nextValues: number[]) => {
