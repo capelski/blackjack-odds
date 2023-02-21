@@ -18,7 +18,7 @@ export const getOutcomesSet = (): OutcomesSet => {
             { key: ScoreKey.hard9, symbol: CardSymbol.nine, values: [9], weight: 1 },
             // There four 10-valued outcomes: 10, J, Q, K
             { key: ScoreKey.hard10, symbol: CardSymbol.figure, values: [10], weight: 4 },
-            { key: ScoreKey.soft11, symbol: CardSymbol.ace, values: [1, 11], weight: 1 }
+            { key: ScoreKey.ace, symbol: CardSymbol.ace, values: [1, 11], weight: 1 }
         ];
         const totalWeight = allOutcomes.reduce((reduced, next) => reduced + next.weight, 0);
         const allWeights = allOutcomes.reduce((reduced, cardOutcome) => {

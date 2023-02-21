@@ -144,6 +144,8 @@ const getHandScoreKey = (
         ? ScoreKey.blackjack
         : cardSymbols.length === 1 && cardSymbols[0] === CardSymbol.figure
         ? ScoreKey.figure
+        : cardSymbols.length === 1 && cardSymbols[0] === CardSymbol.ace
+        ? ScoreKey.ace
         : canSplit(cardSymbols, splitAllowed)
         ? <ScoreKey>`${cardSymbols[0]}${handKeySeparator}${cardSymbols[1]}`
         : <ScoreKey>handScores.join(scoreKeySeparator);
