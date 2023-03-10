@@ -28,7 +28,12 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
             <h3>
                 {playerDisplayKey} vs {dealerDisplayKey} player decisions
             </h3>
-            <OutcomeComponent outcome={playerFact?.vsDealerCard_average.vsDealerOutcome} />
+            <OutcomeComponent
+                outcome={
+                    dealerFact &&
+                    playerFact?.vsDealerCard[dealerFact.hand.key].preferences[0].vsDealerOutcome
+                }
+            />
             {playerFact && dealerFact && (
                 <React.Fragment>
                     <DecisionsProbabilityBreakdown
