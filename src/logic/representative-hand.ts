@@ -1,4 +1,4 @@
-import { blackjackScore, handKeySeparator, maximumScore, scoreKeySeparator } from '../constants';
+import { blackjackScore, maximumScore, scoreKeySeparator } from '../constants';
 import { CardSymbol, DoublingMode } from '../models';
 import {
     Card,
@@ -61,7 +61,7 @@ const createHand = (
     const key = getHandKey(cards, splitRestrictions);
     const canDouble_ = canDouble(cards, casinoRules.doublingMode, splitRestrictions);
     const canSplit_ = canSplit(cards, casinoRules.splitOptions, splitRestrictions);
-    const displayKey = getHandDisplayKey(cards, casinoRules, splitRestrictions);
+    const displayKey = getHandDisplayKey(cards, canSplit_, splitRestrictions);
 
     const cardSet = getCardSet();
     const nextHands = isActive
@@ -208,7 +208,7 @@ const getHandCode = (cards: Card[]): string => {
                 ? 1
                 : numericB - numericA;
         })
-        .join(handKeySeparator);
+        .join(',');
 };
 
 const getHandCodeFromSymbols = (cardSymbols: CardSymbol[]) => {
@@ -219,23 +219,34 @@ const getHandCodeFromSymbols = (cardSymbols: CardSymbol[]) => {
     return getHandCode(cards);
 };
 
-export const getHandDisplayKey = (
+const getHandDisplayKey = (
     cards: Card[],
-    casinoRules: CasinoRules,
+    canSplit: boolean,
     splitRestrictions: SplitRestrictions = {}
 ): string => {
-    const canSplit_ = canSplit(cards, casinoRules.splitOptions, splitRestrictions);
     const code = getHandCode(cards);
     const isBlackjack_ = isBlackjack(cards, splitRestrictions);
     const allScores = mergeScores(cards, splitRestrictions);
 
     return cards.length === 1
         ? cards[0].symbol
-        : canSplit_
+        : canSplit
         ? code
         : isBlackjack_
         ? 'BJ'
         : allScores.join(scoreKeySeparator);
+};
+
+export const getHandDisplayKeyFromSymbols = (
+    cardSymbols: CardSymbol[],
+    canSplit: boolean,
+    splitRestrictions: SplitRestrictions = {}
+) => {
+    const cardSet = getCardSet();
+    const cards = cardSymbols.map(
+        (symbol) => cardSet.cards.find((card) => card.symbol === symbol)!
+    );
+    return getHandDisplayKey(cards, canSplit, splitRestrictions);
 };
 
 const getHandEffectiveScore = (scores: number[]): number => {

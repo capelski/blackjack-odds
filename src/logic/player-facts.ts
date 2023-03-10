@@ -1,4 +1,4 @@
-import { blackjackScore, handKeySeparator } from '../constants';
+import { blackjackScore } from '../constants';
 import { Action, CardSymbol, PlayerStrategy } from '../models';
 import {
     CasinoRules,
@@ -21,7 +21,7 @@ import {
     PlayerStrategyData
 } from '../types';
 import { aggregateFinalScores } from './final-scores';
-import { sortHandCodes } from './representative-hand';
+import { getHandDisplayKeyFromSymbols, sortHandCodes } from './representative-hand';
 import { aggregateOutcomes, getVsDealerOutcome } from './vs-dealer-outcome';
 import { aggregateBreakdowns, getVsDealerBreakdown } from './vs-dealer-breakdown';
 
@@ -229,11 +229,13 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
         const isBlackjackB = b.hand.isBlackjack;
         const isBlackjackDifference = isBlackjackA !== isBlackjackB;
 
+        const acesDisplayKey = getHandDisplayKeyFromSymbols([CardSymbol.ace, CardSymbol.ace], true);
+
         return isSplitDifference
             ? +isSplitB - +isSplitA
-            : a.hand.displayKey === `${CardSymbol.ace}${handKeySeparator}${CardSymbol.ace}`
+            : a.hand.displayKey === acesDisplayKey
             ? 1
-            : b.hand.displayKey === `${CardSymbol.ace}${handKeySeparator}${CardSymbol.ace}`
+            : b.hand.displayKey === acesDisplayKey
             ? -1
             : isSoftDifference
             ? +isSoftB - +isSoftA
