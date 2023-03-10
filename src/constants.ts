@@ -82,4 +82,4 @@ export const probabilityLabels = {
     playerTotal: 'P (total)'
 };
 
-export const scoreKeySeparator = '-';
+export const scoreKeySeparator = '/';
