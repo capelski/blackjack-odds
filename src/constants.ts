@@ -1,5 +1,3 @@
-export const blackjackHandKey = 'BJ';
-
 export const colors = {
     border: {
         highlight: 'coral',

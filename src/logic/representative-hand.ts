@@ -1,10 +1,4 @@
-import {
-    blackjackHandKey,
-    blackjackScore,
-    handKeySeparator,
-    maximumScore,
-    scoreKeySeparator
-} from '../constants';
+import { blackjackScore, handKeySeparator, maximumScore, scoreKeySeparator } from '../constants';
 import { CardSymbol, DoublingMode } from '../models';
 import {
     Card,
@@ -67,13 +61,7 @@ const createHand = (
     const key = getHandKey(cards, splitRestrictions);
     const canDouble_ = canDouble(cards, casinoRules.doublingMode, splitRestrictions);
     const canSplit_ = canSplit(cards, casinoRules.splitOptions, splitRestrictions);
-    const displayKey = canSplit_
-        ? code
-        : isBlackjack_
-        ? blackjackHandKey
-        : cards.length === 1
-        ? cards[0].symbol
-        : allScores.join(scoreKeySeparator);
+    const displayKey = getHandDisplayKey(cards, casinoRules, splitRestrictions);
 
     const cardSet = getCardSet();
     const nextHands = isActive
@@ -231,14 +219,23 @@ const getHandCodeFromSymbols = (cardSymbols: CardSymbol[]) => {
     return getHandCode(cards);
 };
 
-// Some hands have special restrictions after split (e.g. 2,2 after split is 4) and,
-// even though their code matches and existing hand, they must be processed separately
-const getHandRepresentativeCode = (
+export const getHandDisplayKey = (
     cards: Card[],
-    { forbiddenSplit }: SplitRestrictions = {}
+    casinoRules: CasinoRules,
+    splitRestrictions: SplitRestrictions = {}
 ): string => {
+    const canSplit_ = canSplit(cards, casinoRules.splitOptions, splitRestrictions);
     const code = getHandCode(cards);
-    return `${code}${forbiddenSplit ? ' (postSplit)' : ''}`;
+    const isBlackjack_ = isBlackjack(cards, splitRestrictions);
+    const allScores = mergeScores(cards, splitRestrictions);
+
+    return cards.length === 1
+        ? cards[0].symbol
+        : canSplit_
+        ? code
+        : isBlackjack_
+        ? 'BJ'
+        : allScores.join(scoreKeySeparator);
 };
 
 const getHandEffectiveScore = (scores: number[]): number => {
@@ -253,8 +250,6 @@ export const getHandKey = (cards: Card[], splitRestrictions: SplitRestrictions =
 
     return cards.length === 1
         ? `dealer${cards[0].symbol}`
-        : isBlackjack(cards, splitRestrictions)
-        ? blackjackHandKey
         : cards.length === 2
         ? `special${
               isPotentialSplitHand(cards, splitRestrictions)
@@ -262,6 +257,17 @@ export const getHandKey = (cards: Card[], splitRestrictions: SplitRestrictions =
                   : scores
           }`
         : scores;
+};
+
+/** Some hands have special restrictions after split (e.g. 2,2 after split is 4) and,
+ * even though their code matches and existing hand, they must be processed separately
+ */
+const getHandRepresentativeCode = (
+    cards: Card[],
+    { forbiddenSplit }: SplitRestrictions = {}
+): string => {
+    const code = getHandCode(cards);
+    return `${code}${forbiddenSplit ? ' (postSplit)' : ''}`;
 };
 
 /** Returns true if the cards correspond to a Blackjack (i.e. A,10) */
