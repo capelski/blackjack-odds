@@ -1,14 +1,13 @@
 import React from 'react';
-import { ScoreKey } from '../models';
-import { PlayerSettings } from '../types';
+import { PlayerActionOverrides, PlayerActionOverridesByDealerCard } from '../types';
 
 interface PlayerDecisionsEditProps {
+    actionOverrides: PlayerActionOverridesByDealerCard;
+    actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
     playerDecisionsEdit: boolean;
     playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
-    playerSettings: PlayerSettings;
-    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
-    selectedScore?: ScoreKey;
+    handKey?: string;
 }
 
 export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) => {
@@ -23,25 +22,36 @@ export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) =
             />
             Edit player decisions{' '}
             <button
-                disabled={
-                    props.processing ||
-                    Object.keys(props.playerSettings.playerDecisionsOverrides).length === 0
-                }
+                disabled={props.processing || Object.keys(props.actionOverrides).length === 0}
                 onClick={() => {
-                    const nextPlayerDecisionsOverrides = props.selectedScore
-                        ? {
-                              ...props.playerSettings.playerDecisionsOverrides,
-                              [props.selectedScore]: {}
-                          }
+                    const nextPlayerActionsOverrides = props.handKey
+                        ? Object.keys(
+                              props.actionOverrides
+                          ).reduce<PlayerActionOverridesByDealerCard>((reduced, next) => {
+                              return {
+                                  ...reduced,
+                                  [next]: {
+                                      ...Object.keys(props.actionOverrides[next])
+                                          .filter((key) => key !== props.handKey)
+                                          .reduce<PlayerActionOverrides>(
+                                              (innerReduce, innerNext) => {
+                                                  return {
+                                                      ...innerReduce,
+                                                      [innerNext]:
+                                                          props.actionOverrides[next][innerNext]
+                                                  };
+                                              },
+                                              {}
+                                          )
+                                  }
+                              };
+                          }, {})
                         : {};
-                    props.playerSettingsSetter({
-                        ...props.playerSettings,
-                        playerDecisionsOverrides: nextPlayerDecisionsOverrides
-                    });
+                    props.actionOverridesSetter(nextPlayerActionsOverrides);
                 }}
                 type="button"
             >
-                Clear {props.selectedScore ? 'this' : 'all'} edits
+                Clear {props.handKey ? 'this' : 'all'} edits
             </button>
         </React.Fragment>
     );

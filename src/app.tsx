@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from 'react';
 import { BrowserRouter, Navigate, Route, Routes, useLocation } from 'react-router-dom';
-import { DealerCards } from './components';
-import { dealerStandThreshold } from './constants';
 import {
-    defaultPlayerStrategy,
-    getAllHands,
-    getAllScoresStatsChoicesSummary,
-    getAllScoreStats,
+    getAllRepresentativeHands,
+    getDealerFacts,
     getDefaultCasinoRues,
-    getDefaultPlayerSettings,
-    getDisabledSplitOptions,
-    getStandThresholdProbabilities
+    getPlayerFacts,
+    getDefaultPlayerStrategy,
+    groupPlayerFacts,
+    getPlayerAverageData
 } from './logic';
 import { Paths } from './models';
-import { AllScoreStatsChoicesSummary, FinalScoresDictionary, ScoreStats } from './types';
+import {
+    DealerFacts,
+    PlayerActionOverridesByDealerCard,
+    PlayerAverageData,
+    PlayerFact
+} from './types';
 import {
     NavBar,
     PlayerDecisionsAll,
@@ -33,49 +35,51 @@ export const ScrollToTop: React.FC = () => {
 };
 
 export const App: React.FC = () => {
-    const [allScoreStats, setAllScoreStats] = useState<ScoreStats[]>();
-    const [casinoRules, setCasinoRules] = useState(getDefaultCasinoRues(defaultPlayerStrategy));
-    const [dealerProbabilities, setDealerProbabilities] = useState<FinalScoresDictionary>();
-    const [playerChoices, setPlayerChoices] = useState<AllScoreStatsChoicesSummary>();
+    const [actionOverrides, setActionOverrides] = useState<PlayerActionOverridesByDealerCard>({});
+    const [casinoRules, setCasinoRules] = useState(getDefaultCasinoRues());
     const [processing, setProcessing] = useState(true);
-    const [playerSettings, setPlayerSettings] = useState(getDefaultPlayerSettings());
+    const [playerStrategy, setPlayerStrategy] = useState(getDefaultPlayerStrategy());
 
-    // dealerProbabilities are constant regardless the active settings,
-    // but they are computed in a useEffect for faster first render cycle
-    useEffect(() => {
-        const allHands = getAllHands(getDisabledSplitOptions());
-        const allScoreStats = getAllScoreStats(allHands);
-        const dealerProbabilities = getStandThresholdProbabilities({
-            allScoreStats: allScoreStats,
-            standThreshold: dealerStandThreshold
-        });
-
-        setDealerProbabilities(dealerProbabilities);
-    }, []);
+    const [dealerFacts, setDealerFacts] = useState<DealerFacts>();
+    const [playerAverageData, setPlayerAverageData] = useState<PlayerAverageData>();
+    const [playerFacts, setPlayerFacts] = useState<PlayerFact[]>();
 
     // A change in settings disables further changes in settings until re-processing data
     // (could be done with a setTimeout, but safer to trigger an additional render cycle)
     useEffect(() => {
         setProcessing(true);
-    }, [casinoRules, playerSettings]);
+    }, [actionOverrides, casinoRules, playerStrategy]);
 
     // allScoreStats and playerChoices must be recomputed upon settings change
     useEffect(() => {
-        if (processing && dealerProbabilities !== undefined) {
-            const nextAllHands = getAllHands(casinoRules.splitOptions);
-            const nextAllScoreStats = getAllScoreStats(nextAllHands);
-            const nextPlayerChoices = getAllScoresStatsChoicesSummary({
-                ...casinoRules,
-                ...playerSettings,
-                allScoreStats: nextAllScoreStats,
-                dealerProbabilities
-            });
+        if (processing) {
+            const representativeHands = getAllRepresentativeHands(casinoRules);
+            // console.log('Representative hands', representativeHands);
 
-            setAllScoreStats(nextAllScoreStats);
-            setPlayerChoices(nextPlayerChoices);
+            const dealerFacts = getDealerFacts(representativeHands);
+            // console.log('Dealer facts', dealerFacts);
+
+            const allPlayerFacts = getPlayerFacts(
+                representativeHands,
+                dealerFacts,
+                casinoRules,
+                playerStrategy,
+                actionOverrides
+            );
+            // console.log('All player facts', allPlayerFacts);
+
+            const playerAverageData = getPlayerAverageData(allPlayerFacts);
+            // console.log('Player average data', playerAverageData);
+
+            const groupedPlayerFacts = groupPlayerFacts(allPlayerFacts);
+            // console.log('Visible player facts', groupedPlayerFacts);
+
+            setDealerFacts(dealerFacts);
+            setPlayerAverageData(playerAverageData);
+            setPlayerFacts(groupedPlayerFacts);
             setProcessing(false);
         }
-    }, [dealerProbabilities, processing]);
+    }, [processing]);
 
     return (
         <div>
@@ -84,28 +88,15 @@ export const App: React.FC = () => {
                 <NavBar />
                 <Routes>
                     <Route
-                        path={Paths.dealerCards}
-                        element={
-                            <React.Fragment>
-                                <h3>Dealer cards</h3>
-                                {dealerProbabilities !== undefined ? (
-                                    <DealerCards dealerProbabilities={dealerProbabilities} />
-                                ) : (
-                                    'Processing...'
-                                )}
-                            </React.Fragment>
-                        }
-                    />
-                    <Route
                         path={Paths.playerDecisions}
                         element={
                             <PlayerDecisionsAll
-                                allScoreStats={allScoreStats}
-                                playerChoices={playerChoices}
-                                playerSettings={playerSettings}
-                                playerSettingsSetter={setPlayerSettings}
+                                actionOverrides={actionOverrides}
+                                actionOverridesSetter={setActionOverrides}
+                                playerBaseData={playerAverageData?.vsDealerCards}
+                                playerFacts={playerFacts}
+                                dealerFacts={dealerFacts}
                                 processing={processing}
-                                splitOptions={casinoRules.splitOptions}
                             />
                         }
                     />
@@ -113,10 +104,8 @@ export const App: React.FC = () => {
                         path={Paths.playerDecisionsDealerCard}
                         element={
                             <PlayerDecisionsDealerCard
-                                allScoreStats={allScoreStats}
-                                playerChoices={playerChoices}
-                                playerSettings={playerSettings}
-                                playerSettingsSetter={setPlayerSettings}
+                                dealerFacts={dealerFacts}
+                                playerFacts={playerFacts}
                                 processing={processing}
                             />
                         }
@@ -125,12 +114,11 @@ export const App: React.FC = () => {
                         path={Paths.playerDecisionsScore}
                         element={
                             <PlayerDecisionsScore
-                                allScoreStats={allScoreStats}
-                                playerChoices={playerChoices}
-                                playerSettings={playerSettings}
-                                playerSettingsSetter={setPlayerSettings}
+                                actionOverrides={actionOverrides}
+                                actionOverridesSetter={setActionOverrides}
+                                dealerFacts={dealerFacts}
+                                playerFacts={playerFacts}
                                 processing={processing}
-                                splitOptions={casinoRules.splitOptions}
                             />
                         }
                     />
@@ -140,9 +128,9 @@ export const App: React.FC = () => {
                             <StrategyAndRules
                                 casinoRules={casinoRules}
                                 casinoRulesSetter={setCasinoRules}
-                                outcome={playerChoices?.outcome}
-                                playerSettings={playerSettings}
-                                playerSettingsSetter={setPlayerSettings}
+                                playerBaseData={playerAverageData?.vsDealerCards}
+                                playerStrategy={playerStrategy}
+                                playerStrategySetter={setPlayerStrategy}
                                 processing={processing}
                             />
                         }

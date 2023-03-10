@@ -1,7 +1,7 @@
 /**
- * Probability of each possible final scenario for a given score, a player decision and a dealer card
+ * Final scenarios probabilities for a given player hand, dealer card and action
  */
-export type DecisionProbabilityBreakdown = {
+export type VsDealerBreakdown = {
     dealerBusting: number;
     playerBusting: number;
     playerEqualToDealer: number;

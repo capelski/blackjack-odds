@@ -1,8 +1,7 @@
 import cytoscape from 'cytoscape';
 import React, { useEffect, useRef } from 'react';
 import { colors } from '../constants';
-import { ScoreKey } from '../models';
-import { FinalScoreProbabilities, ScoreStats } from '../types';
+import { FinalScores, PlayerFact } from '../types';
 import { getRoundedFloat } from './rounded-float';
 
 export type CytoscapeTree = {
@@ -10,13 +9,13 @@ export type CytoscapeTree = {
     edges: { data: { source: string; target: string } }[];
 };
 
-export interface FinalProbabilitiesGraphProps {
-    allScoreStats: ScoreStats[];
-    finalProbabilities: FinalScoreProbabilities;
-    scoreKey: ScoreKey;
+export interface FinalScoresGraphProps {
+    finalScores: FinalScores;
+    handDisplayKey: string;
+    playerFacts: PlayerFact[];
 }
 
-export const FinalProbabilitiesGraph: React.FC<FinalProbabilitiesGraphProps> = (props) => {
+export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
     const container = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
@@ -25,29 +24,36 @@ export const FinalProbabilitiesGraph: React.FC<FinalProbabilitiesGraphProps> = (
         }
 
         const tree: CytoscapeTree = {
-            nodes: Object.keys(props.finalProbabilities)
-                .concat(props.scoreKey)
-                .map((scoreKey) => {
-                    const validScore = props.allScoreStats!.find((x) => x.key === scoreKey);
+            nodes: Object.keys(props.finalScores)
+                .concat(props.handDisplayKey)
+                .map((handDisplayKey) => {
+                    const playerFact = props.playerFacts.find(
+                        (x) => x.hand.displayKey === handDisplayKey
+                    );
+                    const isBustScore = playerFact && playerFact.hand.isBust;
                     return {
                         data: {
-                            id: scoreKey,
-                            nodeColor: validScore
-                                ? colors.payout.backgroundColor
-                                : colors.loss.backgroundColor
+                            id: handDisplayKey,
+                            nodeColor: isBustScore
+                                ? colors.loss.backgroundColor
+                                : colors.payout.backgroundColor
                         }
                     };
                 }),
-            edges: Object.keys(props.finalProbabilities).map((target: ScoreKey) => {
-                const validScore = props.allScoreStats!.find((x) => x.key === target);
+            edges: Object.keys(props.finalScores).map((handDisplayKey: string) => {
+                const playerFact = props.playerFacts.find(
+                    (x) => x.hand.displayKey === handDisplayKey
+                );
+                const isBustScore = playerFact && playerFact.hand.isBust;
+
                 return {
                     data: {
-                        edgeColor: !validScore
+                        edgeColor: isBustScore
                             ? colors.loss.backgroundColor
                             : colors.payout.backgroundColor,
-                        source: props.scoreKey,
-                        target,
-                        label: getRoundedFloat(props.finalProbabilities[target as any])
+                        source: props.handDisplayKey,
+                        target: handDisplayKey,
+                        label: getRoundedFloat(props.finalScores[handDisplayKey].weight)
                     }
                 };
             })
@@ -100,7 +106,7 @@ export const FinalProbabilitiesGraph: React.FC<FinalProbabilitiesGraphProps> = (
             ],
             elements: tree
         });
-    }, [container, props.allScoreStats, props.finalProbabilities]);
+    }, [container, props.finalScores, props.handDisplayKey, props.playerFacts]);
 
     return (
         <div

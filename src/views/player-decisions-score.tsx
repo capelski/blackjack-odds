@@ -3,38 +3,40 @@ import { useMediaQuery } from 'react-responsive';
 import { useParams } from 'react-router-dom';
 import { InitialHandProbability, OutcomeComponent, PlayerDecisionsTable } from '../components';
 import { desktopBreakpoint } from '../constants';
-import { ScoreKey } from '../models';
-import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats, SplitOptions } from '../types';
+import { getPlayerDecisionScoreParams } from '../logic';
+import { DealerFacts, PlayerActionOverridesByDealerCard, PlayerFact } from '../types';
 
 interface PlayerDecisionsScoreProps {
-    allScoreStats?: ScoreStats[];
-    playerChoices?: AllScoreStatsChoicesSummary;
-    playerSettings: PlayerSettings;
-    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
+    actionOverrides: PlayerActionOverridesByDealerCard;
+    actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
+    playerFacts?: PlayerFact[];
+    dealerFacts?: DealerFacts;
     processing: boolean;
-    splitOptions: SplitOptions;
 }
 
 export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props) => {
-    const { scoreKey } = useParams() as { scoreKey: ScoreKey };
-    const scoreStats = props.allScoreStats?.find((scoreStats) => scoreStats.key === scoreKey);
-    const scoreStatsChoice = props.playerChoices?.choices[scoreKey];
+    const { playerDisplayKey } = getPlayerDecisionScoreParams(useParams());
+
+    const playerFact = props.playerFacts?.find(
+        (playerFact) => playerFact.hand.displayKey === playerDisplayKey
+    );
 
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
     const [displayCombinations, setDisplayCombinations] = useState(false);
 
     return (
         <div>
-            <h3>{scoreKey} player decisions</h3>
-            <OutcomeComponent outcome={scoreStatsChoice?.decisionOutcome} />
+            <h3>{playerDisplayKey} player decisions</h3>
+            <OutcomeComponent outcome={playerFact?.vsDealerCard_average.vsDealerOutcome} />
             <h4>Dealer card based decisions</h4>
-            {scoreStats && props.playerChoices !== undefined ? (
+            {playerDisplayKey && playerFact !== undefined && props.dealerFacts !== undefined ? (
                 <PlayerDecisionsTable
                     {...props}
-                    data={[scoreStats]}
+                    data={[playerFact]}
                     direction={isDesktop ? 'horizontal' : 'vertical'}
-                    playerChoices={props.playerChoices}
-                    selectedScore={scoreKey}
+                    // playerChoices={props.playerChoices}
+                    handKey={playerFact.hand.key}
+                    dealerFacts={props.dealerFacts}
                 />
             ) : (
                 'Processing...'
@@ -42,11 +44,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
             <p>
                 Initial hand probability:{' '}
                 <span style={{ fontWeight: 'bold' }}>
-                    <InitialHandProbability
-                        allScoreStats={props.allScoreStats}
-                        scoreStats={scoreStats}
-                        splitOptions={props.splitOptions}
-                    />
+                    <InitialHandProbability playerFact={playerFact} />
                 </span>
             </p>
             <p>
@@ -60,11 +58,11 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                 >
                     {displayCombinations ? '👇' : '👉'}
                 </span>{' '}
-                Card combinations ({scoreStats?.combinations.length || '-'})
+                Card combinations ({playerFact?.hand.cardCombinations.length || '-'})
             </p>
-            {scoreStats && displayCombinations && (
+            {playerFact && displayCombinations && (
                 <ul>
-                    {scoreStats.combinations.map((combination) => (
+                    {playerFact.hand.cardCombinations.map((combination) => (
                         <li key={combination}>{combination}</li>
                     ))}
                 </ul>

@@ -1,30 +1,28 @@
 import React, { useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { colors, desktopBreakpoint } from '../constants';
-import { getOutcomesSet } from '../logic';
-import { ScoreKey } from '../models';
-import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats } from '../types';
+import { DealerFacts, PlayerActionOverridesByDealerCard, PlayerFact } from '../types';
 import { CustomColumn, CustomTableDirection, CustomTable } from './custom-table';
 import { PlayerDecisionsEdit } from './player-decisions-edit';
 import { PlayerDecisionsTableCell } from './player-decisions-table-cell';
 import { RoundedFloat } from './rounded-float';
 
-export type ScoreStatsColumn = CustomColumn<
-    ScoreStats,
+export type PlayerFactColumn = CustomColumn<
+    PlayerFact,
     {
-        dealerCardKey?: ScoreKey;
+        dealerCardKey?: string;
     }
 >;
 
 interface PlayerDecisionsTableProps {
-    additionalColumns?: ScoreStatsColumn[];
-    data: ScoreStats[];
+    actionOverrides: PlayerActionOverridesByDealerCard;
+    actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
+    additionalColumns?: PlayerFactColumn[];
+    data: PlayerFact[];
     direction?: CustomTableDirection;
-    playerChoices: AllScoreStatsChoicesSummary;
-    playerSettings: PlayerSettings;
-    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
     processing: boolean;
-    selectedScore?: ScoreKey;
+    handKey?: string;
+    dealerFacts: DealerFacts;
 }
 
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
@@ -32,24 +30,22 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
     const columns = useMemo(() => {
-        const outcomesSet = getOutcomesSet();
         const abbreviate = !isDesktop && props.direction !== 'vertical';
-        const columns: ScoreStatsColumn[] = [
+        const columns: PlayerFactColumn[] = [
             ...(props.additionalColumns || []),
-            ...outcomesSet.allOutcomes.map<ScoreStatsColumn>((dealerCard) => ({
+            ...Object.values(props.dealerFacts.byCard).map<PlayerFactColumn>((dealerFact) => ({
                 Cell: PlayerDecisionsTableCell({
                     abbreviate,
-                    dealerCard,
-                    playerChoices: props.playerChoices,
+                    actionOverrides: props.actionOverrides,
+                    actionOverridesSetter: props.actionOverridesSetter,
+                    dealerFact,
                     playerDecisionsEdit,
-                    playerSettings: props.playerSettings,
-                    playerSettingsSetter: props.playerSettingsSetter,
                     processing: props.processing
                 }),
                 Header: () => {
                     return (
                         <React.Fragment>
-                            {dealerCard.symbol}
+                            {dealerFact.hand.displayKey}
                             {!abbreviate && (
                                 <span
                                     style={{
@@ -60,41 +56,32 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                                 >
                                     {' '}
                                     (
-                                    <RoundedFloat value={outcomesSet.allWeights[dealerCard.key]} />)
+                                    <RoundedFloat value={dealerFact.weight} />)
                                 </span>
                             )}
                         </React.Fragment>
                     );
                 },
-                id: dealerCard.key,
-                dealerCardKey: dealerCard.key
+                id: dealerFact.hand.key,
+                dealerCardKey: dealerFact.hand.key
             }))
         ];
         return columns;
-    }, [isDesktop, playerDecisionsEdit, props.additionalColumns]);
+    }, [isDesktop, playerDecisionsEdit, props.additionalColumns, props.actionOverrides]);
 
     return (
         <React.Fragment>
             <CustomTable
                 cellStyle={(cellProps) => {
+                    const playerFact = cellProps.row.original;
                     const { dealerCardKey } = cellProps.column;
-                    const { key: scoreKey } = cellProps.row.original;
 
-                    const choiceIsOverride =
-                        dealerCardKey &&
-                        props.playerChoices.choices[scoreKey].dealerCardChoices[dealerCardKey]
-                            .choiceIsOverride;
-                    const playerOverride =
-                        dealerCardKey &&
-                        props.playerSettings.playerDecisionsOverrides[scoreKey]?.[dealerCardKey];
-
-                    const hasPlayerOverride = choiceIsOverride && playerOverride !== undefined;
+                    const hasOverride =
+                        dealerCardKey && playerFact.vsDealerCard[dealerCardKey].hasOverride;
 
                     return {
-                        borderColor: hasPlayerOverride
-                            ? colors.border.highlight
-                            : colors.border.regular,
-                        opacity: hasPlayerOverride ? 0.7 : undefined
+                        borderColor: hasOverride ? colors.border.highlight : colors.border.regular,
+                        opacity: hasOverride ? 0.7 : undefined
                     };
                 }}
                 columns={columns}
@@ -104,12 +91,12 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
             />
             <br />
             <PlayerDecisionsEdit
+                actionOverrides={props.actionOverrides}
+                actionOverridesSetter={props.actionOverridesSetter}
                 playerDecisionsEdit={playerDecisionsEdit}
                 playerDecisionsEditSetter={setPlayerDecisionsEdit}
-                playerSettings={props.playerSettings}
-                playerSettingsSetter={props.playerSettingsSetter}
                 processing={props.processing}
-                selectedScore={props.selectedScore}
+                handKey={props.handKey}
             />
             <br />
             <br />

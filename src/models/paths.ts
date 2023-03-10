@@ -1,7 +1,9 @@
+export const dealerDisplayKeyParam = 'dealerDisplayKey';
+export const playerDisplayKeyParam = 'playerDisplayKey';
+
 export enum Paths {
-    dealerCards = '/dealer-cards',
     playerDecisions = '/player-decisions',
-    playerDecisionsDealerCard = '/player-decisions/:scoreKey/:dealerCardKey',
-    playerDecisionsScore = '/player-decisions/:scoreKey',
+    playerDecisionsDealerCard = '/player-decisions/:playerDisplayKey/:dealerDisplayKey',
+    playerDecisionsScore = '/player-decisions/:playerDisplayKey',
     strategyAndRules = '/strategy-and-rules'
 }

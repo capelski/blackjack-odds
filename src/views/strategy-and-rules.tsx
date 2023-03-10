@@ -1,29 +1,17 @@
 import React from 'react';
 import { CasinoRulesComponent, PlayerStrategyComponent, OutcomeComponent } from '../components';
-import { isSplitInUse } from '../logic/split-options';
-import { CasinoRules, DecisionOutcome, PlayerSettings } from '../types';
+import { CasinoRules, PlayerBaseData, PlayerStrategyData } from '../types';
 
 interface StrategyAndRulesProps {
     casinoRules: CasinoRules;
     casinoRulesSetter: (casinoRules: CasinoRules) => void;
-    outcome?: DecisionOutcome;
-    playerSettings: PlayerSettings;
-    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
+    playerBaseData?: PlayerBaseData;
+    playerStrategy: PlayerStrategyData;
+    playerStrategySetter: (playerStrategy: PlayerStrategyData) => void;
     processing: boolean;
 }
 
 export const StrategyAndRules: React.FC<StrategyAndRulesProps> = (props) => {
-    const playerSettingsSetter = (playerSettings: PlayerSettings) => {
-        props.playerSettingsSetter(playerSettings);
-        props.casinoRulesSetter({
-            ...props.casinoRules,
-            splitOptions: {
-                ...props.casinoRules.splitOptions,
-                inUse: isSplitInUse(playerSettings.playerStrategy)
-            }
-        });
-    };
-
     return (
         <React.Fragment>
             <CasinoRulesComponent
@@ -32,13 +20,12 @@ export const StrategyAndRules: React.FC<StrategyAndRulesProps> = (props) => {
                 processing={props.processing}
             />
             <PlayerStrategyComponent
-                playerSettings={props.playerSettings}
-                playerSettingsSetter={playerSettingsSetter}
+                playerStrategy={props.playerStrategy}
+                playerStrategySetter={props.playerStrategySetter}
                 processing={props.processing}
             />
             <br />
-            <br />
-            <OutcomeComponent outcome={props.outcome} />
+            <OutcomeComponent outcome={props.playerBaseData?.vsDealerOutcome} />
         </React.Fragment>
     );
 };

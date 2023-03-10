@@ -6,12 +6,12 @@ import {
     desktopBreakpoint,
     colors
 } from '../constants';
-import { DecisionOutcome } from '../types';
+import { VsDealerOutcome } from '../types';
 import { OutcomeBadge } from './outcome-badge';
 import { RoundedFloat } from './rounded-float';
 
 interface OutcomeComponentProps {
-    outcome?: DecisionOutcome;
+    outcome?: VsDealerOutcome;
 }
 
 export const OutcomeComponent: React.FC<OutcomeComponentProps> = (props) => {

@@ -6,36 +6,41 @@ import {
     InitialHandProbability,
     OutcomeComponent,
     PlayerDecisionsTable,
-    ScoreStatsColumn
+    PlayerFactColumn
 } from '../components';
 import { desktopBreakpoint, colors } from '../constants';
-import { getPlayerDecisionScorePath, getPlayerScoreStats } from '../logic';
-import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats, SplitOptions } from '../types';
+import { getPlayerDecisionScorePath } from '../logic';
+import {
+    DealerFacts,
+    PlayerActionOverridesByDealerCard,
+    PlayerBaseData,
+    PlayerFact
+} from '../types';
 
 interface PlayerDecisionsAllProps {
-    allScoreStats?: ScoreStats[];
-    playerChoices?: AllScoreStatsChoicesSummary;
-    playerSettings: PlayerSettings;
-    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
+    actionOverrides: PlayerActionOverridesByDealerCard;
+    actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
+    dealerFacts?: DealerFacts;
+    playerBaseData?: PlayerBaseData;
+    playerFacts?: PlayerFact[];
     processing: boolean;
-    splitOptions: SplitOptions;
 }
 
 export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => {
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
-    const additionalColumns = useMemo((): ScoreStatsColumn[] => {
+    const additionalColumns = useMemo((): PlayerFactColumn[] => {
         return [
             {
-                accessor: 'key',
-                Cell: (cellProps: CellProps<ScoreStats, ScoreStats['key']>) => {
+                accessor: 'hand',
+                Cell: (cellProps: CellProps<PlayerFact, PlayerFact['hand']>) => {
                     return (
                         <div>
                             <Link
-                                to={getPlayerDecisionScorePath(cellProps.value)}
+                                to={getPlayerDecisionScorePath(cellProps.value.displayKey)}
                                 style={{ color: colors.link.default, textDecoration: 'none' }}
                             >
-                                {cellProps.value}
+                                {cellProps.value.displayKey}
                             </Link>
                         </div>
                     );
@@ -43,14 +48,12 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
                 id: 'score'
             },
             {
-                Cell: (cellProps: CellProps<ScoreStats>) => {
+                Cell: (cellProps: CellProps<PlayerFact>) => {
                     return (
                         <div>
                             <InitialHandProbability
-                                allScoreStats={props.allScoreStats}
                                 displayPercent={false}
-                                scoreStats={cellProps.row.original}
-                                splitOptions={props.splitOptions}
+                                playerFact={cellProps.row.original}
                             />
                         </div>
                     );
@@ -59,18 +62,18 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
                 id: 'initialHandProbability'
             }
         ];
-    }, [isDesktop, props.allScoreStats, props.splitOptions]);
+    }, [isDesktop, props.playerFacts]);
 
     return (
         <div>
             <h3>Player decisions</h3>
-            <OutcomeComponent outcome={props.playerChoices?.outcome} />
-            {props.allScoreStats !== undefined && props.playerChoices !== undefined ? (
+            <OutcomeComponent outcome={props.playerBaseData?.vsDealerOutcome} />
+            {props.dealerFacts !== undefined && props.playerFacts !== undefined ? (
                 <PlayerDecisionsTable
                     {...props}
                     additionalColumns={additionalColumns}
-                    data={getPlayerScoreStats(props.allScoreStats)}
-                    playerChoices={props.playerChoices}
+                    data={props.playerFacts}
+                    dealerFacts={props.dealerFacts}
                 />
             ) : (
                 'Processing...'

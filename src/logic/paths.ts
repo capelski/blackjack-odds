@@ -1,37 +1,56 @@
-import { Paths, ScoreKey } from '../models';
+import { Paths } from '../models';
+import { dealerDisplayKeyParam, playerDisplayKeyParam } from '../models/paths';
 import { Dictionary } from '../types';
-import { getOutcomesSet } from './outcomes-set';
+import { getDefaultCasinoRues } from './casino-rules';
+import { getAllRepresentativeHands } from './representative-hand';
 
-export const getPlayerDecisionDealerCardPath = (scoreKey: ScoreKey, dealerCardKey: ScoreKey) => {
+export const getPlayerDecisionDealerCardPath = (
+    playerDisplayKey: string,
+    dealerDisplayKey: string
+) => {
     return Paths.playerDecisionsDealerCard
-        .replace(':scoreKey', scoreKey)
-        .replace(':dealerCardKey', dealerCardKey);
+        .replace(`:${playerDisplayKeyParam}`, playerDisplayKey)
+        .replace(`:${dealerDisplayKeyParam}`, dealerDisplayKey);
 };
 
-export const getPlayerDecisionScorePath = (scoreKey: ScoreKey) => {
-    return Paths.playerDecisionsScore.replace(':scoreKey', scoreKey);
+export const getPlayerDecisionDealerCardParams = (params: Record<string, string | undefined>) => {
+    return {
+        [dealerDisplayKeyParam]: params[dealerDisplayKeyParam],
+        [playerDisplayKeyParam]: params[playerDisplayKeyParam]
+    };
 };
+
+export const getPlayerDecisionScorePath = (playerDisplayKey: string) => {
+    return Paths.playerDecisionsScore.replace(`:${playerDisplayKeyParam}`, playerDisplayKey);
+};
+
+export const getPlayerDecisionScoreParams = (params: Record<string, string | undefined>) => {
+    return {
+        [playerDisplayKeyParam]: params[playerDisplayKeyParam]
+    };
+};
+
+const allHands = getAllRepresentativeHands(getDefaultCasinoRues());
+const playerInitialHandsKey = Object.values(allHands)
+    .filter((hand) => hand.initialHand.isInitial)
+    .map((hand) => hand.displayKey);
+const dealerInitialHandsKey = Object.values(allHands)
+    .filter((hand) => hand.isSingleCard)
+    .map((hand) => hand.displayKey);
 
 const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {
-    [Paths.dealerCards]: [Paths.dealerCards],
     [Paths.playerDecisions]: [Paths.playerDecisions],
-    [Paths.playerDecisionsDealerCard]: Object.values(ScoreKey).reduce<string[]>(
-        (reduced, scoreKey) => {
-            return reduced.concat(
-                getOutcomesSet().allOutcomes.map((outcome) => {
-                    return getPlayerDecisionDealerCardPath(scoreKey, outcome.key);
-                })
-            );
-        },
-        []
-    ),
-    [Paths.playerDecisionsScore]: Object.values(ScoreKey).map((scoreKey) => {
-        return getPlayerDecisionScorePath(scoreKey);
+    [Paths.playerDecisionsDealerCard]: playerInitialHandsKey
+        .map((playerDisplayKey) => {
+            return dealerInitialHandsKey.map((dealerDisplayKey) => {
+                return getPlayerDecisionDealerCardPath(playerDisplayKey, dealerDisplayKey);
+            });
+        })
+        .flat(),
+    [Paths.playerDecisionsScore]: playerInitialHandsKey.map((playerDisplayKey) => {
+        return getPlayerDecisionScorePath(playerDisplayKey);
     }),
     [Paths.strategyAndRules]: [Paths.strategyAndRules]
 };
 
-export const prerenderingRoutes = Object.values(prerenderingRoutesDictionary).reduce(
-    (reduced, next) => reduced.concat(next),
-    []
-);
+export const prerenderingRoutes = Object.values(prerenderingRoutesDictionary).flat();

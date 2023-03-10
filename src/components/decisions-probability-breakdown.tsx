@@ -7,22 +7,13 @@ import {
     displayProbabilityTotals,
     probabilityLabels
 } from '../constants';
-import { getDisplayPlayerDecision, getPrimaryPlayerDecisions } from '../logic';
-import { PlayerDecision } from '../models';
-import { AllDecisionsData, DecisionData, ScoreStats } from '../types';
+import { PlayerActionData, PlayerFact } from '../types';
 import { CustomCell, CustomTable } from './custom-table';
 import { RoundedFloat } from './rounded-float';
 
 interface DecisionsProbabilityBreakdownProps {
-    decisions: AllDecisionsData;
-    playerChoice: PlayerDecision;
-    scoreStats: ScoreStats;
-}
-
-interface RowData {
-    decisionData: DecisionData;
-    isSelectedDecision: boolean;
-    playerDecision: PlayerDecision;
+    dealerCardKey?: string;
+    playerFact: PlayerFact;
 }
 
 const baseStyles: CSSProperties = {
@@ -32,30 +23,28 @@ const baseStyles: CSSProperties = {
 export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdownProps> = (
     props
 ) => {
-    const effectiveScore = props.scoreStats.representativeHand.effectiveScore;
+    const effectiveScore = props.playerFact.hand.effectiveScore;
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
-    const isSoftHand = props.scoreStats.representativeHand.allScores.length > 1;
+    const isSoftHand = props.playerFact.hand.allScores.length > 1;
     const playerLessThanCurrent = probabilityLabels.playerLessThanCurrent(effectiveScore);
     const width = isDesktop ? '500px' : '100%';
 
     const { breakdownColumns, data, outcomeColumns } = useMemo(() => {
-        const breakdownColumns: Column<RowData>[] = [
+        const breakdownColumns: Column<PlayerActionData>[] = [
             {
-                accessor: 'playerDecision',
-                Cell: (cellProps: CellProps<RowData, RowData['playerDecision']>) => {
-                    return <div style={baseStyles}>{cellProps.value}</div>;
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
+                    return <div style={baseStyles}>{cellProps.row.original.action}</div>;
                 },
-                Header: 'Decision',
-                id: 'decision'
+                Header: 'Action',
+                id: 'action'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.loss }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.probabilityBreakdown.playerBusting}
+                                value={cellProps.row.original.vsDealerBreakdown.playerBusting}
                             />
                         </div>
                     );
@@ -64,13 +53,14 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                 id: 'playerBusting'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.loss }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.probabilityBreakdown.playerLessThanDealer}
+                                value={
+                                    cellProps.row.original.vsDealerBreakdown.playerLessThanDealer
+                                }
                             />
                         </div>
                     );
@@ -79,13 +69,12 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                 id: 'playerLessThanDealer'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.push }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.probabilityBreakdown.playerEqualToDealer}
+                                value={cellProps.row.original.vsDealerBreakdown.playerEqualToDealer}
                             />
                         </div>
                     );
@@ -94,13 +83,14 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                 id: 'playerEqualToDealer'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.win }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.probabilityBreakdown.playerMoreThanDealer}
+                                value={
+                                    cellProps.row.original.vsDealerBreakdown.playerMoreThanDealer
+                                }
                             />
                         </div>
                     );
@@ -109,13 +99,12 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                 id: 'playerMoreThanDealer'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.win }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.probabilityBreakdown.dealerBusting}
+                                value={cellProps.row.original.vsDealerBreakdown.dealerBusting}
                             />
                         </div>
                     );
@@ -127,13 +116,12 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
 
         if (displayProbabilityTotals) {
             breakdownColumns.push({
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.probabilityBreakdown.total}
+                                value={cellProps.row.original.vsDealerBreakdown.total}
                             />
                         </div>
                     );
@@ -145,13 +133,14 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
 
         if (isSoftHand) {
             breakdownColumns.push({
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.probabilityBreakdown.playerLessThanCurrent}
+                                value={
+                                    cellProps.row.original.vsDealerBreakdown.playerLessThanCurrent
+                                }
                             />
                         </div>
                     );
@@ -161,23 +150,21 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
             });
         }
 
-        const outcomeColumns: Column<RowData>[] = [
+        const outcomeColumns: Column<PlayerActionData>[] = [
             {
-                accessor: 'playerDecision',
-                Cell: (cellProps: CellProps<RowData, RowData['playerDecision']>) => {
-                    return <div style={baseStyles}>{cellProps.value}</div>;
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
+                    return <div style={baseStyles}>{cellProps.row.original.action}</div>;
                 },
-                Header: 'Decision',
-                id: 'decision'
+                Header: 'Action',
+                id: 'action'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.loss }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.outcome.lossProbability}
+                                value={cellProps.row.original.vsDealerOutcome.lossProbability}
                             />
                         </div>
                     );
@@ -186,13 +173,12 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                 id: 'lossProbability'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.push }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.outcome.pushProbability}
+                                value={cellProps.row.original.vsDealerOutcome.pushProbability}
                             />
                         </div>
                     );
@@ -201,13 +187,12 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                 id: 'pushProbability'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.win }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.outcome.winProbability}
+                                value={cellProps.row.original.vsDealerOutcome.winProbability}
                             />
                         </div>
                     );
@@ -219,13 +204,12 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
 
         if (displayProbabilityTotals) {
             outcomeColumns.push({
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={baseStyles}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.outcome.totalProbability}
+                                value={cellProps.row.original.vsDealerOutcome.totalProbability}
                             />
                         </div>
                     );
@@ -237,13 +221,12 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
 
         outcomeColumns.push(
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.advantage }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.outcome.playerAdvantage.hands}
+                                value={cellProps.row.original.vsDealerOutcome.playerAdvantage.hands}
                             />
                         </div>
                     );
@@ -252,13 +235,14 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
                 id: 'playerAdvantageHands'
             },
             {
-                accessor: 'decisionData',
-                Cell: (cellProps: CellProps<RowData, RowData['decisionData']>) => {
+                Cell: (cellProps: CellProps<PlayerActionData>) => {
                     return (
                         <div style={{ ...baseStyles, ...colors.payout }}>
                             <RoundedFloat
                                 displayPercent={false}
-                                value={cellProps.value.outcome.playerAdvantage.payout}
+                                value={
+                                    cellProps.row.original.vsDealerOutcome.playerAdvantage.payout
+                                }
                             />
                         </div>
                     );
@@ -268,23 +252,20 @@ export const DecisionsProbabilityBreakdown: React.FC<DecisionsProbabilityBreakdo
             }
         );
 
-        const data = getPrimaryPlayerDecisions(props.decisions).map(
-            (playerDecision: PlayerDecision) => ({
-                decisionData: props.decisions[playerDecision],
-                isSelectedDecision: playerDecision === props.playerChoice,
-                playerDecision: getDisplayPlayerDecision(playerDecision, { simplify: true })
-            })
-        );
+        const data = props.dealerCardKey
+            ? props.playerFact.vsDealerCard[props.dealerCardKey].preferences
+            : props.playerFact.vsDealerAverage.preferences;
 
         return { breakdownColumns, data, outcomeColumns };
-    }, [props.decisions, props.playerChoice, props.scoreStats]);
+    }, [props.playerFact, props.dealerCardKey]);
 
-    const playerDecisionRow = (cellProps: CustomCell<RowData, Column<RowData>>) => {
+    const playerDecisionRow = (
+        cellProps: CustomCell<PlayerActionData, Column<PlayerActionData>>
+    ) => {
         return {
-            borderColor: cellProps.row.original.isSelectedDecision
-                ? colors.border.highlight
-                : colors.border.regular,
-            borderWidth: cellProps.row.original.isSelectedDecision ? 2 : 1
+            borderColor:
+                cellProps.row.index === 0 ? colors.border.highlight : colors.border.regular,
+            borderWidth: cellProps.row.index === 0 ? 2 : 1
         };
     };
 

@@ -1,22 +1,40 @@
-export { CardOutcome } from './card-outcome';
+export { Card } from './card';
+export { CardSet } from './card-set';
 export { CasinoRules } from './casino-rules';
-export { AllDecisionsData, DecisionData } from './decision-data';
-export { DecisionOutcome } from './decision-outcome';
-export { DecisionProbabilityBreakdown } from './decision-probability-breakdown';
-export { Dictionary } from './dictionary';
-export { ExpandedRows } from './expanded-rows';
-export { FinalScoreProbabilities, FinalScoresDictionary } from './final-score-probabilities';
-export { Hand, SplitHand } from './hand';
-export { OutcomesSet } from './outcomes-set';
-export { PlayerAdvantage } from './player-advantage';
-export { PlayerDecisionsOverrides } from './player-decisions-overrides';
-export { PlayerSettings } from './player-settings';
-export { ScoreStats } from './score-stats';
 export {
-    AllScoreStatsChoices,
-    AllScoreStatsChoicesSummary,
-    ScoreStatsAllDealerCardChoices,
-    ScoreStatsChoice,
-    ScoreStatsDealerCardChoice
-} from './score-stats-choice';
+    DealerActionData,
+    DealerActionsData,
+    DealerBaseData,
+    DealerDecision,
+    DealerDecisions,
+    DealerFact,
+    DealerFacts
+} from './dealer-facts';
+export { Dictionary } from './dictionary';
+export { FinalScore, FinalScores } from './final-scores';
+export {
+    PlayerActionOverrides,
+    PlayerActionOverridesByDealerCard
+} from './player-action-overrides';
+export {
+    PlayerActionData,
+    PlayerActionsData,
+    PlayerBaseData,
+    PlayerDecision,
+    PlayerDecisionWithWeight,
+    PlayerDecisions,
+    PlayerDecisionsWithWeight,
+    PlayerFact,
+    PlayerFacts,
+    PlayerAverageData
+} from './player-facts';
+export { PlayerStrategyData } from './player-strategy';
+export {
+    HandQueueItem,
+    NextHand,
+    RepresentativeHand,
+    SplitRestrictions
+} from './representative-hand';
 export { SplitOptions } from './split-options';
+export { VsDealerBreakdown } from './vs-dealer-breakdown';
+export { VsDealerOutcome } from './vs-dealer-outcome';

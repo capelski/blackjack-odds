@@ -1,3 +1,5 @@
+export const blackjackHandKey = 'BJ';
+
 export const colors = {
     border: {
         highlight: 'coral',
@@ -58,8 +60,6 @@ export const dealerStandThreshold = 17;
 
 export const decimalsNumber = 2;
 
-export const defaultStandThreshold = 16;
-
 export const desktopBreakpoint = 768;
 
 // Meant to validate computations during development
@@ -70,6 +70,8 @@ export const handKeySeparator = ',';
 export const maximumScore = 21;
 // Convenient way to make a blackjack score higher than a hard 21
 export const blackjackScore = maximumScore + 0.5;
+
+export const postSplitIndicator = 'postSplit';
 
 export const probabilityLabels = {
     dealerBusting: `D > ${maximumScore}`,

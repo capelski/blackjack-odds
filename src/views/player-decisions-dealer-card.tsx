@@ -1,73 +1,60 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import {
-    DecisionsProbabilityBreakdown,
-    FinalProbabilitiesGraph,
-    OutcomeComponent
-} from '../components';
-import { getDisplayPlayerDecision, getPrimaryPlayerDecisions } from '../logic';
-import { PlayerDecision, ScoreKey } from '../models';
-import { AllScoreStatsChoicesSummary, PlayerSettings, ScoreStats } from '../types';
+import { DecisionsProbabilityBreakdown, FinalScoresGraph, OutcomeComponent } from '../components';
+import { getPlayerDecisionDealerCardParams } from '../logic';
+import { Action } from '../models';
+import { DealerFacts, PlayerFact } from '../types';
 
 interface PlayerDecisionsDealerCardProps {
-    allScoreStats?: ScoreStats[];
-    playerChoices?: AllScoreStatsChoicesSummary;
-    playerSettings: PlayerSettings;
-    playerSettingsSetter: (playerSettings: PlayerSettings) => void;
+    dealerFacts?: DealerFacts;
+    playerFacts?: PlayerFact[];
     processing: boolean;
 }
 
 export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps> = (props) => {
-    const { dealerCardKey, scoreKey } = useParams() as {
-        dealerCardKey: ScoreKey;
-        scoreKey: ScoreKey;
-    };
-    const scoreStats = props.allScoreStats?.find((scoreStats) => scoreStats.key === scoreKey);
-    const scoreStatsChoice =
-        props.playerChoices?.choices[scoreKey].dealerCardChoices[dealerCardKey];
+    const { dealerDisplayKey, playerDisplayKey } = getPlayerDecisionDealerCardParams(useParams());
+    const playerFact = props.playerFacts?.find(
+        (playerFact) => playerFact.hand.displayKey === playerDisplayKey
+    );
 
-    const decisionData = scoreStatsChoice?.decisions[scoreStatsChoice.choice];
-
-    const allDecisionsData = scoreStatsChoice
-        ? getPrimaryPlayerDecisions(scoreStatsChoice.decisions)
-              .filter((x) => x !== PlayerDecision.stand)
-              .map((playerDecision: PlayerDecision) => ({
-                  decisionData: scoreStatsChoice.decisions[playerDecision],
-                  playerDecision: getDisplayPlayerDecision(playerDecision, { simplify: true })
-              }))
-        : [];
+    const dealerFact =
+        props.dealerFacts &&
+        Object.values(props.dealerFacts.byCard).find(
+            (dealerFact) => dealerFact.hand.displayKey === dealerDisplayKey
+        );
 
     return (
         <div>
             <h3>
-                {scoreKey} vs {dealerCardKey} player decisions
+                {playerDisplayKey} vs {dealerDisplayKey} player decisions
             </h3>
-            <OutcomeComponent outcome={decisionData?.outcome} />
-            {scoreStats && scoreStatsChoice && (
+            <OutcomeComponent outcome={playerFact?.vsDealerCard_average.vsDealerOutcome} />
+            {playerFact && dealerFact && (
                 <React.Fragment>
                     <DecisionsProbabilityBreakdown
-                        decisions={scoreStatsChoice.decisions}
-                        playerChoice={scoreStatsChoice.choice}
-                        scoreStats={scoreStats}
+                        dealerCardKey={dealerFact.hand.key}
+                        playerFact={playerFact}
                     />
                     <br />
                     <br />
                 </React.Fragment>
             )}
-            {props.allScoreStats !== undefined &&
-                allDecisionsData.length > 0 &&
-                allDecisionsData.map((decision) => (
-                    <React.Fragment key={decision.playerDecision}>
-                        <h4>{decision.playerDecision} final score probabilities</h4>
-                        <FinalProbabilitiesGraph
-                            allScoreStats={props.allScoreStats!}
-                            finalProbabilities={decision.decisionData.finalProbabilities}
-                            scoreKey={scoreKey}
-                        />
-                        <br />
-                        <br />
-                    </React.Fragment>
-                ))}
+            {playerFact !== undefined &&
+                dealerFact !== undefined &&
+                playerFact.vsDealerCard[dealerFact.hand.key].preferences
+                    .filter((x) => x.action !== Action.stand)
+                    .map((playerActionData) => (
+                        <React.Fragment key={playerActionData.action}>
+                            <h4>{playerActionData.action} final score probabilities</h4>
+                            <FinalScoresGraph
+                                finalScores={playerActionData.finalScores}
+                                handDisplayKey={playerDisplayKey!}
+                                playerFacts={props.playerFacts!}
+                            />
+                            <br />
+                            <br />
+                        </React.Fragment>
+                    ))}
         </div>
     );
 };
