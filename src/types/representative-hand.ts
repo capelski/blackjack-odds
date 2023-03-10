@@ -7,7 +7,7 @@ export type HandQueueItem = {
 };
 
 export type NextHand = HandQueueItem & {
-    code: string;
+    representativeCode: string;
     weight: number;
 };
 
@@ -16,7 +16,10 @@ export type RepresentativeHand = {
     allScores: number[];
     canDouble: boolean;
     canSplit: boolean;
-    cardCombinations: string[];
+    codes: {
+        all: string[];
+        representative: string;
+    };
     displayKey: string;
     effectiveScore: number;
     initialHand: {

@@ -22,7 +22,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
     );
 
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
-    const [displayCombinations, setDisplayCombinations] = useState(false);
+    const [displayCodes, setDisplayCodes] = useState(false);
 
     return (
         <div>
@@ -50,20 +50,20 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
             <p>
                 <span
                     onClick={() => {
-                        setDisplayCombinations(!displayCombinations);
+                        setDisplayCodes(!displayCodes);
                     }}
                     style={{
                         cursor: 'pointer'
                     }}
                 >
-                    {displayCombinations ? '👇' : '👉'}
+                    {displayCodes ? '👇' : '👉'}
                 </span>{' '}
-                Card combinations ({playerFact?.hand.cardCombinations.length || '-'})
+                Card combinations ({playerFact?.hand.codes.all.length || '-'})
             </p>
-            {playerFact && displayCombinations && (
+            {playerFact && displayCodes && (
                 <ul>
-                    {playerFact.hand.cardCombinations.map((combination) => (
-                        <li key={combination}>{combination}</li>
+                    {playerFact.hand.codes.all.map((code) => (
+                        <li key={code}>{code}</li>
                     ))}
                 </ul>
             )}

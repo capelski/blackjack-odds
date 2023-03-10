@@ -1,4 +1,4 @@
-import { blackjackScore, handKeySeparator, postSplitIndicator } from '../constants';
+import { blackjackScore, handKeySeparator } from '../constants';
 import { Action, CardSymbol, PlayerStrategy } from '../models';
 import {
     CasinoRules,
@@ -21,7 +21,7 @@ import {
     PlayerStrategyData
 } from '../types';
 import { aggregateFinalScores } from './final-scores';
-import { sortHandCombinations } from './representative-hand';
+import { sortHandCodes } from './representative-hand';
 import { aggregateOutcomes, getVsDealerOutcome } from './vs-dealer-outcome';
 import { aggregateBreakdowns, getVsDealerBreakdown } from './vs-dealer-breakdown';
 
@@ -187,9 +187,10 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
             // TODO Filter out 2-12 if Split enabled?
         )
         .reduce<PlayerFacts>((reduced, playerFact) => {
-            const cardCombinations = playerFact.hand.cardCombinations
-                .concat(reduced[playerFact.hand.displayKey]?.hand.cardCombinations || [])
-                .filter((x) => !x.includes(postSplitIndicator));
+            const handCodes = playerFact.hand.codes.all.concat(
+                reduced[playerFact.hand.displayKey]?.hand.codes.all || []
+            );
+            handCodes.sort(sortHandCodes);
 
             // if (reduced[playerFact.hand.displayKey] !== undefined) {
             //     console.log(`Merging ${playerFact.hand.key} into ${playerFact.hand.displayKey}`);
@@ -200,12 +201,14 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
                 ...playerFact,
                 hand: {
                     ...playerFact.hand,
-                    cardCombinations
+                    codes: {
+                        all: handCodes,
+                        representative: playerFact.hand.codes.representative
+                    }
                 },
                 // TODO Merge averages, as secondary actions could vary
                 weight: playerFact.weight + (reduced[playerFact.hand.displayKey]?.weight || 0)
             };
-            mergedPlayerFact.hand.cardCombinations.sort(sortHandCombinations);
 
             return {
                 ...reduced,

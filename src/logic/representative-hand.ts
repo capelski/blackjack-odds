@@ -3,7 +3,6 @@ import {
     blackjackScore,
     handKeySeparator,
     maximumScore,
-    postSplitIndicator,
     scoreKeySeparator
 } from '../constants';
 import { CardSymbol, DoublingMode } from '../models';
@@ -60,7 +59,7 @@ const createHand = (
     splitRestrictions: SplitRestrictions = {}
 ): RepresentativeHand => {
     const allScores = mergeScores(cards, splitRestrictions);
-    const code = getHandCode(cards, splitRestrictions);
+    const code = getHandCode(cards);
     const effectiveScore = getHandEffectiveScore(allScores);
     const isActive = effectiveScore < maximumScore && !splitRestrictions.forbiddenHit;
     const isBlackjack_ = isBlackjack(cards, splitRestrictions);
@@ -81,9 +80,9 @@ const createHand = (
         ? cardSet.cards.map((card): NextHand => {
               const nextCards = cards.concat([card]);
               return {
-                  code: getHandCode(nextCards),
                   cards: nextCards,
                   key: getHandKey(nextCards),
+                  representativeCode: getHandRepresentativeCode(nextCards),
                   weight: card.weight / cardSet.weight
               };
           })
@@ -94,22 +93,20 @@ const createHand = (
                   const nextCards = [cards[0], card];
                   /* To break circular dependencies between split hands, a splitted hand can not be re-splitted */
                   const forbiddenSplit = true;
-                  const nextCode = getHandCode(nextCards, { forbiddenSplit });
+                  const nextCode = getHandCode(nextCards);
                   const splitRestrictions: SplitRestrictions = {
                       forbiddenBlackjack: !casinoRules.splitOptions.blackjackAfterSplit,
                       forbiddenDouble: !casinoRules.splitOptions.doubleAfterSplit,
                       forbiddenHit:
-                          nextCode ===
-                              getHandCodeFromSymbols([CardSymbol.ace, CardSymbol.ace], {
-                                  forbiddenSplit
-                              }) && !casinoRules.splitOptions.hitSplitAces,
+                          nextCode === getHandCodeFromSymbols([CardSymbol.ace, CardSymbol.ace]) &&
+                          !casinoRules.splitOptions.hitSplitAces,
                       forbiddenSplit
                   };
 
                   return {
-                      code: nextCode,
                       cards: nextCards,
                       key: getHandKey(nextCards, splitRestrictions),
+                      representativeCode: getHandRepresentativeCode(nextCards, splitRestrictions),
                       splitRestrictions,
                       weight: card.weight / cardSet.weight
                   };
@@ -120,7 +117,10 @@ const createHand = (
         allScores,
         canDouble: canDouble_,
         canSplit: canSplit_,
-        cardCombinations: isBust ? [] : [code],
+        codes: {
+            all: isBust ? [] : [code],
+            representative: getHandRepresentativeCode(cards, splitRestrictions)
+        },
         displayKey,
         effectiveScore,
         initialHand: {
@@ -143,23 +143,23 @@ const createHand = (
  */
 export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
     const cardSet = getCardSet();
-    const combinationsQueue = cardSet.cards.map<HandQueueItem>((card) => ({
+    const handsQueue = cardSet.cards.map<HandQueueItem>((card) => ({
         cards: [card],
         key: getHandKey([card])
     }));
-    const handsByCode: Dictionary<boolean> = {};
+    const processedHands: Dictionary<boolean> = {};
     const allHands: Dictionary<RepresentativeHand> = {};
     const initialWeights: Dictionary<number> = {};
 
-    while (combinationsQueue.length > 0) {
-        const { cards, key, splitRestrictions } = combinationsQueue.pop()!;
-        const combinationCode = getHandCode(cards, splitRestrictions);
+    while (handsQueue.length > 0) {
+        const { cards, key, splitRestrictions } = handsQueue.shift()!;
+        const code = getHandCode(cards);
 
         if (allHands[key] === undefined) {
             allHands[key] = createHand(cards, casinoRules, splitRestrictions);
-        } else if (!allHands[key].cardCombinations.includes(combinationCode)) {
-            allHands[key].cardCombinations.push(combinationCode);
-            allHands[key].cardCombinations.sort(sortHandCombinations);
+        } else if (!allHands[key].codes.all.includes(code)) {
+            allHands[key].codes.all.push(code);
+            allHands[key].codes.all.sort(sortHandCodes);
         }
 
         if (allHands[key].isActive) {
@@ -171,9 +171,9 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
                 if (isBust && allHands[nextHand.key] === undefined) {
                     allHands[nextHand.key] = createHand(nextHand.cards, casinoRules);
                 } else if (!isBust) {
-                    if (!handsByCode[nextHand.code]) {
-                        combinationsQueue.push(nextHand);
-                        handsByCode[nextHand.code] = true;
+                    if (!processedHands[nextHand.representativeCode]) {
+                        handsQueue.push(nextHand);
+                        processedHands[nextHand.representativeCode] = true;
                     }
                     if (nextHand.cards.length === 2) {
                         initialWeights[nextHand.key] =
@@ -186,9 +186,9 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
 
             if (allHands[key].canSplit) {
                 allHands[key].splitNextHands.forEach((nextHand) => {
-                    if (!handsByCode[nextHand.code]) {
-                        combinationsQueue.push(nextHand);
-                        handsByCode[nextHand.code] = true;
+                    if (!processedHands[nextHand.representativeCode]) {
+                        handsQueue.push(nextHand);
+                        processedHands[nextHand.representativeCode] = true;
                     }
                 });
             }
@@ -205,8 +205,8 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
     return allHands;
 };
 
-const getHandCode = (cards: Card[], { forbiddenSplit }: SplitRestrictions = {}): string => {
-    return `${cards
+const getHandCode = (cards: Card[]): string => {
+    return cards
         .map((c) => c.symbol)
         .sort((a, b) => {
             const numericA = parseInt(a);
@@ -220,20 +220,25 @@ const getHandCode = (cards: Card[], { forbiddenSplit }: SplitRestrictions = {}):
                 ? 1
                 : numericB - numericA;
         })
-        .join(handKeySeparator)}${
-        forbiddenSplit ? `${handKeySeparator}${postSplitIndicator}` : ''
-    }`;
+        .join(handKeySeparator);
 };
 
-const getHandCodeFromSymbols = (
-    cardSymbols: CardSymbol[],
-    splitRestrictions: SplitRestrictions = {}
-) => {
+const getHandCodeFromSymbols = (cardSymbols: CardSymbol[]) => {
     const cardSet = getCardSet();
     const cards = cardSymbols.map(
         (symbol) => cardSet.cards.find((card) => card.symbol === symbol)!
     );
-    return getHandCode(cards, splitRestrictions);
+    return getHandCode(cards);
+};
+
+// Some hands have special restrictions after split (e.g. 2,2 after split is 4) and,
+// even though their code matches and existing hand, they must be processed separately
+const getHandRepresentativeCode = (
+    cards: Card[],
+    { forbiddenSplit }: SplitRestrictions = {}
+): string => {
+    const code = getHandCode(cards);
+    return `${code}${forbiddenSplit ? ' (postSplit)' : ''}`;
 };
 
 const getHandEffectiveScore = (scores: number[]): number => {
@@ -297,7 +302,7 @@ const mergeScores = (cards: Card[], splitRestrictions: SplitRestrictions = {}): 
               }, []);
 };
 
-export const sortHandCombinations = (a: string, b: string): number => {
+export const sortHandCodes = (a: string, b: string): number => {
     const aSymbols = a.split(',');
     const bSymbols = b.split(',');
     const maxLength = Math.max(aSymbols.length, bSymbols.length);

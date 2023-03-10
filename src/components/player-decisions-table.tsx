@@ -31,9 +31,10 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
 
     const columns = useMemo(() => {
         const abbreviate = !isDesktop && props.direction !== 'vertical';
+        const sortedDealerFacts = Object.values(props.dealerFacts.byCard).reverse();
         const columns: PlayerFactColumn[] = [
             ...(props.additionalColumns || []),
-            ...Object.values(props.dealerFacts.byCard).map<PlayerFactColumn>((dealerFact) => ({
+            ...sortedDealerFacts.map<PlayerFactColumn>((dealerFact) => ({
                 Cell: PlayerDecisionsTableCell({
                     abbreviate,
                     actionOverrides: props.actionOverrides,
@@ -67,7 +68,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
             }))
         ];
         return columns;
-    }, [isDesktop, playerDecisionsEdit, props.additionalColumns, props.actionOverrides]);
+    }, [isDesktop, playerDecisionsEdit, props.actionOverrides, props.additionalColumns]);
 
     return (
         <React.Fragment>
