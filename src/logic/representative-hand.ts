@@ -111,17 +111,17 @@ const createHand = (
         },
         displayKey,
         effectiveScore,
-        initialHand: {
+        isActive,
+        isBlackjack: isBlackjack_,
+        isDealerHand: cards.length === 1,
+        isBust,
+        key,
+        nextHands,
+        playerHand: {
             // This gets populated after all hans have been processed
             isInitial: false,
             weight: 0
         },
-        isActive,
-        isBlackjack: isBlackjack_,
-        isSingleCard: cards.length === 1,
-        isBust,
-        key,
-        nextHands,
         splitNextHands
     };
 };
@@ -184,7 +184,7 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
     }
 
     Object.keys(initialWeights).forEach((handKey) => {
-        allHands[handKey].initialHand = {
+        allHands[handKey].playerHand = {
             isInitial: true,
             weight: initialWeights[handKey]
         };

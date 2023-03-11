@@ -22,16 +22,16 @@ export type RepresentativeHand = {
     };
     displayKey: string;
     effectiveScore: number;
-    initialHand: {
-        isInitial: boolean;
-        weight: number;
-    };
     isActive: boolean;
     isBlackjack: boolean;
     isBust: boolean;
-    isSingleCard: boolean;
+    isDealerHand: boolean;
     key: string;
     nextHands: NextHand[];
+    playerHand: {
+        isInitial: boolean;
+        weight: number;
+    };
     splitNextHands: NextHand[];
 };
 

@@ -48,10 +48,10 @@ export const getPlayerDecisionScoreParams = (params: Record<string, string | und
 const allHands = getAllRepresentativeHands(getDefaultCasinoRues());
 // TODO Use the merged hands instead
 const playerInitialHandsKey = Object.values(allHands)
-    .filter((hand) => hand.initialHand.isInitial)
+    .filter((hand) => hand.playerHand.isInitial)
     .map((hand) => hand.displayKey);
 const dealerInitialHandsKey = Object.values(allHands)
-    .filter((hand) => hand.isSingleCard)
+    .filter((hand) => hand.isDealerHand)
     .map((hand) => hand.displayKey);
 
 const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {

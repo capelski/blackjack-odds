@@ -123,7 +123,7 @@ const getPlayerActionData = (
 
 export const getPlayerAverageData = (allPlayerFacts: PlayerFacts): PlayerAverageData => {
     const initialHandsPlayerFacts = Object.values(allPlayerFacts).filter(
-        (playerFact) => playerFact.hand.initialHand.isInitial
+        (playerFact) => playerFact.hand.playerHand.isInitial
     );
 
     const vsDealerAverage = aggregatePlayerBaseData(
@@ -160,13 +160,13 @@ export const getPlayerFacts = (
     };
 
     const allPlayerFacts = Object.values(hands)
-        .filter((hand) => !hand.isSingleCard)
+        .filter((hand) => !hand.isDealerHand)
         .reduce((reduced, hand) => {
             return {
                 ...reduced,
                 [hand.key]: getHandPlayerFact(
                     hand,
-                    hand.initialHand.weight,
+                    hand.playerHand.weight,
                     playerDecisions,
                     hands,
                     dealerFacts,
@@ -183,7 +183,7 @@ export const getPlayerFacts = (
 export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
     const mergedPlayerFacts = Object.values(playerFacts)
         .filter(
-            (x) => !x.hand.isSingleCard && x.hand.effectiveScore <= blackjackScore
+            (x) => !x.hand.isDealerHand && x.hand.effectiveScore <= blackjackScore
             // TODO Filter out 2-12 if Split enabled?
         )
         .reduce<PlayerFacts>((reduced, playerFact) => {
@@ -216,33 +216,7 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
             };
         }, {});
 
-    return Object.values(mergedPlayerFacts).sort((a, b) => {
-        const isSplitA = a.hand.canSplit;
-        const isSplitB = b.hand.canSplit;
-        const isSplitDifference = isSplitA !== isSplitB;
-
-        const isSoftA = a.hand.allScores.length > 1;
-        const isSoftB = b.hand.allScores.length > 1;
-        const isSoftDifference = isSoftA !== isSoftB;
-
-        const isBlackjackA = a.hand.isBlackjack;
-        const isBlackjackB = b.hand.isBlackjack;
-        const isBlackjackDifference = isBlackjackA !== isBlackjackB;
-
-        const acesDisplayKey = getHandDisplayKeyFromSymbols([CardSymbol.ace, CardSymbol.ace], true);
-
-        return isSplitDifference
-            ? +isSplitB - +isSplitA
-            : a.hand.displayKey === acesDisplayKey
-            ? 1
-            : b.hand.displayKey === acesDisplayKey
-            ? -1
-            : isSoftDifference
-            ? +isSoftB - +isSoftA
-            : isBlackjackDifference
-            ? +isBlackjackA - +isBlackjackB
-            : a.hand.effectiveScore - b.hand.effectiveScore;
-    });
+    return Object.values(mergedPlayerFacts).sort(sortPlayerFacts);
 };
 
 const setPlayerAction_Double = (
@@ -476,4 +450,32 @@ const sortActions = (
         ? b.vsDealerOutcome.winProbability - a.vsDealerOutcome.winProbability
         : //  playerStrategy.strategy === PlayerStrategy.minimumLoss
           a.vsDealerOutcome.lossProbability - b.vsDealerOutcome.lossProbability;
+};
+
+const sortPlayerFacts = (a: PlayerFact, b: PlayerFact) => {
+    const isSplitA = a.hand.canSplit;
+    const isSplitB = b.hand.canSplit;
+    const isSplitDifference = isSplitA !== isSplitB;
+
+    const isSoftA = a.hand.allScores.length > 1;
+    const isSoftB = b.hand.allScores.length > 1;
+    const isSoftDifference = isSoftA !== isSoftB;
+
+    const isBlackjackA = a.hand.isBlackjack;
+    const isBlackjackB = b.hand.isBlackjack;
+    const isBlackjackDifference = isBlackjackA !== isBlackjackB;
+
+    const acesDisplayKey = getHandDisplayKeyFromSymbols([CardSymbol.ace, CardSymbol.ace], true);
+
+    return isSplitDifference
+        ? +isSplitB - +isSplitA
+        : a.hand.displayKey === acesDisplayKey
+        ? 1
+        : b.hand.displayKey === acesDisplayKey
+        ? -1
+        : isSoftDifference
+        ? +isSoftB - +isSoftA
+        : isBlackjackDifference
+        ? +isBlackjackA - +isBlackjackB
+        : a.hand.effectiveScore - b.hand.effectiveScore;
 };
