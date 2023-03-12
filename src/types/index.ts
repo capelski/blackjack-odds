@@ -29,12 +29,7 @@ export {
     PlayerAverageData
 } from './player-facts';
 export { PlayerStrategyData } from './player-strategy';
-export {
-    HandQueueItem,
-    NextHand,
-    RepresentativeHand,
-    SplitRestrictions
-} from './representative-hand';
+export { HandQueueItem, NextHand, RepresentativeHand } from './representative-hand';
 export { SplitOptions } from './split-options';
 export { VsDealerBreakdown } from './vs-dealer-breakdown';
 export { VsDealerOutcome } from './vs-dealer-outcome';

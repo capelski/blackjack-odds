@@ -3,7 +3,7 @@ import { Card } from './card';
 export type HandQueueItem = {
     cards: Card[];
     key: string;
-    splitRestrictions?: SplitRestrictions;
+    isPostSplit?: boolean;
 };
 
 export type NextHand = HandQueueItem & {
@@ -26,6 +26,7 @@ export type RepresentativeHand = {
     isBlackjack: boolean;
     isBust: boolean;
     isDealerHand: boolean;
+    isPostSplit: boolean;
     key: string;
     nextHands: NextHand[];
     playerHand: {
@@ -33,11 +34,4 @@ export type RepresentativeHand = {
         weight: number;
     };
     splitNextHands: NextHand[];
-};
-
-export type SplitRestrictions = {
-    forbiddenBlackjack?: boolean;
-    forbiddenDouble?: boolean;
-    forbiddenHit?: boolean;
-    forbiddenSplit?: boolean;
 };

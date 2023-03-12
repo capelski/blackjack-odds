@@ -1,6 +1,7 @@
 import { dealerStandThreshold } from '../constants';
 import { Action } from '../models';
 import {
+    CasinoRules,
     DealerActionData,
     DealerActionsData,
     DealerBaseData,
@@ -68,12 +69,15 @@ const setDealerDecision = (
     return dealerDecision;
 };
 
-export const getDealerFacts = (hands: Dictionary<RepresentativeHand>): DealerFacts => {
+export const getDealerFacts = (
+    hands: Dictionary<RepresentativeHand>,
+    casinoRules: CasinoRules
+): DealerFacts => {
     const cardSet = getCardSet();
     const dealerDecisions = <DealerDecisions>{};
 
     const byCard = cardSet.cards.reduce<Dictionary<DealerFact>>((reduced, card) => {
-        const key = getHandKey([card]);
+        const key = getHandKey([card], casinoRules);
         const decision = setDealerDecision(dealerDecisions, hands, key);
 
         return {
