@@ -56,7 +56,9 @@ const createHand = (
     const effectiveScore = getHandEffectiveScore(allScores);
     const isActive =
         effectiveScore < maximumScore &&
-        (!isPostSplit || codes.plain !== splitAcesCode || casinoRules.splitOptions.hitSplitAces);
+        (!isPostSplit ||
+            codes.symbols !== splitAcesSymbols ||
+            casinoRules.splitOptions.hitSplitAces);
     const isBlackjack_ = isBlackjack(cards, casinoRules, isPostSplit);
     const isBust = isBustScore(effectiveScore);
     const key = getHandKey(cards, casinoRules, isPostSplit);
@@ -177,7 +179,7 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
     return allHands;
 };
 
-const getHandCodePlain = (cards: Card[]): string => {
+const getHandCodeSymbols = (cards: Card[]): string => {
     return cards
         .map((c) => c.symbol)
         .sort((a, b) => {
@@ -196,7 +198,7 @@ const getHandCodePlain = (cards: Card[]): string => {
 };
 
 const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = false): HandCodes => {
-    const plain = getHandCodePlain(cards);
+    const symbols = getHandCodeSymbols(cards);
 
     /** Some hands have special restrictions after split (e.g. 2,2 after split is 4) and,
      * even though their code matches and existing hand, they must be processed separately
@@ -207,11 +209,11 @@ const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fal
             (isBlackjack(cards, casinoRules, false) &&
                 !casinoRules.splitOptions.blackjackAfterSplit));
 
-    const processing = `${plain}${requiresPostSplitTreatment ? ' (after split)' : ''}`;
+    const processing = `${symbols}${requiresPostSplitTreatment ? ' (after split)' : ''}`;
 
     return {
-        plain,
-        processing
+        processing,
+        symbols
     };
 };
 
@@ -226,7 +228,7 @@ const getHandDisplayKey = (
     return cards.length === 1
         ? cards[0].symbol
         : canSplit_
-        ? getHandCodePlain(cards)
+        ? getHandCodeSymbols(cards)
         : isBlackjack_
         ? 'BJ'
         : mergeScores(cards, casinoRules, isPostSplit).join(scoreKeySeparator);
@@ -260,7 +262,7 @@ const isBlackjack = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fals
     return (
         (!isPostSplit || casinoRules.splitOptions.blackjackAfterSplit) &&
         cards.length === 2 &&
-        getHandCodePlain(cards) === blackjackCode
+        getHandCodeSymbols(cards) === blackjackSymbols
     );
 };
 
@@ -315,5 +317,5 @@ export const sortHandCodes = (a: string, b: string): number => {
     return 0;
 };
 
-export const splitAcesCode = getHandCodePlain(getCards([CardSymbol.ace, CardSymbol.ace]));
-export const blackjackCode = getHandCodePlain(getCards([CardSymbol.ace, CardSymbol.figure]));
+export const splitAcesSymbols = getHandCodeSymbols(getCards([CardSymbol.ace, CardSymbol.ace]));
+export const blackjackSymbols = getHandCodeSymbols(getCards([CardSymbol.ace, CardSymbol.figure]));

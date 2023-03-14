@@ -21,7 +21,7 @@ import {
     PlayerStrategyData
 } from '../types';
 import { aggregateFinalScores } from './final-scores';
-import { sortHandCodes, splitAcesCode } from './representative-hand';
+import { sortHandCodes, splitAcesSymbols } from './representative-hand';
 import { aggregateBreakdowns, getVsDealerBreakdown } from './vs-dealer-breakdown';
 import { aggregateOutcomes, getVsDealerOutcome } from './vs-dealer-outcome';
 
@@ -463,7 +463,7 @@ const sortPlayerFacts = (a: PlayerFact, b: PlayerFact) => {
     const isBlackjackB = b.hand.isBlackjack;
     const isBlackjackDifference = isBlackjackA !== isBlackjackB;
 
-    const acesDisplayKey = splitAcesCode;
+    const acesDisplayKey = splitAcesSymbols;
 
     return isSplitDifference
         ? +isSplitB - +isSplitA

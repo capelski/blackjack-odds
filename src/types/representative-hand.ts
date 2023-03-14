@@ -1,8 +1,8 @@
 import { Card } from './card';
 
 export type HandCodes = {
-    plain: string;
     processing: string;
+    symbols: string;
 };
 
 export type HandQueueItem = {
