@@ -58,11 +58,11 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                 >
                     {displayCodes ? '👇' : '👉'}
                 </span>{' '}
-                Card combinations ({playerFact?.hand.codes.all.length || '-'})
+                Card combinations ({playerFact?.hand.codeSynonyms.length || '-'})
             </p>
             {playerFact && displayCodes && (
                 <ul>
-                    {playerFact.hand.codes.all.map((code) => (
+                    {playerFact.hand.codeSynonyms.map((code) => (
                         <li key={code}>{code}</li>
                     ))}
                 </ul>

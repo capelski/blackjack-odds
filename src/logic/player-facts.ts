@@ -1,5 +1,5 @@
 import { blackjackScore } from '../constants';
-import { Action, CardSymbol, PlayerStrategy } from '../models';
+import { Action, PlayerStrategy } from '../models';
 import {
     CasinoRules,
     DealerFacts,
@@ -21,9 +21,9 @@ import {
     PlayerStrategyData
 } from '../types';
 import { aggregateFinalScores } from './final-scores';
-import { getHandCodeFromSymbols, sortHandCodes } from './representative-hand';
-import { aggregateOutcomes, getVsDealerOutcome } from './vs-dealer-outcome';
+import { sortHandCodes, splitAcesCode } from './representative-hand';
 import { aggregateBreakdowns, getVsDealerBreakdown } from './vs-dealer-breakdown';
+import { aggregateOutcomes, getVsDealerOutcome } from './vs-dealer-outcome';
 
 type PlayerDecisionsByDealerCard = Dictionary<PlayerDecisions>;
 
@@ -187,10 +187,10 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
             // TODO Filter out 2-12 if Split enabled?
         )
         .reduce<PlayerFacts>((reduced, playerFact) => {
-            const handCodes = playerFact.hand.codes.all.concat(
-                reduced[playerFact.hand.displayKey]?.hand.codes.all || []
+            const codeSynonyms = playerFact.hand.codeSynonyms.concat(
+                reduced[playerFact.hand.displayKey]?.hand.codeSynonyms || []
             );
-            handCodes.sort(sortHandCodes);
+            codeSynonyms.sort(sortHandCodes);
 
             // if (reduced[playerFact.hand.displayKey] !== undefined) {
             //     console.log(`Merging ${playerFact.hand.key} into ${playerFact.hand.displayKey}`);
@@ -201,10 +201,7 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
                 ...playerFact,
                 hand: {
                     ...playerFact.hand,
-                    codes: {
-                        all: handCodes,
-                        representative: playerFact.hand.codes.representative
-                    }
+                    codeSynonyms
                 },
                 // TODO Merge averages, as secondary actions could vary
                 weight: playerFact.weight + (reduced[playerFact.hand.displayKey]?.weight || 0)
@@ -392,6 +389,7 @@ const setPlayerDecision = (
         });
     }
 
+    // TODO A,A cannot hit as a secondary preference!
     const preferences = Object.values(allActions).sort((a, b) => {
         return a.overrideIndex > -1 && b.overrideIndex > -1
             ? a.overrideIndex - b.overrideIndex
@@ -465,7 +463,7 @@ const sortPlayerFacts = (a: PlayerFact, b: PlayerFact) => {
     const isBlackjackB = b.hand.isBlackjack;
     const isBlackjackDifference = isBlackjackA !== isBlackjackB;
 
-    const acesDisplayKey = getHandCodeFromSymbols([CardSymbol.ace, CardSymbol.ace]);
+    const acesDisplayKey = splitAcesCode;
 
     return isSplitDifference
         ? +isSplitB - +isSplitA

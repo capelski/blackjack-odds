@@ -34,3 +34,8 @@ export const getCardSet = (() => {
         return cardSet;
     };
 })();
+
+export const getCards = (cardSymbols: CardSymbol[]) => {
+    const cardSet = getCardSet();
+    return cardSymbols.map((symbol) => cardSet.cards.find((card) => card.symbol === symbol)!);
+};

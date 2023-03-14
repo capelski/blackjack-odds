@@ -1,13 +1,18 @@
 import { Card } from './card';
 
+export type HandCodes = {
+    plain: string;
+    processing: string;
+};
+
 export type HandQueueItem = {
     cards: Card[];
+    codes: HandCodes;
     key: string;
     isPostSplit?: boolean;
 };
 
 export type NextHand = HandQueueItem & {
-    representativeCode: string;
     weight: number;
 };
 
@@ -16,10 +21,8 @@ export type RepresentativeHand = {
     allScores: number[];
     canDouble: boolean;
     canSplit: boolean;
-    codes: {
-        all: string[];
-        representative: string;
-    };
+    codes: HandCodes;
+    codeSynonyms: string[];
     displayKey: string;
     effectiveScore: number;
     isActive: boolean;
