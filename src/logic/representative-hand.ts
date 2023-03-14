@@ -70,10 +70,7 @@ const createHand = (
               const nextCards = cards.concat([card]);
               return {
                   cards: nextCards,
-                  codes: {
-                      plain: getHandCodePlain(nextCards),
-                      processing: getHandCodeProcessing(nextCards, casinoRules)
-                  },
+                  codes: getHandCodes(nextCards, casinoRules),
                   key: getHandKey(nextCards, casinoRules),
                   weight: card.weight / cardSet.weight
               };
@@ -86,10 +83,7 @@ const createHand = (
                   const nextCards = [cards[0], card];
                   return {
                       cards: nextCards,
-                      codes: {
-                          plain: getHandCodePlain(nextCards),
-                          processing: getHandCodeProcessing(nextCards, casinoRules, true)
-                      },
+                      codes: getHandCodes(nextCards, casinoRules, true),
                       key: getHandKey(nextCards, casinoRules, true),
                       isPostSplit: true,
                       weight: card.weight / cardSet.weight
@@ -130,10 +124,7 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
         const cards = [card];
         return {
             cards: cards,
-            codes: {
-                plain: getHandCodePlain(cards),
-                processing: getHandCodeProcessing(cards, casinoRules)
-            },
+            codes: getHandCodes(cards, casinoRules),
             key: getHandKey(cards, casinoRules)
         };
     });
@@ -204,22 +195,24 @@ const getHandCodePlain = (cards: Card[]): string => {
         .join(',');
 };
 
-/** Some hands have special restrictions after split (e.g. 2,2 after split is 4) and,
- * even though their code matches and existing hand, they must be processed separately
- */
-const getHandCodeProcessing = (
-    cards: Card[],
-    casinoRules: CasinoRules,
-    isPostSplit = false
-): string => {
+const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = false): HandCodes => {
+    const plain = getHandCodePlain(cards);
+
+    /** Some hands have special restrictions after split (e.g. 2,2 after split is 4) and,
+     * even though their code matches and existing hand, they must be processed separately
+     */
     const requiresPostSplitTreatment =
         isPostSplit &&
         (canSplit(cards, casinoRules, false) ||
             (isBlackjack(cards, casinoRules, false) &&
                 !casinoRules.splitOptions.blackjackAfterSplit));
 
-    const plainCode = getHandCodePlain(cards);
-    return `${plainCode}${requiresPostSplitTreatment ? ' (after split)' : ''}`;
+    const processing = `${plain}${requiresPostSplitTreatment ? ' (after split)' : ''}`;
+
+    return {
+        plain,
+        processing
+    };
 };
 
 const getHandDisplayKey = (
@@ -263,7 +256,7 @@ export const getHandKey = (
 };
 
 /** Returns true if the cards correspond to a Blackjack (i.e. A,10) */
-export const isBlackjack = (cards: Card[], casinoRules: CasinoRules, isPostSplit = false) => {
+const isBlackjack = (cards: Card[], casinoRules: CasinoRules, isPostSplit = false) => {
     return (
         (!isPostSplit || casinoRules.splitOptions.blackjackAfterSplit) &&
         cards.length === 2 &&
