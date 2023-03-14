@@ -35,7 +35,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                     data={[playerFact]}
                     direction={isDesktop ? 'horizontal' : 'vertical'}
                     // playerChoices={props.playerChoices}
-                    handKey={playerFact.hand.key}
+                    handKey={playerFact.hand.codes.processing}
                     dealerFacts={props.dealerFacts}
                 />
             ) : (

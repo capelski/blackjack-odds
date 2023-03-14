@@ -1,14 +1,17 @@
 import { Card } from './card';
 
 export type HandCodes = {
+    /** E.g. "BJ", "A,10 (after split)", "9", "6,6 (after split)" */
+    display: string;
+    /** E.g. "21.5", "11/21", "double9", "6,6 (after split)" */
     processing: string;
+    /** E.g. "A,10", "A,10", "7,2", "6,6" */
     symbols: string;
 };
 
 export type HandQueueItem = {
     cards: Card[];
     codes: HandCodes;
-    key: string;
     isPostSplit?: boolean;
 };
 
@@ -30,7 +33,6 @@ export type RepresentativeHand = {
     isBust: boolean;
     isDealerHand: boolean;
     isPostSplit: boolean;
-    key: string;
     nextHands: NextHand[];
     playerHand: {
         isInitial: boolean;

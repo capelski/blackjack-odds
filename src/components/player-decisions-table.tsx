@@ -63,8 +63,8 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                         </React.Fragment>
                     );
                 },
-                id: dealerFact.hand.key,
-                dealerCardKey: dealerFact.hand.key
+                id: dealerFact.hand.codes.processing,
+                dealerCardKey: dealerFact.hand.codes.processing
             }))
         ];
         return columns;

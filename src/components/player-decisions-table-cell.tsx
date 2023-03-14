@@ -22,7 +22,7 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
     return (cellProps: CellProps<PlayerFact>) => {
         const { hand, vsDealerCard } = cellProps.row.original;
 
-        const preferences = vsDealerCard[props.dealerFact.hand.key].preferences;
+        const preferences = vsDealerCard[props.dealerFact.hand.codes.processing].preferences;
         const actions = preferences.map((p) => p.action);
 
         const { actionStyles, displayActions } = getDisplayActions(actions, {
@@ -30,7 +30,10 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
         });
 
         return (
-            <div style={{ ...baseStyles, ...actionStyles }} key={props.dealerFact.hand.key}>
+            <div
+                style={{ ...baseStyles, ...actionStyles }}
+                key={props.dealerFact.hand.codes.processing}
+            >
                 <div>
                     {!props.processing && props.playerDecisionsEdit ? (
                         <select
@@ -38,9 +41,11 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
                                 const actions = event.target.value.split(' / ') as Action[];
                                 props.actionOverridesSetter({
                                     ...props.actionOverrides,
-                                    [props.dealerFact.hand.key]: {
-                                        ...props.actionOverrides[props.dealerFact.hand.key],
-                                        [hand.key]: actions
+                                    [props.dealerFact.hand.codes.processing]: {
+                                        ...props.actionOverrides[
+                                            props.dealerFact.hand.codes.processing
+                                        ],
+                                        [hand.codes.processing]: actions
                                     }
                                 });
                             }}

@@ -54,7 +54,7 @@ const getHandPlayerFact = (
     const vsDealerAverage = setPlayerDecision(
         playerDecisions[AVERAGE_DATA],
         hands,
-        hand.key,
+        hand.codes.processing,
         dealerFacts.byCard_average.finalScores,
         casinoRules,
         playerStrategy
@@ -68,7 +68,7 @@ const getHandPlayerFact = (
                     ...setPlayerDecision(
                         playerDecisions[cardBaseKey],
                         hands,
-                        hand.key,
+                        hand.codes.processing,
                         dealerFacts.byCard[cardBaseKey].decision.preferences[0].finalScores,
                         casinoRules,
                         playerStrategy,
@@ -164,7 +164,7 @@ export const getPlayerFacts = (
         .reduce((reduced, hand) => {
             return {
                 ...reduced,
-                [hand.key]: getHandPlayerFact(
+                [hand.codes.processing]: getHandPlayerFact(
                     hand,
                     hand.playerHand.weight,
                     playerDecisions,
@@ -224,7 +224,8 @@ const setPlayerAction_Double = (
 ) => {
     const doubleFinalScores: FinalScores = aggregateFinalScores(
         hand.nextHands.map((nextHand) => ({
-            finalScores: playerDecisions[nextHand.key].allActions[Action.stand].finalScores,
+            finalScores:
+                playerDecisions[nextHand.codes.processing].allActions[Action.stand].finalScores,
             weight: nextHand.weight
         }))
     );
@@ -245,7 +246,7 @@ const setPlayerAction_Hit = (
 ) => {
     const hitFinalScores: FinalScores = aggregateFinalScores(
         hand.nextHands.map((nextHand) => ({
-            finalScores: playerDecisions[nextHand.key].preferences[0].finalScores,
+            finalScores: playerDecisions[nextHand.codes.processing].preferences[0].finalScores,
             weight: nextHand.weight
         }))
     );
@@ -265,14 +266,17 @@ const setPlayerAction_Split = (
 ) => {
     const splitFinalScores: FinalScores = aggregateFinalScores(
         hand.splitNextHands.map((nextHand) => ({
-            finalScores: playerDecisions[nextHand.key].preferences[0].finalScores,
+            finalScores: playerDecisions[nextHand.codes.processing].preferences[0].finalScores,
             weight: nextHand.weight
         }))
     );
     const splitCosts = hand.splitNextHands
         .map((nextHand) => ({
-            lossPayout: playerDecisions[nextHand.key].preferences[0].vsDealerOutcome.lossPayout,
-            winPayout: playerDecisions[nextHand.key].preferences[0].vsDealerOutcome.winPayout,
+            lossPayout:
+                playerDecisions[nextHand.codes.processing].preferences[0].vsDealerOutcome
+                    .lossPayout,
+            winPayout:
+                playerDecisions[nextHand.codes.processing].preferences[0].vsDealerOutcome.winPayout,
             weight: nextHand.weight
         }))
         .reduce(
@@ -342,7 +346,7 @@ const setPlayerDecision = (
             setPlayerDecision(
                 playerDecisions,
                 hands,
-                nextHand.key,
+                nextHand.codes.processing,
                 dealerFinalScores,
                 casinoRules,
                 playerStrategy,
@@ -361,7 +365,7 @@ const setPlayerDecision = (
                 setPlayerDecision(
                     playerDecisions,
                     hands,
-                    splitNextHand.key,
+                    splitNextHand.codes.processing,
                     dealerFinalScores,
                     casinoRules,
                     playerStrategy,

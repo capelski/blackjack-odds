@@ -41,14 +41,15 @@ const setDealerDecision = (
 
     if (hand.isActive) {
         hand.nextHands.forEach((nextHand) => {
-            setDealerDecision(dealerDecisions, hands, nextHand.key);
+            setDealerDecision(dealerDecisions, hands, nextHand.codes.processing);
         });
 
         allActions[Action.hit] = {
             action: Action.hit,
             finalScores: aggregateFinalScores(
                 hand.nextHands.map((nextHand) => ({
-                    finalScores: dealerDecisions[nextHand.key].preferences[0].finalScores,
+                    finalScores:
+                        dealerDecisions[nextHand.codes.processing].preferences[0].finalScores,
                     weight: nextHand.weight
                 }))
             )
