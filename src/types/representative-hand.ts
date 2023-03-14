@@ -7,6 +7,9 @@ export type HandCodes = {
     processing: string;
     /** E.g. "A,10", "A,10", "7,2", "6,6" */
     symbols: string;
+
+    /** Other display codes that don't require individual processing */
+    displayEquivalences: string[];
 };
 
 export type HandQueueItem = {
@@ -25,7 +28,6 @@ export type RepresentativeHand = {
     canDouble: boolean;
     canSplit: boolean;
     codes: HandCodes;
-    codeSynonyms: string[];
     displayKey: string;
     effectiveScore: number;
     isActive: boolean;

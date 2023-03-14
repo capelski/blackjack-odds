@@ -95,7 +95,6 @@ const createHand = (
         canDouble: canDouble_,
         canSplit: canSplit_,
         codes,
-        codeSynonyms: [codes.display],
         displayKey,
         effectiveScore,
         isActive,
@@ -125,42 +124,53 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
             codes: getHandCodes(cards, casinoRules)
         };
     });
-    const processedHands: Dictionary<boolean> = {};
+    const processedHandCodes: Dictionary<HandCodes> = {};
     const allHands: Dictionary<RepresentativeHand> = {};
     const initialWeights: Dictionary<number> = {};
 
     while (handsQueue.length > 0) {
         const { cards, codes, isPostSplit } = handsQueue.shift()!;
 
+        processedHandCodes[codes.processing] = codes;
+
         if (allHands[codes.processing] === undefined) {
             allHands[codes.processing] = createHand(cards, codes, casinoRules, isPostSplit);
-        } else if (!allHands[codes.processing].codeSynonyms.includes(codes.display)) {
-            allHands[codes.processing].codeSynonyms.push(codes.display);
+        } else {
+            throw new Error(`${codes.processing} is being processed twice`);
         }
 
-        if (allHands[codes.processing].isActive) {
-            allHands[codes.processing].nextHands.forEach((nextHand) => {
-                if (!processedHands[nextHand.codes.display]) {
-                    handsQueue.push(nextHand);
-                    processedHands[nextHand.codes.display] = true;
-                }
+        const potentialNextHands = [];
 
-                if (nextHand.cards.length === 2) {
+        if (allHands[codes.processing].isActive) {
+            potentialNextHands.push(...allHands[codes.processing].nextHands);
+
+            if (cards.length === 1) {
+                // Next hands are player initial hands
+                allHands[codes.processing].nextHands.forEach((nextHand) => {
                     initialWeights[nextHand.codes.processing] =
                         (initialWeights[nextHand.codes.processing] || 0) +
                         (nextHand.cards[0].weight * nextHand.cards[1].weight) / cardSet.weight ** 2;
-                }
-            });
-
-            if (allHands[codes.processing].canSplit) {
-                allHands[codes.processing].splitNextHands.forEach((nextHand) => {
-                    if (!processedHands[nextHand.codes.display]) {
-                        handsQueue.push(nextHand);
-                        processedHands[nextHand.codes.display] = true;
-                    }
                 });
             }
+
+            if (allHands[codes.processing].canSplit) {
+                potentialNextHands.push(...allHands[codes.processing].splitNextHands);
+            }
         }
+
+        potentialNextHands.forEach((nextHand) => {
+            if (!processedHandCodes[nextHand.codes.processing]) {
+                processedHandCodes[nextHand.codes.processing] = nextHand.codes;
+                handsQueue.push(nextHand);
+            } else {
+                /** Note that manipulating displayEquivalences works only as long as createHand
+                 * keeps a reference to the handCodes object in the processedHandCodes dictionary */
+                const { displayEquivalences } = processedHandCodes[nextHand.codes.processing];
+                if (!displayEquivalences.includes(nextHand.codes.display)) {
+                    displayEquivalences.push(nextHand.codes.display);
+                }
+            }
+        });
     }
 
     Object.keys(initialWeights).forEach((handKey) => {
@@ -171,7 +181,7 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
     });
 
     const allHandsArray = Object.values(allHands).filter((x) => !x.isBust && !x.isDealerHand);
-    allHandsArray.forEach((hand) => hand.codeSynonyms.sort(sortHandCodes));
+    allHandsArray.forEach((hand) => hand.codes.displayEquivalences.sort(sortHandCodes));
 
     return allHands;
 };
@@ -219,6 +229,7 @@ const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fal
 
     return {
         display,
+        displayEquivalences: [display],
         processing,
         symbols
     };

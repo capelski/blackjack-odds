@@ -187,10 +187,10 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
             // TODO Filter out 2-12 if Split enabled?
         )
         .reduce<PlayerFacts>((reduced, playerFact) => {
-            const codeSynonyms = playerFact.hand.codeSynonyms.concat(
-                reduced[playerFact.hand.displayKey]?.hand.codeSynonyms || []
+            const displayEquivalences = playerFact.hand.codes.displayEquivalences.concat(
+                reduced[playerFact.hand.displayKey]?.hand.codes.displayEquivalences || []
             );
-            codeSynonyms.sort(sortHandCodes);
+            displayEquivalences.sort(sortHandCodes);
 
             // if (reduced[playerFact.hand.displayKey] !== undefined) {
             //     console.log(`Merging ${playerFact.hand.key} into ${playerFact.hand.displayKey}`);
@@ -201,7 +201,10 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
                 ...playerFact,
                 hand: {
                     ...playerFact.hand,
-                    codeSynonyms
+                    codes: {
+                        ...playerFact.hand.codes,
+                        displayEquivalences
+                    }
                 },
                 // TODO Merge averages, as secondary actions could vary
                 weight: playerFact.weight + (reduced[playerFact.hand.displayKey]?.weight || 0)
