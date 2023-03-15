@@ -56,7 +56,7 @@ export const App: React.FC = () => {
             const representativeHands = getAllRepresentativeHands(casinoRules);
             // console.log('Representative hands', representativeHands);
 
-            const dealerFacts = getDealerFacts(representativeHands, casinoRules);
+            const dealerFacts = getDealerFacts(representativeHands);
             // console.log('Dealer facts', dealerFacts);
 
             const allPlayerFacts = getPlayerFacts(

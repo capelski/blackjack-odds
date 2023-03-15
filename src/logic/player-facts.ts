@@ -183,7 +183,7 @@ export const getPlayerFacts = (
 export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
     const mergedPlayerFacts = Object.values(playerFacts)
         .filter(
-            (x) => !x.hand.isDealerHand && x.hand.effectiveScore <= blackjackScore
+            (x) => !x.hand.dealerHand.isInitial && x.hand.effectiveScore <= blackjackScore
             // TODO Filter out 2-12 if Split enabled?
         )
         .reduce<PlayerFacts>((reduced, playerFact) => {

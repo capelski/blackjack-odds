@@ -51,7 +51,7 @@ const playerInitialHandsKey = Object.values(allHands)
     .filter((hand) => hand.playerHand.isInitial)
     .map((hand) => hand.codes.group);
 const dealerInitialHandsKey = Object.values(allHands)
-    .filter((hand) => hand.isDealerHand)
+    .filter((hand) => hand.dealerHand.isInitial)
     .map((hand) => hand.codes.group);
 
 const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {

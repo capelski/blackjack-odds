@@ -97,7 +97,10 @@ const createHand = (
         effectiveScore,
         isActive,
         isBlackjack: isBlackjack_,
-        isDealerHand: cards.length === 1,
+        dealerHand: {
+            isInitial: cards.length === 1,
+            weight: cards.length === 1 ? cards[0].weight / cardSet.weight : 0
+        },
         isBust,
         isPostSplit,
         nextHands,
@@ -178,7 +181,9 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
         };
     });
 
-    const allHandsArray = Object.values(allHands).filter((x) => !x.isBust && !x.isDealerHand);
+    const allHandsArray = Object.values(allHands).filter(
+        (x) => !x.isBust && !x.dealerHand.isInitial
+    );
     allHandsArray.forEach((hand) => hand.codes.displayEquivalences.sort(sortHandCodes));
 
     return allHands;
@@ -252,25 +257,6 @@ const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fal
 
 const getHandEffectiveScore = (scores: number[]): number => {
     return [...scores].reverse()[0];
-};
-
-/** Returns the representative hand key for the given set of card outcomes
- * (e.g. [2,3,7] => 12, [10, A] => BJ, etc.)
- */
-export const getHandKey = (
-    cards: Card[],
-    casinoRules: CasinoRules,
-    isPostSplit = false
-): string => {
-    const scores = mergeScores(cards, casinoRules, isPostSplit).join(scoreKeySeparator);
-
-    return cards.length === 1
-        ? `dealer${cards[0].symbol}`
-        : canSplit(cards, casinoRules, isPostSplit)
-        ? `split${cards.map((c) => c.symbol).join(',')}`
-        : canDouble(cards, casinoRules, isPostSplit)
-        ? `double${scores}`
-        : scores;
 };
 
 /** Returns true if the cards correspond to a Blackjack (i.e. A,10) */

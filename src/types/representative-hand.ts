@@ -37,11 +37,14 @@ export type RepresentativeHand = {
     canDouble: boolean;
     canSplit: boolean;
     codes: HandCodes;
+    dealerHand: {
+        isInitial: boolean;
+        weight: number;
+    };
     effectiveScore: number;
     isActive: boolean;
     isBlackjack: boolean;
     isBust: boolean;
-    isDealerHand: boolean;
     isPostSplit: boolean;
     nextHands: NextHand[];
     playerHand: {

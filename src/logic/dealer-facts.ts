@@ -1,7 +1,6 @@
 import { dealerStandThreshold } from '../constants';
 import { Action } from '../models';
 import {
-    CasinoRules,
     DealerActionData,
     DealerActionsData,
     DealerBaseData,
@@ -12,9 +11,7 @@ import {
     Dictionary,
     RepresentativeHand
 } from '../types';
-import { getCardSet } from './card-set';
 import { aggregateFinalScores } from './final-scores';
-import { getHandKey } from './representative-hand';
 
 const setDealerDecision = (
     dealerDecisions: DealerDecisions,
@@ -70,26 +67,23 @@ const setDealerDecision = (
     return dealerDecision;
 };
 
-export const getDealerFacts = (
-    hands: Dictionary<RepresentativeHand>,
-    casinoRules: CasinoRules
-): DealerFacts => {
-    const cardSet = getCardSet();
+export const getDealerFacts = (hands: Dictionary<RepresentativeHand>): DealerFacts => {
     const dealerDecisions = <DealerDecisions>{};
 
-    const byCard = cardSet.cards.reduce<Dictionary<DealerFact>>((reduced, card) => {
-        const key = getHandKey([card], casinoRules);
-        const decision = setDealerDecision(dealerDecisions, hands, key);
+    const byCard = Object.values(hands)
+        .filter((hand) => hand.dealerHand.isInitial)
+        .reduce<Dictionary<DealerFact>>((reduced, hand) => {
+            const decision = setDealerDecision(dealerDecisions, hands, hand.codes.processing);
 
-        return {
-            ...reduced,
-            [key]: {
-                decision,
-                hand: hands[key],
-                weight: card.weight / cardSet.weight
-            }
-        };
-    }, {});
+            return {
+                ...reduced,
+                [hand.codes.processing]: {
+                    decision,
+                    hand,
+                    weight: hand.dealerHand.weight
+                }
+            };
+        }, {});
 
     const byCard_average: DealerBaseData = {
         finalScores: aggregateFinalScores(
