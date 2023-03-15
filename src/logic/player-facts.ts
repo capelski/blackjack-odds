@@ -1,4 +1,3 @@
-import { blackjackScore } from '../constants';
 import { Action, PlayerStrategy } from '../models';
 import {
     CasinoRules,
@@ -33,7 +32,7 @@ const aggregatePlayerBaseData = <T extends PlayerDecisionWithWeight | PlayerFact
     items: T[],
     getter: (item: T) => PlayerActionData | PlayerBaseData
 ): PlayerBaseData => {
-    const data = items.map((item) => ({ ...getter(item), weight: item.weight }));
+    const data = items.map((item) => ({ weight: item.weight, ...getter(item) }));
     return {
         finalScores: aggregateFinalScores(data),
         vsDealerBreakdown: aggregateBreakdowns(data),
@@ -160,7 +159,7 @@ export const getPlayerFacts = (
     };
 
     const allPlayerFacts = Object.values(hands)
-        .filter((hand) => hand.playerHand.isInitial)
+        .filter((hand) => !hand.dealerHand.isInitial)
         .reduce((reduced, hand) => {
             return {
                 ...reduced,
@@ -181,40 +180,51 @@ export const getPlayerFacts = (
 };
 
 export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
-    const mergedPlayerFacts = Object.values(playerFacts)
-        .filter(
-            (x) => !x.hand.dealerHand.isInitial && x.hand.effectiveScore <= blackjackScore
-            // TODO Filter out 2-12 if Split enabled?
-        )
-        .reduce<PlayerFacts>((reduced, playerFact) => {
-            const displayEquivalences = playerFact.hand.codes.displayEquivalences.concat(
-                reduced[playerFact.hand.codes.group]?.hand.codes.displayEquivalences || []
-            );
-            displayEquivalences.sort(sortHandCodes);
+    const groupedPlayerFacts = Object.values(playerFacts)
+        .filter((playerFact) => !playerFact.hand.isBust)
+        .reduce<Dictionary<PlayerFact[]>>((reduced, playerFact) => {
+            const groupCode = playerFact.hand.codes.group;
+            const group = (reduced[groupCode] || []).concat([playerFact]).sort((a, b) => {
+                return b.hand.playerHand.weight - a.hand.playerHand.weight;
+            });
+            return {
+                ...reduced,
+                [groupCode]: group
+            };
+        }, {});
 
-            // if (reduced[playerFact.hand.codes.group] !== undefined) {
-            //     console.log(`Merging ${playerFact.hand.key} into ${playerFact.hand.codes.group}`);
-            // }
+    const mergedPlayerFacts = Object.values(groupedPlayerFacts).reduce<PlayerFacts>(
+        (reduced, playerFacts) => {
+            const mainFact = playerFacts[0];
 
-            // TODO Incorrect merge. When doubling.any_pair, 8-18 goes before initial 8-18 and sets canDouble to false!
+            const displayEquivalences = playerFacts
+                .reduce<string[]>((displayReduced, playerFact) => {
+                    return displayReduced.concat(playerFact.hand.codes.displayEquivalences);
+                }, [])
+                .sort(sortHandCodes);
+            const weight = playerFacts.reduce((weightReduced, playerFact) => {
+                return weightReduced + playerFact.weight;
+            }, 0);
+
             const mergedPlayerFact: PlayerFact = {
-                ...playerFact,
+                ...mainFact,
                 hand: {
-                    ...playerFact.hand,
+                    ...mainFact.hand,
                     codes: {
-                        ...playerFact.hand.codes,
+                        ...mainFact.hand.codes,
                         displayEquivalences
                     }
                 },
-                // TODO Merge averages, as secondary actions could vary
-                weight: playerFact.weight + (reduced[playerFact.hand.codes.group]?.weight || 0)
+                weight
             };
 
             return {
                 ...reduced,
-                [playerFact.hand.codes.group]: mergedPlayerFact
+                [mainFact.hand.codes.group]: mergedPlayerFact
             };
-        }, {});
+        },
+        {}
+    );
 
     return Object.values(mergedPlayerFacts).sort(sortPlayerFacts);
 };
