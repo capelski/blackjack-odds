@@ -1,6 +1,6 @@
 import { scoreKeySeparator } from '../constants';
 import { Paths } from '../models';
-import { dealerDisplayKeyParam, playerDisplayKeyParam } from '../models/paths';
+import { dealerGroupCodeParam, playerGroupCodeParam } from '../models/paths';
 import { Dictionary } from '../types';
 import { getDefaultCasinoRues } from './casino-rules';
 import { getAllRepresentativeHands } from './representative-hand';
@@ -13,16 +13,16 @@ export const getPlayerDecisionDealerCardPath = (
 ) => {
     return Paths.playerDecisionsDealerCard
         .replace(
-            `:${playerDisplayKeyParam}`,
+            `:${playerGroupCodeParam}`,
             playerDisplayKey.replace(scoreKeySeparator, safeParametersSeparator)
         )
-        .replace(`:${dealerDisplayKeyParam}`, dealerDisplayKey);
+        .replace(`:${dealerGroupCodeParam}`, dealerDisplayKey);
 };
 
 export const getPlayerDecisionDealerCardParams = (params: Record<string, string | undefined>) => {
     return {
-        [dealerDisplayKeyParam]: params[dealerDisplayKeyParam],
-        [playerDisplayKeyParam]: params[playerDisplayKeyParam]?.replace(
+        [dealerGroupCodeParam]: params[dealerGroupCodeParam],
+        [playerGroupCodeParam]: params[playerGroupCodeParam]?.replace(
             safeParametersSeparator,
             scoreKeySeparator
         )
@@ -31,14 +31,14 @@ export const getPlayerDecisionDealerCardParams = (params: Record<string, string 
 
 export const getPlayerDecisionScorePath = (playerDisplayKey: string) => {
     return Paths.playerDecisionsScore.replace(
-        `:${playerDisplayKeyParam}`,
+        `:${playerGroupCodeParam}`,
         playerDisplayKey.replace(scoreKeySeparator, safeParametersSeparator)
     );
 };
 
 export const getPlayerDecisionScoreParams = (params: Record<string, string | undefined>) => {
     return {
-        [playerDisplayKeyParam]: params[playerDisplayKeyParam]?.replace(
+        [playerGroupCodeParam]: params[playerGroupCodeParam]?.replace(
             safeParametersSeparator,
             scoreKeySeparator
         )
@@ -46,13 +46,13 @@ export const getPlayerDecisionScoreParams = (params: Record<string, string | und
 };
 
 const allHands = getAllRepresentativeHands(getDefaultCasinoRues());
-// TODO Use the merged hands instead
+// TODO Use the grouped hands instead
 const playerInitialHandsKey = Object.values(allHands)
     .filter((hand) => hand.playerHand.isInitial)
-    .map((hand) => hand.displayKey);
+    .map((hand) => hand.codes.group);
 const dealerInitialHandsKey = Object.values(allHands)
     .filter((hand) => hand.isDealerHand)
-    .map((hand) => hand.displayKey);
+    .map((hand) => hand.codes.group);
 
 const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {
     [Paths.playerDecisions]: [Paths.playerDecisions],

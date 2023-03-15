@@ -15,10 +15,10 @@ interface PlayerDecisionsScoreProps {
 }
 
 export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props) => {
-    const { playerDisplayKey } = getPlayerDecisionScoreParams(useParams());
+    const { playerGroupCode } = getPlayerDecisionScoreParams(useParams());
 
     const playerFact = props.playerFacts?.find(
-        (playerFact) => playerFact.hand.displayKey === playerDisplayKey
+        (playerFact) => playerFact.hand.codes.group === playerGroupCode
     );
 
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
@@ -26,10 +26,10 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
 
     return (
         <div>
-            <h3>{playerDisplayKey} player decisions</h3>
+            <h3>{playerGroupCode} player decisions</h3>
             <OutcomeComponent outcome={playerFact?.vsDealerCard_average.vsDealerOutcome} />
             <h4>Dealer card based decisions</h4>
-            {playerDisplayKey && playerFact !== undefined && props.dealerFacts !== undefined ? (
+            {playerGroupCode && playerFact !== undefined && props.dealerFacts !== undefined ? (
                 <PlayerDecisionsTable
                     {...props}
                     data={[playerFact]}

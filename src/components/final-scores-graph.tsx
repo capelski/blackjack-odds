@@ -28,7 +28,7 @@ export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
                 .concat(props.handDisplayKey)
                 .map((handDisplayKey) => {
                     const playerFact = props.playerFacts.find(
-                        (x) => x.hand.displayKey === handDisplayKey
+                        (x) => x.hand.codes.group === handDisplayKey
                     );
                     const isBustScore = playerFact && playerFact.hand.isBust;
                     return {
@@ -42,7 +42,7 @@ export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
                 }),
             edges: Object.keys(props.finalScores).map((handDisplayKey: string) => {
                 const playerFact = props.playerFacts.find(
-                    (x) => x.hand.displayKey === handDisplayKey
+                    (x) => x.hand.codes.group === handDisplayKey
                 );
                 const isBustScore = playerFact && playerFact.hand.isBust;
 

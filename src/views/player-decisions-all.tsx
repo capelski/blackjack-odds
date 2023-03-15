@@ -37,10 +37,10 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
                     return (
                         <div>
                             <Link
-                                to={getPlayerDecisionScorePath(cellProps.value.displayKey)}
+                                to={getPlayerDecisionScorePath(cellProps.value.codes.group)}
                                 style={{ color: colors.link.default, textDecoration: 'none' }}
                             >
-                                {cellProps.value.displayKey}
+                                {cellProps.value.codes.group}
                             </Link>
                         </div>
                     );

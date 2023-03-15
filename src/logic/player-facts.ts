@@ -160,7 +160,7 @@ export const getPlayerFacts = (
     };
 
     const allPlayerFacts = Object.values(hands)
-        .filter((hand) => !hand.isDealerHand)
+        .filter((hand) => hand.playerHand.isInitial)
         .reduce((reduced, hand) => {
             return {
                 ...reduced,
@@ -188,12 +188,12 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
         )
         .reduce<PlayerFacts>((reduced, playerFact) => {
             const displayEquivalences = playerFact.hand.codes.displayEquivalences.concat(
-                reduced[playerFact.hand.displayKey]?.hand.codes.displayEquivalences || []
+                reduced[playerFact.hand.codes.group]?.hand.codes.displayEquivalences || []
             );
             displayEquivalences.sort(sortHandCodes);
 
-            // if (reduced[playerFact.hand.displayKey] !== undefined) {
-            //     console.log(`Merging ${playerFact.hand.key} into ${playerFact.hand.displayKey}`);
+            // if (reduced[playerFact.hand.codes.group] !== undefined) {
+            //     console.log(`Merging ${playerFact.hand.key} into ${playerFact.hand.codes.group}`);
             // }
 
             // TODO Incorrect merge. When doubling.any_pair, 8-18 goes before initial 8-18 and sets canDouble to false!
@@ -207,12 +207,12 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
                     }
                 },
                 // TODO Merge averages, as secondary actions could vary
-                weight: playerFact.weight + (reduced[playerFact.hand.displayKey]?.weight || 0)
+                weight: playerFact.weight + (reduced[playerFact.hand.codes.group]?.weight || 0)
             };
 
             return {
                 ...reduced,
-                [playerFact.hand.displayKey]: mergedPlayerFact
+                [playerFact.hand.codes.group]: mergedPlayerFact
             };
         }, {});
 
@@ -470,13 +470,11 @@ const sortPlayerFacts = (a: PlayerFact, b: PlayerFact) => {
     const isBlackjackB = b.hand.isBlackjack;
     const isBlackjackDifference = isBlackjackA !== isBlackjackB;
 
-    const acesDisplayKey = splitAcesSymbols;
-
     return isSplitDifference
         ? +isSplitB - +isSplitA
-        : a.hand.displayKey === acesDisplayKey
+        : a.hand.codes.group === splitAcesSymbols
         ? 1
-        : b.hand.displayKey === acesDisplayKey
+        : b.hand.codes.group === splitAcesSymbols
         ? -1
         : isSoftDifference
         ? +isSoftB - +isSoftA

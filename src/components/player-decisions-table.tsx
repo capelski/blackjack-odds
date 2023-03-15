@@ -46,7 +46,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 Header: () => {
                     return (
                         <React.Fragment>
-                            {dealerFact.hand.displayKey}
+                            {dealerFact.hand.codes.display}
                             {!abbreviate && (
                                 <span
                                     style={{

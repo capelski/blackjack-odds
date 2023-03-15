@@ -12,21 +12,21 @@ interface PlayerDecisionsDealerCardProps {
 }
 
 export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps> = (props) => {
-    const { dealerDisplayKey, playerDisplayKey } = getPlayerDecisionDealerCardParams(useParams());
+    const { dealerGroupCode, playerGroupCode } = getPlayerDecisionDealerCardParams(useParams());
     const playerFact = props.playerFacts?.find(
-        (playerFact) => playerFact.hand.displayKey === playerDisplayKey
+        (playerFact) => playerFact.hand.codes.group === playerGroupCode
     );
 
     const dealerFact =
         props.dealerFacts &&
         Object.values(props.dealerFacts.byCard).find(
-            (dealerFact) => dealerFact.hand.displayKey === dealerDisplayKey
+            (dealerFact) => dealerFact.hand.codes.group === dealerGroupCode
         );
 
     return (
         <div>
             <h3>
-                {playerDisplayKey} vs {dealerDisplayKey} player decisions
+                {playerGroupCode} vs {dealerGroupCode} player decisions
             </h3>
             <OutcomeComponent
                 outcome={
@@ -54,7 +54,7 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
                             <h4>{playerActionData.action} final score probabilities</h4>
                             <FinalScoresGraph
                                 finalScores={playerActionData.finalScores}
-                                handDisplayKey={playerDisplayKey!}
+                                handDisplayKey={playerGroupCode!}
                                 playerFacts={props.playerFacts!}
                             />
                             <br />

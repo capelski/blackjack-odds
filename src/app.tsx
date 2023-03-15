@@ -4,10 +4,10 @@ import {
     getAllRepresentativeHands,
     getDealerFacts,
     getDefaultCasinoRues,
-    getPlayerFacts,
     getDefaultPlayerStrategy,
-    groupPlayerFacts,
-    getPlayerAverageData
+    getPlayerAverageData,
+    getPlayerFacts,
+    groupPlayerFacts
 } from './logic';
 import { Paths } from './models';
 import {

@@ -63,8 +63,8 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
                     ) : (
                         <Link
                             to={getPlayerDecisionDealerCardPath(
-                                cellProps.row.original.hand.displayKey,
-                                props.dealerFact.hand.displayKey
+                                cellProps.row.original.hand.codes.group,
+                                props.dealerFact.hand.codes.group
                             )}
                             style={{ color: 'inherit', textDecoration: 'none' }}
                         >

@@ -1,14 +1,23 @@
 import { Card } from './card';
 
 export type HandCodes = {
-    /** E.g. "BJ", "A,10 (after split)", "9", "6,6 (after split)" */
-    display: string;
-    /** E.g. "21.5", "11/21", "double9", "6,6 (after split)" */
-    processing: string;
-    /** E.g. "A,10", "A,10", "7,2", "6,6" */
+    /** 1. The plain symbols in the hand cards.
+     * E.g. "A,10", "A,10", "7,2", "4,3,2", "6,6", "6,6" */
     symbols: string;
 
-    /** Other display codes that don't require individual processing */
+    /** 2. The symbols in the hand cards as they will be displayed.
+     * E.g. "A, 10", "A,10 (after split)", "7,2", "4,3,2", "6,6", "6,6 (after split)" */
+    display: string;
+
+    /** 3. A code that indicates the individual processing required for the hand.
+     * E.g. "21.5", "11/21", "double9", "9", "6,6", "12" */
+    processing: string;
+
+    /** 4. The hand code as it will be displayed in the player decisions table.
+     * E.g. "BJ", "11/21", "double9", "9", "6,6", "12" */
+    group: string;
+
+    /** All display codes that require the same hand processing */
     displayEquivalences: string[];
 };
 
@@ -28,7 +37,6 @@ export type RepresentativeHand = {
     canDouble: boolean;
     canSplit: boolean;
     codes: HandCodes;
-    displayKey: string;
     effectiveScore: number;
     isActive: boolean;
     isBlackjack: boolean;
