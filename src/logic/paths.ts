@@ -45,25 +45,27 @@ export const getPlayerDecisionScoreParams = (params: Record<string, string | und
     };
 };
 
-const allHands = getAllRepresentativeHands(getDefaultCasinoRues());
-// TODO Use the grouped hands instead
-const playerInitialHandsKey = Object.values(allHands)
-    .filter((hand) => hand.playerHand.isInitial)
-    .map((hand) => hand.codes.group);
-const dealerInitialHandsKey = Object.values(allHands)
+const allHands = Object.values(getAllRepresentativeHands(getDefaultCasinoRues()));
+const playerGroupCodes = allHands
+    .filter((hand) => !hand.isBust && !hand.dealerHand.isInitial)
+    .reduce<string[]>((reduced, next) => {
+        const { group } = next.codes;
+        return reduced.find((x) => x === group) ? reduced : reduced.concat([group]);
+    }, []);
+const dealerGroupCodes = allHands
     .filter((hand) => hand.dealerHand.isInitial)
     .map((hand) => hand.codes.group);
 
 const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {
     [Paths.playerDecisions]: [Paths.playerDecisions],
-    [Paths.playerDecisionsDealerCard]: playerInitialHandsKey
+    [Paths.playerDecisionsDealerCard]: playerGroupCodes
         .map((playerDisplayKey) => {
-            return dealerInitialHandsKey.map((dealerDisplayKey) => {
+            return dealerGroupCodes.map((dealerDisplayKey) => {
                 return getPlayerDecisionDealerCardPath(playerDisplayKey, dealerDisplayKey);
             });
         })
         .flat(),
-    [Paths.playerDecisionsScore]: playerInitialHandsKey.map((playerDisplayKey) => {
+    [Paths.playerDecisionsScore]: playerGroupCodes.map((playerDisplayKey) => {
         return getPlayerDecisionScorePath(playerDisplayKey);
     }),
     [Paths.strategyAndRules]: [Paths.strategyAndRules]
