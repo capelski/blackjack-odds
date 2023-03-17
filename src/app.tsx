@@ -12,9 +12,9 @@ import {
 import { Paths } from './models';
 import {
     DealerFacts,
+    GroupedPlayerFacts,
     PlayerActionOverridesByDealerCard,
-    PlayerAverageData,
-    PlayerFact
+    PlayerAverageData
 } from './types';
 import {
     NavBar,
@@ -42,7 +42,7 @@ export const App: React.FC = () => {
 
     const [dealerFacts, setDealerFacts] = useState<DealerFacts>();
     const [playerAverageData, setPlayerAverageData] = useState<PlayerAverageData>();
-    const [playerFacts, setPlayerFacts] = useState<PlayerFact[]>();
+    const [playerFacts, setPlayerFacts] = useState<GroupedPlayerFacts>();
 
     // A change in settings disables further changes in settings until re-processing data
     // (could be done with a setTimeout, but safer to trigger an additional render cycle)

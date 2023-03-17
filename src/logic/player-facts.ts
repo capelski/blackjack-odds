@@ -4,20 +4,22 @@ import {
     DealerFacts,
     Dictionary,
     FinalScores,
+    GroupedPlayerFacts,
     PlayerActionData,
+    PlayerActionOverrides,
+    PlayerActionOverridesByDealerCard,
     PlayerActionsData,
+    PlayerAverageData,
     PlayerBaseData,
     PlayerDecision,
-    PlayerFact,
     PlayerDecisions,
     PlayerDecisionsWithWeight,
     PlayerDecisionWithWeight,
-    PlayerAverageData,
-    RepresentativeHand,
+    PlayerFact,
     PlayerFacts,
-    PlayerActionOverrides,
-    PlayerActionOverridesByDealerCard,
-    PlayerStrategyData
+    PlayerFactsGroup,
+    PlayerStrategyData,
+    RepresentativeHand
 } from '../types';
 import { aggregateFinalScores } from './final-scores';
 import { sortHandCodes, splitAcesSymbols } from './representative-hand';
@@ -179,8 +181,8 @@ export const getPlayerFacts = (
     return allPlayerFacts;
 };
 
-export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
-    const groupedPlayerFacts = Object.values(playerFacts)
+export const groupPlayerFacts = (playerFacts: PlayerFacts): GroupedPlayerFacts => {
+    const playerFactsByGroupCode = Object.values(playerFacts)
         .filter((playerFact) => !playerFact.hand.isBust)
         .reduce<Dictionary<PlayerFact[]>>((reduced, playerFact) => {
             const groupCode = playerFact.hand.codes.group;
@@ -193,40 +195,29 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): PlayerFact[] => {
             };
         }, {});
 
-    const mergedPlayerFacts = Object.values(groupedPlayerFacts).reduce<PlayerFacts>(
-        (reduced, playerFacts) => {
-            const mainFact = playerFacts[0];
+    const groupedPlayerFacts = Object.values(playerFactsByGroupCode).reduce<
+        Dictionary<PlayerFactsGroup>
+    >((reduced, playerFacts) => {
+        const groupCode = playerFacts[0].hand.codes.group;
 
-            const displayEquivalences = playerFacts
+        const playerFactsGroup: PlayerFactsGroup = {
+            allFacts: playerFacts,
+            code: groupCode,
+            combinations: playerFacts
                 .reduce<string[]>((displayReduced, playerFact) => {
                     return displayReduced.concat(playerFact.hand.codes.displayEquivalences);
                 }, [])
-                .sort(sortHandCodes);
-            const weight = playerFacts.reduce((weightReduced, playerFact) => {
-                return weightReduced + playerFact.weight;
-            }, 0);
+                .sort(sortHandCodes),
+            mainFact: playerFacts[0]
+        };
 
-            const mergedPlayerFact: PlayerFact = {
-                ...mainFact,
-                hand: {
-                    ...mainFact.hand,
-                    codes: {
-                        ...mainFact.hand.codes,
-                        displayEquivalences
-                    }
-                },
-                weight
-            };
+        return {
+            ...reduced,
+            [groupCode]: playerFactsGroup
+        };
+    }, {});
 
-            return {
-                ...reduced,
-                [mainFact.hand.codes.group]: mergedPlayerFact
-            };
-        },
-        {}
-    );
-
-    return Object.values(mergedPlayerFacts).sort(sortPlayerFacts);
+    return Object.values(groupedPlayerFacts).sort(sortPlayerFacts);
 };
 
 const setPlayerAction_Double = (
@@ -467,28 +458,31 @@ const sortActions = (
           a.vsDealerOutcome.lossProbability - b.vsDealerOutcome.lossProbability;
 };
 
-const sortPlayerFacts = (a: PlayerFact, b: PlayerFact) => {
-    const isSplitA = a.hand.canSplit;
-    const isSplitB = b.hand.canSplit;
+const sortPlayerFacts = (a: PlayerFactsGroup, b: PlayerFactsGroup) => {
+    const aHand = a.allFacts[0].hand;
+    const bHand = b.allFacts[0].hand;
+
+    const isSplitA = aHand.canSplit;
+    const isSplitB = bHand.canSplit;
     const isSplitDifference = isSplitA !== isSplitB;
 
-    const isSoftA = a.hand.allScores.length > 1;
-    const isSoftB = b.hand.allScores.length > 1;
+    const isSoftA = aHand.allScores.length > 1;
+    const isSoftB = bHand.allScores.length > 1;
     const isSoftDifference = isSoftA !== isSoftB;
 
-    const isBlackjackA = a.hand.isBlackjack;
-    const isBlackjackB = b.hand.isBlackjack;
+    const isBlackjackA = aHand.isBlackjack;
+    const isBlackjackB = bHand.isBlackjack;
     const isBlackjackDifference = isBlackjackA !== isBlackjackB;
 
     return isSplitDifference
         ? +isSplitB - +isSplitA
-        : a.hand.codes.group === splitAcesSymbols
+        : aHand.codes.group === splitAcesSymbols
         ? 1
-        : b.hand.codes.group === splitAcesSymbols
+        : bHand.codes.group === splitAcesSymbols
         ? -1
         : isSoftDifference
         ? +isSoftB - +isSoftA
         : isBlackjackDifference
         ? +isBlackjackA - +isBlackjackB
-        : a.hand.effectiveScore - b.hand.effectiveScore;
+        : aHand.effectiveScore - bHand.effectiveScore;
 };

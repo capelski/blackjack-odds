@@ -3,7 +3,9 @@ import { Link } from 'react-router-dom';
 import { CellProps } from 'react-table';
 import { getDisplayActions, getOverrideActions, getPlayerDecisionDealerCardPath } from '../logic';
 import { Action } from '../models';
-import { DealerFact, PlayerActionOverridesByDealerCard, PlayerFact } from '../types';
+import { DealerFact, PlayerActionOverridesByDealerCard, PlayerFactsGroup } from '../types';
+
+export type PlayerFactCellProps = CellProps<PlayerFactsGroup>;
 
 interface PlayerDecisionsTableCellProps {
     abbreviate: boolean;
@@ -19,8 +21,8 @@ const baseStyles: CSSProperties = {
 };
 
 export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) => {
-    return (cellProps: CellProps<PlayerFact>) => {
-        const { hand, vsDealerCard } = cellProps.row.original;
+    return (cellProps: PlayerFactCellProps) => {
+        const { hand, vsDealerCard } = cellProps.row.original.mainFact;
 
         const preferences = vsDealerCard[props.dealerFact.hand.codes.processing].preferences;
         const actions = preferences.map((p) => p.action);
@@ -63,7 +65,7 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
                     ) : (
                         <Link
                             to={getPlayerDecisionDealerCardPath(
-                                cellProps.row.original.hand.codes.group,
+                                cellProps.row.original.code,
                                 props.dealerFact.hand.codes.group
                             )}
                             style={{ color: 'inherit', textDecoration: 'none' }}

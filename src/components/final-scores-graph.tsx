@@ -1,7 +1,7 @@
 import cytoscape from 'cytoscape';
 import React, { useEffect, useRef } from 'react';
 import { colors } from '../constants';
-import { FinalScores, PlayerFact } from '../types';
+import { FinalScores, GroupedPlayerFacts } from '../types';
 import { getRoundedFloat } from './rounded-float';
 
 export type CytoscapeTree = {
@@ -12,7 +12,7 @@ export type CytoscapeTree = {
 export interface FinalScoresGraphProps {
     finalScores: FinalScores;
     handDisplayKey: string;
-    playerFacts: PlayerFact[];
+    playerFacts: GroupedPlayerFacts;
 }
 
 export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
@@ -27,10 +27,10 @@ export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
             nodes: Object.keys(props.finalScores)
                 .concat(props.handDisplayKey)
                 .map((handDisplayKey) => {
-                    const playerFact = props.playerFacts.find(
-                        (x) => x.hand.codes.group === handDisplayKey
+                    const playerFactsGroup = props.playerFacts.find(
+                        (x) => x.mainFact.hand.codes.group === handDisplayKey
                     );
-                    const isBustScore = playerFact && playerFact.hand.isBust;
+                    const isBustScore = playerFactsGroup && playerFactsGroup.mainFact.hand.isBust;
                     return {
                         data: {
                             id: handDisplayKey,
@@ -41,10 +41,10 @@ export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
                     };
                 }),
             edges: Object.keys(props.finalScores).map((handDisplayKey: string) => {
-                const playerFact = props.playerFacts.find(
-                    (x) => x.hand.codes.group === handDisplayKey
+                const playerFactsGroup = props.playerFacts.find(
+                    (x) => x.mainFact.hand.codes.group === handDisplayKey
                 );
-                const isBustScore = playerFact && playerFact.hand.isBust;
+                const isBustScore = playerFactsGroup && playerFactsGroup.mainFact.hand.isBust;
 
                 return {
                     data: {

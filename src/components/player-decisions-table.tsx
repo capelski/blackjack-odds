@@ -1,14 +1,19 @@
 import React, { useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { colors, desktopBreakpoint } from '../constants';
-import { DealerFacts, PlayerActionOverridesByDealerCard, PlayerFact } from '../types';
+import {
+    DealerFacts,
+    GroupedPlayerFacts,
+    PlayerActionOverridesByDealerCard,
+    PlayerFactsGroup
+} from '../types';
 import { CustomColumn, CustomTableDirection, CustomTable } from './custom-table';
 import { PlayerDecisionsEdit } from './player-decisions-edit';
 import { PlayerDecisionsTableCell } from './player-decisions-table-cell';
 import { RoundedFloat } from './rounded-float';
 
-export type PlayerFactColumn = CustomColumn<
-    PlayerFact,
+export type PlayerFactsColumn = CustomColumn<
+    PlayerFactsGroup,
     {
         dealerCardKey?: string;
     }
@@ -17,8 +22,8 @@ export type PlayerFactColumn = CustomColumn<
 interface PlayerDecisionsTableProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
-    additionalColumns?: PlayerFactColumn[];
-    data: PlayerFact[];
+    additionalColumns?: PlayerFactsColumn[];
+    data: GroupedPlayerFacts;
     direction?: CustomTableDirection;
     processing: boolean;
     handKey?: string;
@@ -32,9 +37,9 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
     const columns = useMemo(() => {
         const abbreviate = !isDesktop && props.direction !== 'vertical';
         const sortedDealerFacts = Object.values(props.dealerFacts.byCard).reverse();
-        const columns: PlayerFactColumn[] = [
+        const columns: PlayerFactsColumn[] = [
             ...(props.additionalColumns || []),
-            ...sortedDealerFacts.map<PlayerFactColumn>((dealerFact) => ({
+            ...sortedDealerFacts.map<PlayerFactsColumn>((dealerFact) => ({
                 Cell: PlayerDecisionsTableCell({
                     abbreviate,
                     actionOverrides: props.actionOverrides,
@@ -74,11 +79,12 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
         <React.Fragment>
             <CustomTable
                 cellStyle={(cellProps) => {
-                    const playerFact = cellProps.row.original;
+                    const { allFacts } = cellProps.row.original;
                     const { dealerCardKey } = cellProps.column;
 
                     const hasOverride =
-                        dealerCardKey && playerFact.vsDealerCard[dealerCardKey].hasOverride;
+                        dealerCardKey &&
+                        allFacts.some((x) => x.vsDealerCard[dealerCardKey].hasOverride);
 
                     return {
                         borderColor: hasOverride ? colors.border.highlight : colors.border.regular,

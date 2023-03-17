@@ -26,7 +26,9 @@ export {
     PlayerDecisionsWithWeight,
     PlayerFact,
     PlayerFacts,
-    PlayerAverageData
+    PlayerAverageData,
+    PlayerFactsGroup,
+    GroupedPlayerFacts
 } from './player-facts';
 export { PlayerStrategyData } from './player-strategy';
 export { HandCodes, HandQueueItem, NextHand, RepresentativeHand } from './representative-hand';

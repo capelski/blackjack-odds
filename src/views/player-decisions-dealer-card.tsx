@@ -3,19 +3,18 @@ import { useParams } from 'react-router-dom';
 import { DecisionsProbabilityBreakdown, FinalScoresGraph, OutcomeComponent } from '../components';
 import { getPlayerDecisionDealerCardParams } from '../logic';
 import { Action } from '../models';
-import { DealerFacts, PlayerFact } from '../types';
+import { DealerFacts, GroupedPlayerFacts } from '../types';
 
 interface PlayerDecisionsDealerCardProps {
     dealerFacts?: DealerFacts;
-    playerFacts?: PlayerFact[];
+    playerFacts?: GroupedPlayerFacts;
     processing: boolean;
 }
 
 export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps> = (props) => {
     const { dealerGroupCode, playerGroupCode } = getPlayerDecisionDealerCardParams(useParams());
-    const playerFact = props.playerFacts?.find(
-        (playerFact) => playerFact.hand.codes.group === playerGroupCode
-    );
+
+    const playerFactsGroup = props.playerFacts?.find((group) => group.code === playerGroupCode);
 
     const dealerFact =
         props.dealerFacts &&
@@ -31,23 +30,23 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
             <OutcomeComponent
                 outcome={
                     dealerFact &&
-                    playerFact?.vsDealerCard[dealerFact.hand.codes.processing].preferences[0]
-                        .vsDealerOutcome
+                    playerFactsGroup?.mainFact.vsDealerCard[dealerFact.hand.codes.processing]
+                        .preferences[0].vsDealerOutcome
                 }
             />
-            {playerFact && dealerFact && (
+            {playerFactsGroup && dealerFact && (
                 <React.Fragment>
                     <DecisionsProbabilityBreakdown
                         dealerCardKey={dealerFact.hand.codes.processing}
-                        playerFact={playerFact}
+                        playerFact={playerFactsGroup.mainFact}
                     />
                     <br />
                     <br />
                 </React.Fragment>
             )}
-            {playerFact !== undefined &&
+            {playerFactsGroup !== undefined &&
                 dealerFact !== undefined &&
-                playerFact.vsDealerCard[dealerFact.hand.codes.processing].preferences
+                playerFactsGroup.mainFact.vsDealerCard[dealerFact.hand.codes.processing].preferences
                     .filter((x) => x.action !== Action.stand)
                     .map((playerActionData) => (
                         <React.Fragment key={playerActionData.action}>

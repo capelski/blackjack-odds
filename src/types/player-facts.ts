@@ -48,3 +48,12 @@ export type PlayerFact = {
 };
 
 export type PlayerFacts = Dictionary<PlayerFact>;
+
+export type PlayerFactsGroup = {
+    allFacts: PlayerFact[];
+    code: string;
+    combinations: string[];
+    mainFact: PlayerFact;
+};
+
+export type GroupedPlayerFacts = PlayerFactsGroup[];

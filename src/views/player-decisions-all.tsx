@@ -1,20 +1,20 @@
 import React, { useMemo } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { Link } from 'react-router-dom';
-import { CellProps } from 'react-table';
 import {
     InitialHandProbability,
     OutcomeComponent,
     PlayerDecisionsTable,
-    PlayerFactColumn
+    PlayerFactCellProps,
+    PlayerFactsColumn
 } from '../components';
 import { desktopBreakpoint, colors } from '../constants';
 import { getPlayerDecisionScorePath } from '../logic';
 import {
     DealerFacts,
+    GroupedPlayerFacts,
     PlayerActionOverridesByDealerCard,
-    PlayerBaseData,
-    PlayerFact
+    PlayerBaseData
 } from '../types';
 
 interface PlayerDecisionsAllProps {
@@ -22,25 +22,24 @@ interface PlayerDecisionsAllProps {
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
     dealerFacts?: DealerFacts;
     playerBaseData?: PlayerBaseData;
-    playerFacts?: PlayerFact[];
+    playerFacts?: GroupedPlayerFacts;
     processing: boolean;
 }
 
 export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => {
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
-    const additionalColumns = useMemo((): PlayerFactColumn[] => {
+    const additionalColumns = useMemo((): PlayerFactsColumn[] => {
         return [
             {
-                accessor: 'hand',
-                Cell: (cellProps: CellProps<PlayerFact, PlayerFact['hand']>) => {
+                Cell: (cellProps: PlayerFactCellProps) => {
                     return (
                         <div>
                             <Link
-                                to={getPlayerDecisionScorePath(cellProps.value.codes.group)}
+                                to={getPlayerDecisionScorePath(cellProps.row.original.code)}
                                 style={{ color: colors.link.default, textDecoration: 'none' }}
                             >
-                                {cellProps.value.codes.group}
+                                {cellProps.row.original.code}
                             </Link>
                         </div>
                     );
@@ -48,12 +47,12 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
                 id: 'score'
             },
             {
-                Cell: (cellProps: CellProps<PlayerFact>) => {
+                Cell: (cellProps: PlayerFactCellProps) => {
                     return (
                         <div>
                             <InitialHandProbability
                                 displayPercent={false}
-                                playerFact={cellProps.row.original}
+                                playerFact={cellProps.row.original.mainFact}
                             />
                         </div>
                     );
