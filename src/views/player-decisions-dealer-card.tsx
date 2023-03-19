@@ -30,7 +30,7 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
             <OutcomeComponent
                 outcome={
                     dealerFact &&
-                    playerFactsGroup?.mainFact.vsDealerCard[dealerFact.hand.codes.processing]
+                    playerFactsGroup?.allFacts[0].vsDealerCard[dealerFact.hand.codes.processing]
                         .preferences[0].vsDealerOutcome
                 }
             />
@@ -38,7 +38,7 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
                 <React.Fragment>
                     <DecisionsProbabilityBreakdown
                         dealerCardKey={dealerFact.hand.codes.processing}
-                        playerFact={playerFactsGroup.mainFact}
+                        playerFact={playerFactsGroup.allFacts[0]}
                     />
                     <br />
                     <br />
@@ -46,7 +46,9 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
             )}
             {playerFactsGroup !== undefined &&
                 dealerFact !== undefined &&
-                playerFactsGroup.mainFact.vsDealerCard[dealerFact.hand.codes.processing].preferences
+                playerFactsGroup.allFacts[0].vsDealerCard[
+                    dealerFact.hand.codes.processing
+                ].preferences
                     .filter((x) => x.action !== Action.stand)
                     .map((playerActionData) => (
                         <React.Fragment key={playerActionData.action}>

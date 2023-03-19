@@ -5,7 +5,7 @@ import {
     InitialHandProbability,
     OutcomeComponent,
     PlayerDecisionsTable,
-    PlayerFactCellProps,
+    PlayerFactsCell,
     PlayerFactsColumn
 } from '../components';
 import { desktopBreakpoint, colors } from '../constants';
@@ -32,7 +32,7 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
     const additionalColumns = useMemo((): PlayerFactsColumn[] => {
         return [
             {
-                Cell: (cellProps: PlayerFactCellProps) => {
+                Cell: (cellProps: PlayerFactsCell) => {
                     return (
                         <div>
                             <Link
@@ -47,12 +47,12 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
                 id: 'score'
             },
             {
-                Cell: (cellProps: PlayerFactCellProps) => {
+                Cell: (cellProps: PlayerFactsCell) => {
                     return (
                         <div>
                             <InitialHandProbability
                                 displayPercent={false}
-                                playerFact={cellProps.row.original.mainFact}
+                                playerFact={cellProps.row.original.allFacts[0]}
                             />
                         </div>
                     );

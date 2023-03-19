@@ -1,11 +1,24 @@
 import React, { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { CellProps } from 'react-table';
-import { getDisplayActions, getOverrideActions, getPlayerDecisionDealerCardPath } from '../logic';
+import { getDisplayActions, getPlayerDecisionDealerCardPath } from '../logic';
 import { Action } from '../models';
-import { DealerFact, PlayerActionOverridesByDealerCard, PlayerFactsGroup } from '../types';
+import {
+    DealerFact,
+    Dictionary,
+    PlayerActionOverridesByDealerCard,
+    PlayerFact,
+    PlayerFactsGroup
+} from '../types';
+import { CustomCell, CustomColumn } from './custom-table';
 
-export type PlayerFactCellProps = CellProps<PlayerFactsGroup>;
+export type PlayerFactsColumn = CustomColumn<
+    PlayerFactsGroup,
+    {
+        dealerCardKey?: string;
+    }
+>;
+
+export type PlayerFactsCell = CustomCell<PlayerFactsGroup, PlayerFactsColumn>;
 
 interface PlayerDecisionsTableCellProps {
     abbreviate: boolean;
@@ -21,47 +34,66 @@ const baseStyles: CSSProperties = {
 };
 
 export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) => {
-    return (cellProps: PlayerFactCellProps) => {
-        const { hand, vsDealerCard } = cellProps.row.original.mainFact;
+    return (cellProps: PlayerFactsCell) => {
+        const dealerCardKey = cellProps.column.dealerCardKey!;
 
-        const preferences = vsDealerCard[props.dealerFact.hand.codes.processing].preferences;
-        const actions = preferences.map((p) => p.action);
+        const relevantFacts = Object.values(
+            cellProps.row.original.allFacts.reduce<Dictionary<PlayerFact>>(
+                (reduced, playerFact) => {
+                    const key = playerFact.vsDealerCard[dealerCardKey].preferences[0].action;
+                    return {
+                        ...reduced,
+                        [key]: reduced[key] || playerFact
+                    };
+                },
+                {}
+            )
+        );
 
-        const { actionStyles, displayActions } = getDisplayActions(actions, {
-            abbreviate: props.abbreviate
-        });
+        const { displayActions, styles } = getDisplayActions(
+            relevantFacts.map(
+                (playerFact) => playerFact.vsDealerCard[dealerCardKey].preferences[0].action
+            ),
+            props.abbreviate
+        );
 
         return (
-            <div
-                style={{ ...baseStyles, ...actionStyles }}
-                key={props.dealerFact.hand.codes.processing}
-            >
+            <div style={{ ...baseStyles, ...styles }} key={dealerCardKey}>
                 <div>
                     {!props.processing && props.playerDecisionsEdit ? (
-                        <select
-                            onChange={(event) => {
-                                const actions = event.target.value.split(' / ') as Action[];
-                                props.actionOverridesSetter({
-                                    ...props.actionOverrides,
-                                    [props.dealerFact.hand.codes.processing]: {
-                                        ...props.actionOverrides[
-                                            props.dealerFact.hand.codes.processing
-                                        ],
-                                        [hand.codes.processing]: actions
+                        relevantFacts.map((playerFact) => {
+                            return (
+                                <select
+                                    key={playerFact.hand.codes.processing}
+                                    onChange={(event) => {
+                                        props.actionOverridesSetter({
+                                            ...props.actionOverrides,
+                                            [dealerCardKey]: {
+                                                ...props.actionOverrides[dealerCardKey],
+                                                [playerFact.hand.codes.processing]: event.target
+                                                    .value as Action
+                                            }
+                                        });
+                                    }}
+                                    value={
+                                        playerFact.vsDealerCard[dealerCardKey].preferences[0].action
                                     }
-                                });
-                            }}
-                            value={displayActions}
-                        >
-                            {getOverrideActions(preferences.map((x) => x.action)).map((actions) => {
-                                const displayActions = actions.join(' / ');
-                                return (
-                                    <option key={displayActions} value={displayActions}>
-                                        {displayActions}
-                                    </option>
-                                );
-                            })}
-                        </select>
+                                >
+                                    {playerFact.vsDealerCard[dealerCardKey].preferences.map(
+                                        (preference) => {
+                                            return (
+                                                <option
+                                                    key={preference.action}
+                                                    value={preference.action}
+                                                >
+                                                    {preference.action}
+                                                </option>
+                                            );
+                                        }
+                                    )}
+                                </select>
+                            );
+                        })
                     ) : (
                         <Link
                             to={getPlayerDecisionDealerCardPath(

@@ -116,7 +116,6 @@ const getPlayerActionData = (
     return {
         action,
         finalScores: playerFinalScores,
-        overrideIndex: -1,
         vsDealerBreakdown,
         vsDealerOutcome
     };
@@ -207,8 +206,7 @@ export const groupPlayerFacts = (playerFacts: PlayerFacts): GroupedPlayerFacts =
                 .reduce<string[]>((displayReduced, playerFact) => {
                     return displayReduced.concat(playerFact.hand.codes.displayEquivalences);
                 }, [])
-                .sort(sortHandCodes),
-            mainFact: playerFacts[0]
+                .sort(sortHandCodes)
         };
 
         return {
@@ -381,36 +379,22 @@ const setPlayerDecision = (
         }
     }
 
-    let actionOverrides = playerActionOverrides && playerActionOverrides[handKey];
-    // TODO Register a drivenBy relationship for secondary hands
-    const secondaryOverrides =
-        playerActionOverrides && !actionOverrides && playerActionOverrides[`special${handKey}`];
-    if (secondaryOverrides) {
-        actionOverrides = [secondaryOverrides[secondaryOverrides.length - 1]];
-        console.log('Secondary overrides', handKey, secondaryOverrides);
-    }
-
-    if (actionOverrides) {
-        actionOverrides.forEach((action, index) => {
-            const overrideAction = Object.values(allActions).find((x) => x.action === action)!;
-            overrideAction.overrideIndex = index;
-        });
-    }
-
-    // TODO A,A cannot hit as a secondary preference!
-    const preferences = Object.values(allActions).sort((a, b) => {
-        return a.overrideIndex > -1 && b.overrideIndex > -1
-            ? a.overrideIndex - b.overrideIndex
-            : a.overrideIndex > -1 && b.overrideIndex === -1
-            ? -1
-            : a.overrideIndex === -1 && b.overrideIndex > -1
-            ? 1
-            : sortActions(hand, playerStrategy, a, b);
+    let preferences = Object.values(allActions).sort((a, b) => {
+        return sortActions(hand, playerStrategy, a, b);
     });
+
+    const actionOverride = playerActionOverrides && playerActionOverrides[handKey];
+    if (actionOverride && actionOverride !== preferences[0].action) {
+        const targetAction = allActions[actionOverride];
+        targetAction.isOverride = true;
+        preferences = [targetAction].concat(
+            preferences.filter((action) => action !== targetAction)
+        );
+    }
 
     const playerDecision: PlayerDecision = {
         allActions,
-        hasOverride: preferences.some((p) => p.overrideIndex !== -1),
+        hasOverride: preferences.some((p) => p.isOverride),
         preferences
     };
 

@@ -28,7 +28,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
         <div>
             <h3>{playerGroupCode} player decisions</h3>
             <OutcomeComponent
-                outcome={playerFactsGroup?.mainFact.vsDealerCard_average.vsDealerOutcome}
+                outcome={playerFactsGroup?.allFacts[0].vsDealerCard_average.vsDealerOutcome}
             />
             <h4>Dealer card based decisions</h4>
             {playerGroupCode &&
@@ -38,7 +38,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                     {...props}
                     data={[playerFactsGroup]}
                     direction={isDesktop ? 'horizontal' : 'vertical'}
-                    handKey={playerFactsGroup.mainFact.hand.codes.processing}
+                    handKey={playerFactsGroup.allFacts[0].hand.codes.processing}
                     dealerFacts={props.dealerFacts}
                 />
             ) : (
@@ -47,7 +47,7 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
             <p>
                 Initial hand probability:{' '}
                 <span style={{ fontWeight: 'bold' }}>
-                    <InitialHandProbability playerFact={playerFactsGroup?.mainFact} />
+                    <InitialHandProbability playerFact={playerFactsGroup?.allFacts[0]} />
                 </span>
             </p>
             <p>

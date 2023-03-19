@@ -18,7 +18,7 @@ export type PlayerBaseData = {
 
 export type PlayerActionData = PlayerBaseData & {
     action: Action;
-    overrideIndex: number;
+    isOverride?: boolean;
 };
 
 export type PlayerActionsData = {
@@ -53,7 +53,6 @@ export type PlayerFactsGroup = {
     allFacts: PlayerFact[];
     code: string;
     combinations: string[];
-    mainFact: PlayerFact;
 };
 
 export type GroupedPlayerFacts = PlayerFactsGroup[];

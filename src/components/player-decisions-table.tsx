@@ -1,23 +1,11 @@
 import React, { useMemo, useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { colors, desktopBreakpoint } from '../constants';
-import {
-    DealerFacts,
-    GroupedPlayerFacts,
-    PlayerActionOverridesByDealerCard,
-    PlayerFactsGroup
-} from '../types';
-import { CustomColumn, CustomTableDirection, CustomTable } from './custom-table';
+import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
+import { CustomTableDirection, CustomTable } from './custom-table';
 import { PlayerDecisionsEdit } from './player-decisions-edit';
-import { PlayerDecisionsTableCell } from './player-decisions-table-cell';
+import { PlayerDecisionsTableCell, PlayerFactsColumn } from './player-decisions-table-cell';
 import { RoundedFloat } from './rounded-float';
-
-export type PlayerFactsColumn = CustomColumn<
-    PlayerFactsGroup,
-    {
-        dealerCardKey?: string;
-    }
->;
 
 interface PlayerDecisionsTableProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
