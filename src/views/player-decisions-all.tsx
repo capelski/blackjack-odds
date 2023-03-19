@@ -22,6 +22,8 @@ interface PlayerDecisionsAllProps {
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
     dealerFacts?: DealerFacts;
     playerBaseData?: PlayerBaseData;
+    playerDecisionsEdit: boolean;
+    playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     playerFacts?: GroupedPlayerFacts;
     processing: boolean;
 }

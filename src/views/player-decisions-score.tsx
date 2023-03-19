@@ -11,6 +11,8 @@ interface PlayerDecisionsScoreProps {
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
     playerFacts?: GroupedPlayerFacts;
     dealerFacts?: DealerFacts;
+    playerDecisionsEdit: boolean;
+    playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     processing: boolean;
 }
 

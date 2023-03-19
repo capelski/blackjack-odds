@@ -38,6 +38,7 @@ export const App: React.FC = () => {
     const [actionOverrides, setActionOverrides] = useState<PlayerActionOverridesByDealerCard>({});
     const [casinoRules, setCasinoRules] = useState(getDefaultCasinoRues());
     const [processing, setProcessing] = useState(true);
+    const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const [playerStrategy, setPlayerStrategy] = useState(getDefaultPlayerStrategy());
 
     const [dealerFacts, setDealerFacts] = useState<DealerFacts>();
@@ -94,6 +95,8 @@ export const App: React.FC = () => {
                                 actionOverrides={actionOverrides}
                                 actionOverridesSetter={setActionOverrides}
                                 playerBaseData={playerAverageData?.vsDealerCards}
+                                playerDecisionsEdit={playerDecisionsEdit}
+                                playerDecisionsEditSetter={setPlayerDecisionsEdit}
                                 playerFacts={playerFacts}
                                 dealerFacts={dealerFacts}
                                 processing={processing}
@@ -117,6 +120,8 @@ export const App: React.FC = () => {
                                 actionOverrides={actionOverrides}
                                 actionOverridesSetter={setActionOverrides}
                                 dealerFacts={dealerFacts}
+                                playerDecisionsEdit={playerDecisionsEdit}
+                                playerDecisionsEditSetter={setPlayerDecisionsEdit}
                                 playerFacts={playerFacts}
                                 processing={processing}
                             />

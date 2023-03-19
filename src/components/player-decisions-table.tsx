@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { colors, desktopBreakpoint } from '../constants';
 import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
@@ -13,13 +13,14 @@ interface PlayerDecisionsTableProps {
     additionalColumns?: PlayerFactsColumn[];
     data: GroupedPlayerFacts;
     direction?: CustomTableDirection;
+    playerDecisionsEdit: boolean;
+    playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     processing: boolean;
     handKey?: string;
     dealerFacts: DealerFacts;
 }
 
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
-    const [playerDecisionsEdit, setPlayerDecisionsEdit] = useState(false);
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
 
     const columns = useMemo(() => {
@@ -33,7 +34,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                     actionOverrides: props.actionOverrides,
                     actionOverridesSetter: props.actionOverridesSetter,
                     dealerFact,
-                    playerDecisionsEdit,
+                    playerDecisionsEdit: props.playerDecisionsEdit,
                     processing: props.processing
                 }),
                 Header: () => {
@@ -61,7 +62,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
             }))
         ];
         return columns;
-    }, [isDesktop, playerDecisionsEdit, props.actionOverrides, props.additionalColumns]);
+    }, [isDesktop, props.playerDecisionsEdit, props.actionOverrides, props.additionalColumns]);
 
     return (
         <React.Fragment>
@@ -88,8 +89,8 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
             <PlayerDecisionsEdit
                 actionOverrides={props.actionOverrides}
                 actionOverridesSetter={props.actionOverridesSetter}
-                playerDecisionsEdit={playerDecisionsEdit}
-                playerDecisionsEditSetter={setPlayerDecisionsEdit}
+                playerDecisionsEdit={props.playerDecisionsEdit}
+                playerDecisionsEditSetter={props.playerDecisionsEditSetter}
                 processing={props.processing}
                 handKey={props.handKey}
             />
