@@ -1,6 +1,10 @@
 import React, { CSSProperties } from 'react';
 import { Link } from 'react-router-dom';
-import { getDisplayActions, getPlayerDecisionDealerCardPath } from '../logic';
+import {
+    getDisplayActions,
+    getPlayerDecisionDealerCardPath,
+    setPlayerFactOverride
+} from '../logic';
 import { Action } from '../models';
 import {
     DealerFact,
@@ -66,14 +70,15 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
                                 <select
                                     key={playerFact.hand.codes.processing}
                                     onChange={(event) => {
-                                        props.actionOverridesSetter({
-                                            ...props.actionOverrides,
-                                            [dealerCardKey]: {
-                                                ...props.actionOverrides[dealerCardKey],
-                                                [playerFact.hand.codes.processing]: event.target
-                                                    .value as Action
-                                            }
-                                        });
+                                        const selectedAction = event.target.value as Action;
+                                        const nextActionOverrides = setPlayerFactOverride(
+                                            props.actionOverrides,
+                                            playerFact,
+                                            dealerCardKey,
+                                            selectedAction
+                                        );
+
+                                        props.actionOverridesSetter(nextActionOverrides);
                                     }}
                                     value={
                                         playerFact.vsDealerCard[dealerCardKey].preferences[0].action

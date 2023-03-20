@@ -1,5 +1,6 @@
 import React from 'react';
-import { PlayerActionOverrides, PlayerActionOverridesByDealerCard } from '../types';
+import { clearGroupOverrides, hasGroupOverrides, hasOverrides } from '../logic';
+import { PlayerActionOverridesByDealerCard, PlayerFactsGroup } from '../types';
 
 interface PlayerDecisionsEditProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
@@ -7,10 +8,14 @@ interface PlayerDecisionsEditProps {
     playerDecisionsEdit: boolean;
     playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     processing: boolean;
-    handKey?: string;
+    selectedPlayerFactsGroup?: PlayerFactsGroup;
 }
 
 export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) => {
+    const clearEnabled = props.selectedPlayerFactsGroup
+        ? hasGroupOverrides(props.actionOverrides, props.selectedPlayerFactsGroup)
+        : hasOverrides(props.actionOverrides);
+
     return (
         <React.Fragment>
             {' '}
@@ -22,36 +27,16 @@ export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) =
             />
             Edit player decisions{' '}
             <button
-                disabled={props.processing || Object.keys(props.actionOverrides).length === 0}
+                disabled={props.processing || !clearEnabled}
                 onClick={() => {
-                    const nextPlayerActionsOverrides = props.handKey
-                        ? Object.keys(
-                              props.actionOverrides
-                          ).reduce<PlayerActionOverridesByDealerCard>((reduced, next) => {
-                              return {
-                                  ...reduced,
-                                  [next]: {
-                                      ...Object.keys(props.actionOverrides[next])
-                                          .filter((key) => key !== props.handKey)
-                                          .reduce<PlayerActionOverrides>(
-                                              (innerReduce, innerNext) => {
-                                                  return {
-                                                      ...innerReduce,
-                                                      [innerNext]:
-                                                          props.actionOverrides[next][innerNext]
-                                                  };
-                                              },
-                                              {}
-                                          )
-                                  }
-                              };
-                          }, {})
+                    const nextActionOverrides = props.selectedPlayerFactsGroup
+                        ? clearGroupOverrides(props.actionOverrides, props.selectedPlayerFactsGroup)
                         : {};
-                    props.actionOverridesSetter(nextPlayerActionsOverrides);
+                    props.actionOverridesSetter(nextActionOverrides);
                 }}
                 type="button"
             >
-                Clear {props.handKey ? 'this' : 'all'} edits
+                Clear {props.selectedPlayerFactsGroup ? 'these' : 'all'} edits
             </button>
         </React.Fragment>
     );

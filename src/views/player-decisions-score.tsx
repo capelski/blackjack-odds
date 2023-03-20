@@ -39,9 +39,9 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                 <PlayerDecisionsTable
                     {...props}
                     data={[playerFactsGroup]}
-                    direction={isDesktop ? 'horizontal' : 'vertical'}
-                    handKey={playerFactsGroup.allFacts[0].hand.codes.processing}
                     dealerFacts={props.dealerFacts}
+                    direction={isDesktop ? 'horizontal' : 'vertical'}
+                    selectedPlayerFactsGroup={playerFactsGroup}
                 />
             ) : (
                 'Processing...'

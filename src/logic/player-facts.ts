@@ -116,6 +116,7 @@ const getPlayerActionData = (
     return {
         action,
         finalScores: playerFinalScores,
+        order: -1,
         vsDealerBreakdown,
         vsDealerOutcome
     };
@@ -381,6 +382,9 @@ const setPlayerDecision = (
 
     let preferences = Object.values(allActions).sort((a, b) => {
         return sortActions(hand, playerStrategy, a, b);
+    });
+    preferences.forEach((action, index) => {
+        action.order = index;
     });
 
     const actionOverride = playerActionOverrides && playerActionOverrides[handKey];

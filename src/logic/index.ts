@@ -8,6 +8,12 @@ export {
     getPlayerDecisionScoreParams,
     getPlayerDecisionScorePath
 } from './paths';
+export {
+    clearGroupOverrides,
+    hasGroupOverrides,
+    hasOverrides,
+    setPlayerFactOverride
+} from './player-action-overrides';
 export { getPlayerAverageData, getPlayerFacts, groupPlayerFacts } from './player-facts';
 export { getDefaultPlayerStrategy } from './player-strategy';
 export { getAllRepresentativeHands } from './representative-hand';

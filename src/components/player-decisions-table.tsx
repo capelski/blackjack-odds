@@ -1,7 +1,12 @@
 import React, { useMemo } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { colors, desktopBreakpoint } from '../constants';
-import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
+import {
+    DealerFacts,
+    GroupedPlayerFacts,
+    PlayerActionOverridesByDealerCard,
+    PlayerFactsGroup
+} from '../types';
 import { CustomTableDirection, CustomTable } from './custom-table';
 import { PlayerDecisionsEdit } from './player-decisions-edit';
 import { PlayerDecisionsTableCell, PlayerFactsColumn } from './player-decisions-table-cell';
@@ -12,12 +17,12 @@ interface PlayerDecisionsTableProps {
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
     additionalColumns?: PlayerFactsColumn[];
     data: GroupedPlayerFacts;
+    dealerFacts: DealerFacts;
     direction?: CustomTableDirection;
     playerDecisionsEdit: boolean;
     playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     processing: boolean;
-    handKey?: string;
-    dealerFacts: DealerFacts;
+    selectedPlayerFactsGroup?: PlayerFactsGroup;
 }
 
 export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props) => {
@@ -92,7 +97,7 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
                 playerDecisionsEdit={props.playerDecisionsEdit}
                 playerDecisionsEditSetter={props.playerDecisionsEditSetter}
                 processing={props.processing}
-                handKey={props.handKey}
+                selectedPlayerFactsGroup={props.selectedPlayerFactsGroup}
             />
             <br />
             <br />

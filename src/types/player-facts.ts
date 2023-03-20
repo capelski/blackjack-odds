@@ -19,6 +19,7 @@ export type PlayerBaseData = {
 export type PlayerActionData = PlayerBaseData & {
     action: Action;
     isOverride?: boolean;
+    order: number;
 };
 
 export type PlayerActionsData = {
