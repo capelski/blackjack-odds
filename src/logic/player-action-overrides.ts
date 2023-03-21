@@ -52,23 +52,35 @@ export const hasGroupOverrides = (
 
 export const setPlayerFactOverride = (
     actionOverrides: PlayerActionOverridesByDealerCard,
+    playerFactsGroup: PlayerFactsGroup,
     playerFact: PlayerFact,
     dealerCard: string,
     action: Action
 ) => {
     const nextActionOverrides = { ...actionOverrides };
-    const isOverride = playerFact.vsDealerCard[dealerCard].allActions[action].order !== 0;
+    if (nextActionOverrides[dealerCard] === undefined) {
+        nextActionOverrides[dealerCard] = {};
+    }
 
-    if (isOverride) {
-        if (nextActionOverrides[dealerCard] === undefined) {
-            nextActionOverrides[dealerCard] = {};
+    // Hit/Stand actions are always available; selecting them as first action override
+    // must override the secondary actions as well
+    const isRestrictiveOverride =
+        playerFact === playerFactsGroup.allFacts[0] &&
+        (action === Action.hit || action === Action.stand);
+    const affectedPlayerFacts = isRestrictiveOverride ? playerFactsGroup.allFacts : [playerFact];
+
+    affectedPlayerFacts.forEach((affectedPlayerFact) => {
+        const actionData = affectedPlayerFact.vsDealerCard[dealerCard].allActions[action];
+        const isOverride = actionData && actionData.order !== 0;
+        if (isOverride) {
+            nextActionOverrides[dealerCard][affectedPlayerFact.hand.codes.processing] = action;
+        } else {
+            delete nextActionOverrides[dealerCard][affectedPlayerFact.hand.codes.processing];
         }
-        nextActionOverrides[dealerCard][playerFact.hand.codes.processing] = action;
-    } else if (nextActionOverrides[dealerCard] !== undefined) {
-        delete nextActionOverrides[dealerCard][playerFact.hand.codes.processing];
-        if (Object.keys(nextActionOverrides[dealerCard]).length === 0) {
-            delete nextActionOverrides[dealerCard];
-        }
+    });
+
+    if (Object.keys(nextActionOverrides[dealerCard]).length === 0) {
+        delete nextActionOverrides[dealerCard];
     }
 
     return nextActionOverrides;

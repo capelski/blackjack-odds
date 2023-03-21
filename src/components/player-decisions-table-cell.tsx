@@ -6,13 +6,7 @@ import {
     setPlayerFactOverride
 } from '../logic';
 import { Action } from '../models';
-import {
-    DealerFact,
-    Dictionary,
-    PlayerActionOverridesByDealerCard,
-    PlayerFact,
-    PlayerFactsGroup
-} from '../types';
+import { DealerFact, PlayerActionOverridesByDealerCard, PlayerFactsGroup } from '../types';
 import { CustomCell, CustomColumn } from './custom-table';
 
 export type PlayerFactsColumn = CustomColumn<
@@ -41,21 +35,21 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
     return (cellProps: PlayerFactsCell) => {
         const dealerCardKey = cellProps.column.dealerCardKey!;
 
-        const relevantFacts = Object.values(
-            cellProps.row.original.allFacts.reduce<Dictionary<PlayerFact>>(
-                (reduced, playerFact) => {
-                    const key = playerFact.vsDealerCard[dealerCardKey].preferences[0].action;
-                    return {
-                        ...reduced,
-                        [key]: reduced[key] || playerFact
-                    };
-                },
-                {}
-            )
-        );
+        const { allFacts } = cellProps.row.original;
+        const mainAction = allFacts[0].vsDealerCard[dealerCardKey].preferences[0].action;
+        const actionableFacts =
+            mainAction === Action.hit || mainAction === Action.stand
+                ? [allFacts[0]]
+                : allFacts.filter((playerFact, index) => {
+                      return (
+                          index === 0 ||
+                          playerFact.vsDealerCard[dealerCardKey].preferences[0].action !==
+                              mainAction
+                      );
+                  });
 
         const { displayActions, styles } = getDisplayActions(
-            relevantFacts.map(
+            actionableFacts.map(
                 (playerFact) => playerFact.vsDealerCard[dealerCardKey].preferences[0].action
             ),
             props.abbreviate
@@ -65,14 +59,17 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
             <div style={{ ...baseStyles, ...styles }} key={dealerCardKey}>
                 <div>
                     {!props.processing && props.playerDecisionsEdit ? (
-                        relevantFacts.map((playerFact) => {
+                        actionableFacts.map((playerFact) => {
+                            const { preferences } = playerFact.vsDealerCard[dealerCardKey];
                             return (
                                 <select
+                                    disabled={preferences.length === 1}
                                     key={playerFact.hand.codes.processing}
                                     onChange={(event) => {
                                         const selectedAction = event.target.value as Action;
                                         const nextActionOverrides = setPlayerFactOverride(
                                             props.actionOverrides,
+                                            cellProps.row.original,
                                             playerFact,
                                             dealerCardKey,
                                             selectedAction
@@ -80,22 +77,18 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
 
                                         props.actionOverridesSetter(nextActionOverrides);
                                     }}
-                                    value={
-                                        playerFact.vsDealerCard[dealerCardKey].preferences[0].action
-                                    }
+                                    value={preferences[0].action}
                                 >
-                                    {playerFact.vsDealerCard[dealerCardKey].preferences.map(
-                                        (preference) => {
-                                            return (
-                                                <option
-                                                    key={preference.action}
-                                                    value={preference.action}
-                                                >
-                                                    {preference.action}
-                                                </option>
-                                            );
-                                        }
-                                    )}
+                                    {preferences.map((preference) => {
+                                        return (
+                                            <option
+                                                key={preference.action}
+                                                value={preference.action}
+                                            >
+                                                {preference.action}
+                                            </option>
+                                        );
+                                    })}
                                 </select>
                             );
                         })
