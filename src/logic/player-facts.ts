@@ -183,7 +183,7 @@ export const getPlayerFacts = (
 
 export const groupPlayerFacts = (playerFacts: PlayerFacts): GroupedPlayerFacts => {
     const playerFactsByGroupCode = Object.values(playerFacts)
-        .filter((playerFact) => !playerFact.hand.isBust)
+        .filter((playerFact) => !playerFact.hand.isBust && !playerFact.hand.isForbiddenHit)
         .reduce<Dictionary<PlayerFact[]>>((reduced, playerFact) => {
             const groupCode = playerFact.hand.codes.group;
             const group = (reduced[groupCode] || []).concat([playerFact]).sort((a, b) => {

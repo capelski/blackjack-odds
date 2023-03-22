@@ -45,6 +45,7 @@ export type RepresentativeHand = {
     isActive: boolean;
     isBlackjack: boolean;
     isBust: boolean;
+    isForbiddenHit: boolean;
     isPostSplit: boolean;
     nextHands: NextHand[];
     playerHand: {

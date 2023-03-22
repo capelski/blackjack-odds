@@ -53,11 +53,9 @@ const createHand = (
 ): RepresentativeHand => {
     const allScores = mergeScores(cards, casinoRules, isPostSplit);
     const effectiveScore = getHandEffectiveScore(allScores);
-    const isActive =
-        effectiveScore < maximumScore &&
-        (!isPostSplit ||
-            codes.symbols !== splitAcesSymbols ||
-            casinoRules.splitOptions.hitSplitAces);
+    const isForbiddenHit =
+        isPostSplit && cards[0].symbol === CardSymbol.ace && !casinoRules.splitOptions.hitSplitAces;
+    const isActive = effectiveScore < maximumScore && !isForbiddenHit;
     const isBlackjack_ = isBlackjack(cards, casinoRules, isPostSplit);
     const isBust = isBustScore(effectiveScore);
     const canDouble_ = canDouble(cards, casinoRules, isPostSplit);
@@ -94,14 +92,15 @@ const createHand = (
         canDouble: canDouble_,
         canSplit: canSplit_,
         codes,
-        effectiveScore,
-        isActive,
-        isBlackjack: isBlackjack_,
         dealerHand: {
             isInitial: cards.length === 1,
             weight: cards.length === 1 ? cards[0].weight / cardSet.weight : 0
         },
+        effectiveScore,
+        isActive,
+        isBlackjack: isBlackjack_,
         isBust,
+        isForbiddenHit,
         isPostSplit,
         nextHands,
         playerHand: {
@@ -211,7 +210,9 @@ const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fal
     const symbols = getHandCodeSymbols(cards);
     const requiresPostSplit =
         isPostSplit &&
-        (canSplit(cards, casinoRules, false) || isBlackjack(cards, casinoRules, false));
+        (canSplit(cards, casinoRules, false) || // Split hands cannot be re-splitted
+            isBlackjack(cards, casinoRules, false) || // Post split blackjacks depend on casino rules
+            (isPostSplit && cards[0].symbol === CardSymbol.ace)); // Hitting split aces depends on casino rules
     const display = `${symbols}${requiresPostSplit ? ' (after split)' : ''}`;
 
     const scores = mergeScores(cards, casinoRules, isPostSplit).join(scoreKeySeparator);
@@ -230,6 +231,10 @@ const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fal
     const group =
         cards.length === 1
             ? cards[0].symbol
+            : isPostSplit &&
+              cards[0].symbol === CardSymbol.ace &&
+              !casinoRules.splitOptions.hitSplitAces
+            ? 'forbiddenHit'
             : canSplit(cards, casinoRules)
             ? getHandCodeSymbols(cards)
             : isBlackjack(cards, casinoRules, isPostSplit)
