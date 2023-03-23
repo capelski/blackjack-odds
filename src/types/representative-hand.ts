@@ -6,15 +6,15 @@ export type HandCodes = {
     symbols: string;
 
     /** 2. The symbols in the hand cards as they will be displayed.
-     * E.g. "A, 10", "A,10 (after split)", "7,2", "4,3,2", "6,6", "6,6 (after split)" */
+     * E.g. "A,10", "A,10 (after split)", "7,2", "4,3,2", "6,6", "6,6 (after split)" */
     display: string;
 
     /** 3. A code that indicates the individual processing required for the hand.
-     * E.g. "21.5", "11/21", "double9", "9", "6,6", "12" */
+     * E.g. "21.5", "postSplitA,10", "double9", "9", "split6,6", "postSplit6,6" */
     processing: string;
 
     /** 4. The hand code as it will be displayed in the player decisions table.
-     * E.g. "BJ", "11/21", "double9", "9", "6,6", "12" */
+     * E.g. "BJ", "11/21", "9", "9", "6,6", "6,6" */
     group: string;
 
     /** All display codes that require the same hand processing */
