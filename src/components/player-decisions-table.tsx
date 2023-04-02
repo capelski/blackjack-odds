@@ -9,7 +9,11 @@ import {
 } from '../types';
 import { CustomTableDirection, CustomTable } from './custom-table';
 import { PlayerDecisionsEdit } from './player-decisions-edit';
-import { PlayerDecisionsTableCell, PlayerFactsColumn } from './player-decisions-table-cell';
+import {
+    PlayerDecisionsTableCell,
+    PlayerFactsCell,
+    PlayerFactsColumn
+} from './player-decisions-table-cell';
 import { RoundedFloat } from './rounded-float';
 
 interface PlayerDecisionsTableProps {
@@ -34,14 +38,19 @@ export const PlayerDecisionsTable: React.FC<PlayerDecisionsTableProps> = (props)
         const columns: PlayerFactsColumn[] = [
             ...(props.additionalColumns || []),
             ...sortedDealerFacts.map<PlayerFactsColumn>((dealerFact) => ({
-                Cell: PlayerDecisionsTableCell({
-                    abbreviate,
-                    actionOverrides: props.actionOverrides,
-                    actionOverridesSetter: props.actionOverridesSetter,
-                    dealerFact,
-                    playerDecisionsEdit: props.playerDecisionsEdit,
-                    processing: props.processing
-                }),
+                Cell: (cellProps: PlayerFactsCell) => {
+                    return (
+                        <PlayerDecisionsTableCell
+                            abbreviate={abbreviate}
+                            actionOverrides={props.actionOverrides}
+                            actionOverridesSetter={props.actionOverridesSetter}
+                            dealerFact={dealerFact}
+                            playerDecisionsEdit={props.playerDecisionsEdit}
+                            playerFacts={cellProps.row.original.allFacts}
+                            processing={props.processing}
+                        />
+                    );
+                },
                 Header: () => {
                     return (
                         <React.Fragment>

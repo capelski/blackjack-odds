@@ -5,6 +5,7 @@ import { PlayerActionOverridesByDealerCard, PlayerFactsGroup } from '../types';
 interface PlayerDecisionsEditProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
+    hideClearButton?: boolean;
     playerDecisionsEdit: boolean;
     playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     processing: boolean;
@@ -13,7 +14,7 @@ interface PlayerDecisionsEditProps {
 
 export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) => {
     const clearEnabled = props.selectedPlayerFactsGroup
-        ? hasGroupOverrides(props.actionOverrides, props.selectedPlayerFactsGroup)
+        ? hasGroupOverrides(props.actionOverrides, props.selectedPlayerFactsGroup.allFacts)
         : hasOverrides(props.actionOverrides);
 
     return (
@@ -26,18 +27,23 @@ export const PlayerDecisionsEdit: React.FC<PlayerDecisionsEditProps> = (props) =
                 type="checkbox"
             />
             Edit player decisions{' '}
-            <button
-                disabled={props.processing || !clearEnabled}
-                onClick={() => {
-                    const nextActionOverrides = props.selectedPlayerFactsGroup
-                        ? clearGroupOverrides(props.actionOverrides, props.selectedPlayerFactsGroup)
-                        : {};
-                    props.actionOverridesSetter(nextActionOverrides);
-                }}
-                type="button"
-            >
-                Clear {props.selectedPlayerFactsGroup ? 'these' : 'all'} edits
-            </button>
+            {!props.hideClearButton && (
+                <button
+                    disabled={props.processing || !clearEnabled}
+                    onClick={() => {
+                        const nextActionOverrides = props.selectedPlayerFactsGroup
+                            ? clearGroupOverrides(
+                                  props.actionOverrides,
+                                  props.selectedPlayerFactsGroup.allFacts
+                              )
+                            : {};
+                        props.actionOverridesSetter(nextActionOverrides);
+                    }}
+                    type="button"
+                >
+                    Clear {props.selectedPlayerFactsGroup ? 'these' : 'all'} edits
+                </button>
+            )}
         </React.Fragment>
     );
 };

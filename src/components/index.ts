@@ -3,6 +3,7 @@ export * from './custom-table';
 export * from './decisions-probability-breakdown';
 export * from './final-scores-graph';
 export * from './initial-hand-probability';
+export * from './next-hands-table';
 export * from './outcome';
 export * from './outcome-badge';
 export * from './player-decisions-edit';

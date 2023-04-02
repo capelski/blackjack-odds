@@ -1,21 +1,16 @@
 import { Action } from '../models';
-import {
-    PlayerActionOverrides,
-    PlayerActionOverridesByDealerCard,
-    PlayerFact,
-    PlayerFactsGroup
-} from '../types';
+import { PlayerActionOverrides, PlayerActionOverridesByDealerCard, PlayerFact } from '../types';
 
 export const clearGroupOverrides = (
     actionOverrides: PlayerActionOverridesByDealerCard,
-    playerFactsGroup: PlayerFactsGroup
+    playerFacts: PlayerFact[]
 ) => {
     return Object.keys(actionOverrides).reduce<PlayerActionOverridesByDealerCard>(
         (reduced, dealerCardKey) => {
             const dealerCardOverrides = actionOverrides[dealerCardKey];
             const clearedActionOverrides = Object.keys(dealerCardOverrides)
                 .filter((processingCode) => {
-                    return playerFactsGroup.allFacts.every(
+                    return playerFacts.every(
                         (playerFact) => playerFact.hand.codes.processing !== processingCode
                     );
                 })
@@ -39,20 +34,18 @@ export const hasOverrides = (actionOverrides: PlayerActionOverridesByDealerCard)
 
 export const hasGroupOverrides = (
     actionOverrides: PlayerActionOverridesByDealerCard,
-    playerFactsGroup: PlayerFactsGroup
+    playerFacts: PlayerFact[]
 ) => {
     return Object.values(actionOverrides).some((dealerCardOverrides) => {
         return Object.keys(dealerCardOverrides).some((processingCode) =>
-            playerFactsGroup.allFacts.some(
-                (playerFact) => playerFact.hand.codes.processing === processingCode
-            )
+            playerFacts.some((playerFact) => playerFact.hand.codes.processing === processingCode)
         );
     });
 };
 
 export const setPlayerFactOverride = (
     actionOverrides: PlayerActionOverridesByDealerCard,
-    playerFactsGroup: PlayerFactsGroup,
+    playerFacts: PlayerFact[],
     playerFact: PlayerFact,
     dealerCard: string,
     action: Action
@@ -65,9 +58,8 @@ export const setPlayerFactOverride = (
     // Hit/Stand actions are always available; selecting them as first action override
     // must override the secondary actions as well
     const isRestrictiveOverride =
-        playerFact === playerFactsGroup.allFacts[0] &&
-        (action === Action.hit || action === Action.stand);
-    const affectedPlayerFacts = isRestrictiveOverride ? playerFactsGroup.allFacts : [playerFact];
+        playerFact === playerFacts[0] && (action === Action.hit || action === Action.stand);
+    const affectedPlayerFacts = isRestrictiveOverride ? playerFacts : [playerFact];
 
     affectedPlayerFacts.forEach((affectedPlayerFact) => {
         const actionData = affectedPlayerFact.vsDealerCard[dealerCard].allActions[action];

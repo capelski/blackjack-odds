@@ -45,27 +45,20 @@ const canSplit = (cards: Card[], casinoRules: CasinoRules, isPostSplit = false) 
     );
 };
 
-const createHand = (
-    cards: Card[],
-    codes: HandCodes,
-    casinoRules: CasinoRules,
-    isPostSplit = false
-): RepresentativeHand => {
-    const allScores = mergeScores(cards, casinoRules, isPostSplit);
+const createHand = (handItem: HandQueueItem, casinoRules: CasinoRules): RepresentativeHand => {
+    const allScores = mergeScores(handItem.cards, casinoRules, handItem.isPostSplit);
     const effectiveScore = getHandEffectiveScore(allScores);
-    const isForbiddenHit =
-        isPostSplit && cards[0].symbol === CardSymbol.ace && !casinoRules.splitOptions.hitSplitAces;
-    const isActive = effectiveScore < maximumScore && !isForbiddenHit;
-    const isBlackjack_ = isBlackjack(cards, casinoRules, isPostSplit);
+    const isActive = effectiveScore < maximumScore && !handItem.isForbiddenHit;
+    const isBlackjack_ = isBlackjack(handItem.cards, casinoRules, handItem.isPostSplit);
     const isBust = isBustScore(effectiveScore);
-    const canDouble_ = canDouble(cards, casinoRules, isPostSplit);
-    const canSplit_ = canSplit(cards, casinoRules, isPostSplit);
+    const canDouble_ = canDouble(handItem.cards, casinoRules, handItem.isPostSplit);
+    const canSplit_ = canSplit(handItem.cards, casinoRules, handItem.isPostSplit);
 
     const cardSet = getCardSet();
 
     const nextHands = isActive
         ? cardSet.cards.map((card): NextHand => {
-              const nextCards = cards.concat([card]);
+              const nextCards = handItem.cards.concat([card]);
               return {
                   cards: nextCards,
                   codes: getHandCodes(nextCards, casinoRules),
@@ -77,10 +70,14 @@ const createHand = (
     const splitNextHands =
         isActive && canSplit_
             ? cardSet.cards.map((card): NextHand => {
-                  const nextCards = [cards[0], card];
+                  const nextCards = [handItem.cards[0], card];
                   return {
                       cards: nextCards,
                       codes: getHandCodes(nextCards, casinoRules, true),
+                      isForbiddenHit:
+                          handItem.cards[0].symbol === CardSymbol.ace &&
+                          !casinoRules.splitOptions.hitSplitAces,
+                      isForbiddenSplit: handItem.cards[0].symbol === card.symbol,
                       isPostSplit: true,
                       weight: card.weight / cardSet.weight
                   };
@@ -91,17 +88,16 @@ const createHand = (
         allScores,
         canDouble: canDouble_,
         canSplit: canSplit_,
-        codes,
+        codes: handItem.codes,
         dealerHand: {
-            isInitial: cards.length === 1,
-            weight: cards.length === 1 ? cards[0].weight / cardSet.weight : 0
+            isInitial: handItem.cards.length === 1,
+            weight: handItem.cards.length === 1 ? handItem.cards[0].weight / cardSet.weight : 0
         },
         effectiveScore,
         isActive,
         isBlackjack: isBlackjack_,
         isBust,
-        isForbiddenHit,
-        isPostSplit,
+        isForbiddenHit: handItem.isForbiddenHit === undefined ? false : handItem.isForbiddenHit,
         nextHands,
         playerHand: {
             // This gets populated after all hans have been processed
@@ -129,32 +125,32 @@ export const getAllRepresentativeHands = (casinoRules: CasinoRules) => {
     const initialWeights: Dictionary<number> = {};
 
     while (handsQueue.length > 0) {
-        const { cards, codes, isPostSplit } = handsQueue.shift()!;
+        const hand = handsQueue.shift()!;
 
-        processedHandCodes[codes.processing] = codes;
+        processedHandCodes[hand.codes.processing] = hand.codes;
 
-        if (allHands[codes.processing] === undefined) {
-            allHands[codes.processing] = createHand(cards, codes, casinoRules, isPostSplit);
+        if (allHands[hand.codes.processing] === undefined) {
+            allHands[hand.codes.processing] = createHand(hand, casinoRules);
         } else {
-            throw new Error(`${codes.processing} is being processed twice`);
+            throw new Error(`${hand.codes.processing} is being processed twice`);
         }
 
         const potentialNextHands: NextHand[] = [];
 
-        if (allHands[codes.processing].isActive) {
-            potentialNextHands.push(...allHands[codes.processing].nextHands);
+        if (allHands[hand.codes.processing].isActive) {
+            potentialNextHands.push(...allHands[hand.codes.processing].nextHands);
 
-            if (cards.length === 1) {
+            if (hand.cards.length === 1) {
                 // Next hands are player initial hands
-                allHands[codes.processing].nextHands.forEach((nextHand) => {
+                allHands[hand.codes.processing].nextHands.forEach((nextHand) => {
                     initialWeights[nextHand.codes.processing] =
                         (initialWeights[nextHand.codes.processing] || 0) +
                         (nextHand.cards[0].weight * nextHand.cards[1].weight) / cardSet.weight ** 2;
                 });
             }
 
-            if (allHands[codes.processing].canSplit) {
-                potentialNextHands.push(...allHands[codes.processing].splitNextHands);
+            if (allHands[hand.codes.processing].canSplit) {
+                potentialNextHands.push(...allHands[hand.codes.processing].splitNextHands);
             }
         }
 
@@ -221,9 +217,9 @@ const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fal
         cards.length === 1
             ? `dealer${cards[0].symbol}`
             : canSplit(cards, casinoRules, isPostSplit)
-            ? `split${symbols}`
+            ? symbols
             : requiresPostSplit
-            ? `postSplit${symbols}`
+            ? `${symbols} (after split)`
             : canDouble(cards, casinoRules, isPostSplit)
             ? `double${scores}`
             : scores;
@@ -234,9 +230,9 @@ const getHandCodes = (cards: Card[], casinoRules: CasinoRules, isPostSplit = fal
             : isPostSplit &&
               cards[0].symbol === CardSymbol.ace &&
               !casinoRules.splitOptions.hitSplitAces
-            ? 'forbiddenHit'
+            ? display
             : canSplit(cards, casinoRules)
-            ? getHandCodeSymbols(cards)
+            ? symbols
             : isBlackjack(cards, casinoRules, isPostSplit)
             ? 'BJ'
             : scores;

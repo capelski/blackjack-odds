@@ -1,13 +1,22 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import { DecisionsProbabilityBreakdown, FinalScoresGraph, OutcomeComponent } from '../components';
+import {
+    DecisionsProbabilityBreakdown,
+    FinalScoresGraph,
+    NextHandsTable,
+    OutcomeComponent
+} from '../components';
 import { getPlayerDecisionDealerCardParams } from '../logic';
 import { Action } from '../models';
-import { DealerFacts, GroupedPlayerFacts } from '../types';
+import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
 
 interface PlayerDecisionsDealerCardProps {
+    actionOverrides: PlayerActionOverridesByDealerCard;
+    actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
     dealerFacts?: DealerFacts;
     playerFacts?: GroupedPlayerFacts;
+    playerDecisionsEdit: boolean;
+    playerDecisionsEditSetter: (playerDecisionsEdit: boolean) => void;
     processing: boolean;
 }
 
@@ -53,6 +62,33 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
                     .map((playerActionData) => (
                         <React.Fragment key={playerActionData.action}>
                             <h4>{playerActionData.action} final score probabilities</h4>
+
+                            {playerActionData.action === Action.hit &&
+                                props.dealerFacts &&
+                                props.playerFacts && (
+                                    <NextHandsTable
+                                        {...props}
+                                        data={playerFactsGroup.allFacts[0].hand.nextHands}
+                                        dealerFact={dealerFact}
+                                        dealerFacts={props.dealerFacts}
+                                        direction="vertical"
+                                        playerFacts={props.playerFacts}
+                                    />
+                                )}
+
+                            {playerActionData.action === Action.split &&
+                                props.dealerFacts &&
+                                props.playerFacts && (
+                                    <NextHandsTable
+                                        {...props}
+                                        data={playerFactsGroup.allFacts[0].hand.splitNextHands}
+                                        dealerFact={dealerFact}
+                                        dealerFacts={props.dealerFacts}
+                                        direction="vertical"
+                                        playerFacts={props.playerFacts}
+                                    />
+                                )}
+
                             <FinalScoresGraph
                                 finalScores={playerActionData.finalScores}
                                 handDisplayKey={playerGroupCode!}

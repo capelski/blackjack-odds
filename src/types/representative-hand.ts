@@ -10,7 +10,7 @@ export type HandCodes = {
     display: string;
 
     /** 3. A code that indicates the individual processing required for the hand.
-     * E.g. "21.5", "postSplitA,10", "double9", "9", "split6,6", "postSplit6,6" */
+     * E.g. "21.5", "A,10 (after split)", "double9", "9", "6,6", "6,6 (after split)" */
     processing: string;
 
     /** 4. The hand code as it will be displayed in the player decisions table.
@@ -24,6 +24,8 @@ export type HandCodes = {
 export type HandQueueItem = {
     cards: Card[];
     codes: HandCodes;
+    isForbiddenHit?: boolean;
+    isForbiddenSplit?: boolean;
     isPostSplit?: boolean;
 };
 
@@ -46,7 +48,6 @@ export type RepresentativeHand = {
     isBlackjack: boolean;
     isBust: boolean;
     isForbiddenHit: boolean;
-    isPostSplit: boolean;
     nextHands: NextHand[];
     playerHand: {
         isInitial: boolean;

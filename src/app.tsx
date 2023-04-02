@@ -73,7 +73,7 @@ export const App: React.FC = () => {
             // console.log('Player average data', playerAverageData);
 
             const groupedPlayerFacts = groupPlayerFacts(allPlayerFacts);
-            // console.log('Visible player facts', groupedPlayerFacts);
+            // console.log('Grouped player facts', groupedPlayerFacts);
 
             setDealerFacts(dealerFacts);
             setPlayerAverageData(playerAverageData);
@@ -107,7 +107,11 @@ export const App: React.FC = () => {
                         path={Paths.playerDecisionsDealerCard}
                         element={
                             <PlayerDecisionsDealerCard
+                                actionOverrides={actionOverrides}
+                                actionOverridesSetter={setActionOverrides}
                                 dealerFacts={dealerFacts}
+                                playerDecisionsEdit={playerDecisionsEdit}
+                                playerDecisionsEditSetter={setPlayerDecisionsEdit}
                                 playerFacts={playerFacts}
                                 processing={processing}
                             />
