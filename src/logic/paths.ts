@@ -47,7 +47,7 @@ export const getPlayerDecisionScoreParams = (params: Record<string, string | und
 
 const allHands = Object.values(getAllRepresentativeHands(getDefaultCasinoRues()));
 const playerGroupCodes = allHands
-    .filter((hand) => !hand.isBust && !hand.dealerHand.isInitial)
+    .filter((hand) => !hand.isBust && !hand.dealerHand.isInitial && !hand.isForbiddenHit)
     .reduce<string[]>((reduced, next) => {
         const { group } = next.codes;
         return reduced.find((x) => x === group) ? reduced : reduced.concat([group]);
