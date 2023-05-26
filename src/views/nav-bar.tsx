@@ -30,7 +30,7 @@ export const BreadcrumbSection: React.FC<BreadcrumbSectionProps> = (props) => {
             <Link
                 style={{
                     ...breadcrumbStyles,
-                    fontWeight: props.pathname === props.to ? 'bold' : undefined
+                    fontWeight: props.pathname.replace(/\/$/, '') === props.to ? 'bold' : undefined
                 }}
                 to={props.to}
             >
