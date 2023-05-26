@@ -86,7 +86,16 @@ export const App: React.FC = () => {
         <div>
             <BrowserRouter basename="/blackjack-odds">
                 <ScrollToTop />
-                <NavBar />
+                <NavBar>
+                    <StrategyAndRules
+                        casinoRules={casinoRules}
+                        casinoRulesSetter={setCasinoRules}
+                        playerBaseData={playerAverageData?.vsDealerCards}
+                        playerStrategy={playerStrategy}
+                        playerStrategySetter={setPlayerStrategy}
+                        processing={processing}
+                    />
+                </NavBar>
                 <Routes>
                     <Route
                         path={Paths.playerDecisions}
@@ -127,19 +136,6 @@ export const App: React.FC = () => {
                                 playerDecisionsEdit={playerDecisionsEdit}
                                 playerDecisionsEditSetter={setPlayerDecisionsEdit}
                                 playerFacts={playerFacts}
-                                processing={processing}
-                            />
-                        }
-                    />
-                    <Route
-                        path={Paths.strategyAndRules}
-                        element={
-                            <StrategyAndRules
-                                casinoRules={casinoRules}
-                                casinoRulesSetter={setCasinoRules}
-                                playerBaseData={playerAverageData?.vsDealerCards}
-                                playerStrategy={playerStrategy}
-                                playerStrategySetter={setPlayerStrategy}
                                 processing={processing}
                             />
                         }

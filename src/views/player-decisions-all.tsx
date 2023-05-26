@@ -67,7 +67,6 @@ export const PlayerDecisionsAll: React.FC<PlayerDecisionsAllProps> = (props) => 
 
     return (
         <div>
-            <h3>Player decisions</h3>
             <OutcomeComponent outcome={props.playerBaseData?.vsDealerOutcome} />
             {props.dealerFacts !== undefined && props.playerFacts !== undefined ? (
                 <PlayerDecisionsTable

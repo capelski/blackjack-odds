@@ -1,40 +1,106 @@
-import React from 'react';
-import { Link, Location, useLocation } from 'react-router-dom';
-import { colors } from '../constants';
+import React, { CSSProperties, useState } from 'react';
+import Modal from 'react-modal';
+import { Link, useLocation } from 'react-router-dom';
 import { Paths } from '../models';
+import { getPlayerDecisionDealerCardPath, getPlayerDecisionScorePath } from '../logic';
+import { routeCodeToDisplayCode } from '../logic/paths';
+import { colors } from '../constants';
 
-interface StyledLinkProps {
-    location: Location;
+export const BreadcrumbSeparator: React.FC = () => (
+    <span style={{ paddingLeft: 8, paddingRight: 8 }}>{'>'}</span>
+);
+
+interface BreadcrumbSectionProps {
+    hideSeparator?: boolean;
+    pathname: string;
+    text: string;
     to: string;
 }
 
-const StyledLink: React.FC<StyledLinkProps> = (props) => {
+const breadcrumbStyles: CSSProperties = {
+    color: colors.link.default,
+    fontSize: 18,
+    textDecoration: 'none'
+};
+
+export const BreadcrumbSection: React.FC<BreadcrumbSectionProps> = (props) => {
     return (
-        <Link
-            style={{
-                color: colors.link.default,
-                fontWeight: props.location.pathname === props.to ? 'bold' : undefined,
-                paddingRight: 16,
-                textDecoration: props.location.pathname === props.to ? 'unset' : 'underline'
-            }}
-            to={props.to}
-        >
-            {props.children}
-        </Link>
+        <React.Fragment>
+            {!props.hideSeparator && <BreadcrumbSeparator />}
+            <Link
+                style={{
+                    ...breadcrumbStyles,
+                    fontWeight: props.pathname === props.to ? 'bold' : undefined
+                }}
+                to={props.to}
+            >
+                {props.text}
+            </Link>
+        </React.Fragment>
     );
 };
 
-export const NavBar: React.FC = () => {
-    const location = useLocation();
+export const NavBar: React.FC = (props) => {
+    const { pathname } = useLocation();
+
+    const [, , score, dealerCard] = pathname.split('/');
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
+
+    const toggleModal = () => setIsModalOpen(!isModalOpen);
 
     return (
-        <nav>
-            <StyledLink location={location} to={Paths.playerDecisions}>
-                Player decisions
-            </StyledLink>
-            <StyledLink location={location} to={Paths.strategyAndRules}>
-                Strategy/Rules
-            </StyledLink>
+        <nav
+            style={{
+                alignItems: 'center',
+                display: 'flex',
+                justifyContent: 'space-between',
+                marginTop: 16,
+                marginBottom: 16
+            }}
+        >
+            <div>
+                <BreadcrumbSection
+                    hideSeparator={true}
+                    pathname={pathname}
+                    text="Player decisions"
+                    to={Paths.playerDecisions}
+                />
+                {score && (
+                    <BreadcrumbSection
+                        pathname={pathname}
+                        text={routeCodeToDisplayCode(score)!}
+                        to={getPlayerDecisionScorePath(score)}
+                    />
+                )}
+                {dealerCard && (
+                    <BreadcrumbSection
+                        pathname={pathname}
+                        text={dealerCard}
+                        to={getPlayerDecisionDealerCardPath(score, dealerCard)}
+                    />
+                )}
+            </div>
+            <div>
+                <span
+                    style={{ ...breadcrumbStyles, cursor: 'pointer', fontSize: 24 }}
+                    onClick={toggleModal}
+                >
+                    ⚙️
+                </span>
+                <Modal
+                    isOpen={isModalOpen}
+                    onRequestClose={toggleModal}
+                    style={{ content: { inset: 0 } }}
+                >
+                    <div style={{ display: 'flex', fontSize: 20, justifyContent: 'end' }}>
+                        <span onClick={toggleModal} style={{ cursor: 'pointer' }}>
+                            ✖️
+                        </span>
+                    </div>
+                    {props.children}
+                </Modal>
+            </div>
         </nav>
     );
 };

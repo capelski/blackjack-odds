@@ -7,41 +7,38 @@ import { getAllRepresentativeHands } from './representative-hand';
 
 const safeParametersSeparator = '-';
 
+export const displayCodeToRouteCode = (displayCode: string) =>
+    displayCode.replace(scoreKeySeparator, safeParametersSeparator);
+
+export const routeCodeToDisplayCode = (routeCode?: string) =>
+    routeCode?.replace(safeParametersSeparator, scoreKeySeparator);
+
 export const getPlayerDecisionDealerCardPath = (
     playerDisplayKey: string,
     dealerDisplayKey: string
 ) => {
     return Paths.playerDecisionsDealerCard
-        .replace(
-            `:${playerGroupCodeParam}`,
-            playerDisplayKey.replace(scoreKeySeparator, safeParametersSeparator)
-        )
+        .replace(`:${playerGroupCodeParam}`, displayCodeToRouteCode(playerDisplayKey))
         .replace(`:${dealerGroupCodeParam}`, dealerDisplayKey);
 };
 
 export const getPlayerDecisionDealerCardParams = (params: Record<string, string | undefined>) => {
     return {
         [dealerGroupCodeParam]: params[dealerGroupCodeParam],
-        [playerGroupCodeParam]: params[playerGroupCodeParam]?.replace(
-            safeParametersSeparator,
-            scoreKeySeparator
-        )
+        [playerGroupCodeParam]: routeCodeToDisplayCode(params[playerGroupCodeParam])
     };
 };
 
 export const getPlayerDecisionScorePath = (playerDisplayKey: string) => {
     return Paths.playerDecisionsScore.replace(
         `:${playerGroupCodeParam}`,
-        playerDisplayKey.replace(scoreKeySeparator, safeParametersSeparator)
+        displayCodeToRouteCode(playerDisplayKey)
     );
 };
 
 export const getPlayerDecisionScoreParams = (params: Record<string, string | undefined>) => {
     return {
-        [playerGroupCodeParam]: params[playerGroupCodeParam]?.replace(
-            safeParametersSeparator,
-            scoreKeySeparator
-        )
+        [playerGroupCodeParam]: routeCodeToDisplayCode(params[playerGroupCodeParam])
     };
 };
 
@@ -67,8 +64,7 @@ const prerenderingRoutesDictionary: Dictionary<string[], Paths> = {
         .flat(),
     [Paths.playerDecisionsScore]: playerGroupCodes.map((playerDisplayKey) => {
         return getPlayerDecisionScorePath(playerDisplayKey);
-    }),
-    [Paths.strategyAndRules]: [Paths.strategyAndRules]
+    })
 };
 
 export const prerenderingRoutes = Object.values(prerenderingRoutesDictionary).flat();

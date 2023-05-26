@@ -33,9 +33,6 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
 
     return (
         <div>
-            <h3>
-                {playerGroupCode} vs {dealerGroupCode} player decisions
-            </h3>
             <OutcomeComponent
                 outcome={
                     dealerFact &&

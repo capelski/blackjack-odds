@@ -28,7 +28,6 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
 
     return (
         <div>
-            <h3>{playerGroupCode} player decisions</h3>
             <OutcomeComponent
                 outcome={playerFactsGroup?.allFacts[0].vsDealerCard_average.vsDealerOutcome}
             />
