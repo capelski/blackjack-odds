@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import {
     getDisplayActions,
     getPlayerDecisionDealerCardPath,
+    getPlayerDecisionScorePath,
     setPlayerFactOverride
 } from '../logic';
 import { Action } from '../models';
@@ -27,7 +28,7 @@ interface PlayerDecisionsTableCellProps {
     abbreviate: boolean;
     actionOverrides: PlayerActionOverridesByDealerCard;
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
-    dealerFact: DealerFact;
+    dealerFact?: DealerFact;
     effectiveCode?: string;
     playerDecisionsEdit: boolean;
     playerFacts: PlayerFact[];
@@ -39,21 +40,27 @@ const baseStyles: CSSProperties = {
 };
 
 export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) => {
-    const dealerCardKey = props.dealerFact.hand.codes.processing;
-    const mainAction = props.playerFacts[0].vsDealerCard[dealerCardKey].preferences[0].action;
+    const dealerCardKey = props.dealerFact?.hand.codes.processing;
+    const mainAction = dealerCardKey
+        ? props.playerFacts[0].vsDealerCard[dealerCardKey].preferences[0].action
+        : props.playerFacts[0].vsDealerAverage.preferences[0].action;
     const actionableFacts =
         mainAction === Action.hit || mainAction === Action.stand
             ? [props.playerFacts[0]]
             : props.playerFacts.filter((playerFact, index) => {
                   return (
                       index === 0 ||
-                      playerFact.vsDealerCard[dealerCardKey].preferences[0].action !== mainAction
+                      (dealerCardKey
+                          ? playerFact.vsDealerCard[dealerCardKey].preferences[0].action
+                          : playerFact.vsDealerAverage.preferences[0].action) !== mainAction
                   );
               });
 
     const { displayActions, styles } = getDisplayActions(
-        actionableFacts.map(
-            (playerFact) => playerFact.vsDealerCard[dealerCardKey].preferences[0].action
+        actionableFacts.map((playerFact) =>
+            dealerCardKey
+                ? playerFact.vsDealerCard[dealerCardKey].preferences[0].action
+                : playerFact.vsDealerAverage.preferences[0].action
         ),
         props.abbreviate
     );
@@ -61,7 +68,7 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
     return (
         <div style={{ ...baseStyles, ...styles }} key={dealerCardKey}>
             <div>
-                {!props.processing && props.playerDecisionsEdit ? (
+                {!props.processing && props.playerDecisionsEdit && dealerCardKey ? (
                     actionableFacts.map((playerFact) => {
                         const { preferences } = playerFact.vsDealerCard[dealerCardKey];
                         return (
@@ -94,10 +101,16 @@ export const PlayerDecisionsTableCell = (props: PlayerDecisionsTableCellProps) =
                     })
                 ) : (
                     <Link
-                        to={getPlayerDecisionDealerCardPath(
-                            props.effectiveCode || props.playerFacts[0].hand.codes.group,
-                            props.dealerFact.hand.codes.group
-                        )}
+                        to={
+                            props.dealerFact
+                                ? getPlayerDecisionDealerCardPath(
+                                      props.effectiveCode || props.playerFacts[0].hand.codes.group,
+                                      props.dealerFact.hand.codes.group
+                                  )
+                                : getPlayerDecisionScorePath(
+                                      props.effectiveCode || props.playerFacts[0].hand.codes.group
+                                  )
+                        }
                         style={{ color: 'inherit', textDecoration: 'none' }}
                     >
                         {displayActions}

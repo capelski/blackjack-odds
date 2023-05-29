@@ -1,9 +1,17 @@
 import React, { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { useParams } from 'react-router-dom';
-import { InitialHandProbability, OutcomeComponent, PlayerDecisionsTable } from '../components';
+import {
+    DecisionsProbabilityBreakdown,
+    FinalScoresGraph,
+    InitialHandProbability,
+    NextHandsTable,
+    OutcomeComponent,
+    PlayerDecisionsTable
+} from '../components';
 import { desktopBreakpoint } from '../constants';
 import { getPlayerDecisionScoreParams } from '../logic';
+import { Action } from '../models';
 import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
 
 interface PlayerDecisionsScoreProps {
@@ -31,20 +39,6 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
             <OutcomeComponent
                 outcome={playerFactsGroup?.allFacts[0].vsDealerCard_average.vsDealerOutcome}
             />
-            <h4>Dealer card based decisions</h4>
-            {playerGroupCode &&
-            playerFactsGroup !== undefined &&
-            props.dealerFacts !== undefined ? (
-                <PlayerDecisionsTable
-                    {...props}
-                    data={[playerFactsGroup]}
-                    dealerFacts={props.dealerFacts}
-                    direction={isDesktop ? 'horizontal' : 'vertical'}
-                    selectedPlayerFactsGroup={playerFactsGroup}
-                />
-            ) : (
-                'Processing...'
-            )}
             <p>
                 Initial hand probability:{' '}
                 <span style={{ fontWeight: 'bold' }}>
@@ -70,6 +64,65 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
                         <li key={combination}>{combination}</li>
                     ))}
                 </ul>
+            )}
+            {playerFactsGroup && (
+                <React.Fragment>
+                    <DecisionsProbabilityBreakdown playerFact={playerFactsGroup.allFacts[0]} />
+                    <br />
+                    <br />
+                </React.Fragment>
+            )}
+            {playerFactsGroup !== undefined &&
+                playerFactsGroup.allFacts[0].vsDealerAverage.preferences
+                    .filter((x) => x.action !== Action.stand)
+                    .map((playerActionData) => (
+                        <React.Fragment key={playerActionData.action}>
+                            <h4>{playerActionData.action} final score probabilities</h4>
+                            {playerActionData.action === Action.hit &&
+                                props.dealerFacts &&
+                                props.playerFacts && (
+                                    <NextHandsTable
+                                        {...props}
+                                        data={playerFactsGroup.allFacts[0].hand.nextHands}
+                                        dealerFacts={props.dealerFacts}
+                                        direction="vertical"
+                                        playerFacts={props.playerFacts}
+                                    />
+                                )}
+                            {playerActionData.action === Action.split &&
+                                props.dealerFacts &&
+                                props.playerFacts && (
+                                    <NextHandsTable
+                                        {...props}
+                                        data={playerFactsGroup.allFacts[0].hand.splitNextHands}
+                                        dealerFacts={props.dealerFacts}
+                                        direction="vertical"
+                                        playerFacts={props.playerFacts}
+                                    />
+                                )}
+                            <FinalScoresGraph
+                                finalScores={playerActionData.finalScores}
+                                handDisplayKey={playerGroupCode!}
+                                playerFacts={props.playerFacts!}
+                            />
+                            <br />
+                            <br />
+                        </React.Fragment>
+                    ))}
+
+            <h4>Dealer card based decisions</h4>
+            {playerGroupCode &&
+            playerFactsGroup !== undefined &&
+            props.dealerFacts !== undefined ? (
+                <PlayerDecisionsTable
+                    {...props}
+                    data={[playerFactsGroup]}
+                    dealerFacts={props.dealerFacts}
+                    direction={isDesktop ? 'horizontal' : 'vertical'}
+                    selectedPlayerFactsGroup={playerFactsGroup}
+                />
+            ) : (
+                'Processing...'
             )}
         </div>
     );

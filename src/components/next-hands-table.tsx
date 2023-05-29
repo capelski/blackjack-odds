@@ -18,7 +18,7 @@ interface NextHandsTableProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
     actionOverridesSetter: (actionOverrides: PlayerActionOverridesByDealerCard) => void;
     data: NextHand[];
-    dealerFact: DealerFact;
+    dealerFact?: DealerFact;
     dealerFacts: DealerFacts;
     direction?: CustomTableDirection;
     playerDecisionsEdit: boolean;
@@ -106,7 +106,7 @@ export const NextHandsTable: React.FC<NextHandsTableProps> = (props) => {
             <CustomTable
                 cellStyle={(cellProps) => {
                     const allFacts = cellProps.row.original.playerFact;
-                    const dealerCardKey = props.dealerFact.hand.codes.processing;
+                    const dealerCardKey = props.dealerFact?.hand.codes.processing;
 
                     const hasOverride =
                         dealerCardKey &&
