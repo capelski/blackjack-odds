@@ -1,35 +1,15 @@
 import React from 'react';
-import { useMediaQuery } from 'react-responsive';
-import { desktopBreakpoint } from '../constants';
+import { Badge, BadgeProps } from './badge';
 import { RoundedFloat } from './rounded-float';
 
-interface BadgeProps {
-    backgroundColor: string;
-    color: string;
+interface OutcomeBadgeProps extends BadgeProps {
     name: string;
     value: number;
 }
 
-export const OutcomeBadge: React.FC<BadgeProps> = (props) => {
-    const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
-
+export const OutcomeBadge: React.FC<OutcomeBadgeProps> = (props) => {
     return (
-        <div
-            style={{
-                backgroundColor: props.backgroundColor,
-                border: `1px solid ${props.color}`,
-                borderRadius: 8,
-                color: props.color,
-                flexGrow: 1,
-                marginBottom: isDesktop ? 8 : 4,
-                marginRight: isDesktop ? 8 : 4,
-                paddingBottom: 8,
-                paddingLeft: 4,
-                paddingRight: 4,
-                paddingTop: 8,
-                textAlign: 'center'
-            }}
-        >
+        <Badge {...props}>
             <div>{props.name}</div>
             <div>
                 <span style={{ fontSize: 24 }}>
@@ -37,6 +17,6 @@ export const OutcomeBadge: React.FC<BadgeProps> = (props) => {
                 </span>{' '}
                 %
             </div>
-        </div>
+        </Badge>
     );
 };
