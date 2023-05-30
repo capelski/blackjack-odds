@@ -1,6 +1,7 @@
 import cytoscape from 'cytoscape';
 import React, { useEffect, useRef } from 'react';
-import { colors } from '../constants';
+import { useMediaQuery } from 'react-responsive';
+import { colors, desktopBreakpoint } from '../constants';
 import { FinalScores, GroupedPlayerFacts } from '../types';
 import { getRoundedFloat } from './rounded-float';
 
@@ -17,6 +18,10 @@ export interface FinalScoresGraphProps {
 
 export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
     const container = useRef<HTMLDivElement>(null);
+
+    const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
+
+    const dimensions = isDesktop ? 'min(60vh, 60vw)' : 'min(95vh, 95vw)';
 
     useEffect(() => {
         if (!container.current) {
@@ -114,8 +119,9 @@ export const FinalScoresGraph: React.FC<FinalScoresGraphProps> = (props) => {
             ref={container}
             style={{
                 border: '1px solid black',
-                height: 'min(80vh, 80vw)',
-                width: 'min(80vh, 80vw)'
+                height: dimensions,
+                margin: 'auto',
+                width: dimensions
             }}
         ></div>
     );
