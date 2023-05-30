@@ -1,10 +1,10 @@
 import React from 'react';
 import { useMediaQuery } from 'react-responsive';
 import {
-    probabilityLabels,
-    displayProbabilityTotals,
+    colors,
     desktopBreakpoint,
-    colors
+    displayProbabilityTotals,
+    probabilityLabels
 } from '../constants';
 import { VsDealerOutcome } from '../types';
 import { OutcomeBadge } from './outcome-badge';
@@ -26,16 +26,6 @@ export const OutcomeComponent: React.FC<OutcomeComponentProps> = (props) => {
                 }}
             >
                 <OutcomeBadge
-                    {...colors.payout}
-                    name="payout (€)"
-                    value={props.outcome?.playerAdvantage.payout || 0}
-                />
-                <OutcomeBadge
-                    {...colors.advantage}
-                    name="advantage (win - loss)"
-                    value={props.outcome?.playerAdvantage.hands || 0}
-                />
-                <OutcomeBadge
                     {...colors.win}
                     name="winning hands"
                     value={props.outcome?.winProbability || 0}
@@ -49,6 +39,16 @@ export const OutcomeComponent: React.FC<OutcomeComponentProps> = (props) => {
                     {...colors.push}
                     name="pushing hands"
                     value={props.outcome?.pushProbability || 0}
+                />
+                <OutcomeBadge
+                    {...colors.advantage}
+                    name="advantage (win - loss)"
+                    value={props.outcome?.playerAdvantage.hands || 0}
+                />
+                <OutcomeBadge
+                    {...colors.payout}
+                    name="payout (€)"
+                    value={props.outcome?.playerAdvantage.payout || 0}
                 />
             </div>
 
