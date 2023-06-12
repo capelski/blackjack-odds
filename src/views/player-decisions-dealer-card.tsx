@@ -1,11 +1,7 @@
 import React from 'react';
 import { useParams } from 'react-router-dom';
-import {
-    DecisionsProbabilityBreakdown,
-    FinalScoresGraph,
-    NextHandsTable,
-    OutcomeComponent
-} from '../components';
+import { DecisionsProbabilityBreakdown, FinalScoresGraph, NextHandsTable } from '../components';
+import { ScoreBadges } from '../components/score-badges';
 import { getPlayerDecisionDealerCardParams } from '../logic';
 import { Action } from '../models';
 import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
@@ -33,13 +29,11 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
 
     return (
         <div>
-            <OutcomeComponent
-                outcome={
-                    dealerFact &&
-                    playerFactsGroup?.allFacts[0].vsDealerCard[dealerFact.hand.codes.processing]
-                        .preferences[0].vsDealerOutcome
-                }
+            <ScoreBadges
+                dealerCard={dealerFact?.hand.codes.processing}
+                playerFactsGroup={playerFactsGroup}
             />
+
             {playerFactsGroup && dealerFact && (
                 <React.Fragment>
                     <DecisionsProbabilityBreakdown

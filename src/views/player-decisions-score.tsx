@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { useParams } from 'react-router-dom';
 import {
     DecisionsProbabilityBreakdown,
     FinalScoresGraph,
-    InitialHandProbability,
     NextHandsTable,
-    OutcomeComponent,
     PlayerDecisionsTable
 } from '../components';
+import { ScoreBadges } from '../components/score-badges';
 import { desktopBreakpoint } from '../constants';
 import { getPlayerDecisionScoreParams } from '../logic';
 import { Action } from '../models';
@@ -32,39 +31,10 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
     );
 
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
-    const [displayCodes, setDisplayCodes] = useState(false);
 
     return (
         <div>
-            <OutcomeComponent
-                outcome={playerFactsGroup?.allFacts[0].vsDealerCard_average.vsDealerOutcome}
-            />
-            <p>
-                Initial hand probability:{' '}
-                <span style={{ fontWeight: 'bold' }}>
-                    <InitialHandProbability playerFact={playerFactsGroup?.allFacts[0]} />
-                </span>
-            </p>
-            <p>
-                <span
-                    onClick={() => {
-                        setDisplayCodes(!displayCodes);
-                    }}
-                    style={{
-                        cursor: 'pointer'
-                    }}
-                >
-                    {displayCodes ? '👇' : '👉'}
-                </span>{' '}
-                Card combinations ({playerFactsGroup?.combinations.length || '-'})
-            </p>
-            {playerFactsGroup && displayCodes && (
-                <ul>
-                    {playerFactsGroup?.combinations.map((combination) => (
-                        <li key={combination}>{combination}</li>
-                    ))}
-                </ul>
-            )}
+            <ScoreBadges playerFactsGroup={playerFactsGroup} />
             {playerFactsGroup && (
                 <React.Fragment>
                     <DecisionsProbabilityBreakdown playerFact={playerFactsGroup.allFacts[0]} />
