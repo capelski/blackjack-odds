@@ -1,10 +1,14 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import { DecisionsProbabilityBreakdown, FinalScoresGraph, NextHandsTable } from '../components';
+import { ActionDetails } from '../components';
 import { ScoreBadges } from '../components/score-badges';
 import { getPlayerDecisionDealerCardParams } from '../logic';
-import { Action } from '../models';
-import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
+import {
+    DealerFacts,
+    Dictionary,
+    GroupedPlayerFacts,
+    PlayerActionOverridesByDealerCard
+} from '../types';
 
 interface PlayerDecisionsDealerCardProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
@@ -27,6 +31,8 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
             (dealerFact) => dealerFact.hand.codes.group === dealerGroupCode
         );
 
+    const [expandedActions, setExpandedActions] = useState<Dictionary<boolean>>({});
+
     return (
         <div>
             <ScoreBadges
@@ -34,60 +40,31 @@ export const PlayerDecisionsDealerCard: React.FC<PlayerDecisionsDealerCardProps>
                 playerFactsGroup={playerFactsGroup}
             />
 
-            {playerFactsGroup && dealerFact && (
-                <React.Fragment>
-                    <DecisionsProbabilityBreakdown
-                        dealerCardKey={dealerFact.hand.codes.processing}
-                        playerFact={playerFactsGroup.allFacts[0]}
-                    />
-                    <br />
-                    <br />
-                </React.Fragment>
-            )}
             {playerFactsGroup !== undefined &&
                 dealerFact !== undefined &&
-                playerFactsGroup.allFacts[0].vsDealerCard[
-                    dealerFact.hand.codes.processing
-                ].preferences
-                    .filter((x) => x.action !== Action.stand)
+                [
+                    ...playerFactsGroup.allFacts[0].vsDealerCard[dealerFact.hand.codes.processing]
+                        .preferences
+                ]
+                    .sort((a, b) => a.action.localeCompare(b.action))
                     .map((playerActionData) => (
-                        <React.Fragment key={playerActionData.action}>
-                            <h4>{playerActionData.action} final score probabilities</h4>
-
-                            {playerActionData.action === Action.hit &&
-                                props.dealerFacts &&
-                                props.playerFacts && (
-                                    <NextHandsTable
-                                        {...props}
-                                        data={playerFactsGroup.allFacts[0].hand.nextHands}
-                                        dealerFact={dealerFact}
-                                        dealerFacts={props.dealerFacts}
-                                        direction="vertical"
-                                        playerFacts={props.playerFacts}
-                                    />
-                                )}
-
-                            {playerActionData.action === Action.split &&
-                                props.dealerFacts &&
-                                props.playerFacts && (
-                                    <NextHandsTable
-                                        {...props}
-                                        data={playerFactsGroup.allFacts[0].hand.splitNextHands}
-                                        dealerFact={dealerFact}
-                                        dealerFacts={props.dealerFacts}
-                                        direction="vertical"
-                                        playerFacts={props.playerFacts}
-                                    />
-                                )}
-
-                            <FinalScoresGraph
-                                finalScores={playerActionData.finalScores}
-                                handDisplayKey={playerGroupCode!}
-                                playerFacts={props.playerFacts!}
-                            />
-                            <br />
-                            <br />
-                        </React.Fragment>
+                        <ActionDetails
+                            {...props}
+                            actionData={playerActionData}
+                            dealerFact={dealerFact}
+                            expand={() =>
+                                setExpandedActions({
+                                    ...expandedActions,
+                                    [playerActionData.action]:
+                                        !expandedActions[playerActionData.action]
+                                })
+                            }
+                            hand={playerFactsGroup.allFacts[0].hand}
+                            isExpanded={expandedActions[playerActionData.action]}
+                            key={playerActionData.action}
+                            playerFacts={props.playerFacts!}
+                            playerGroupCode={playerGroupCode!}
+                        />
                     ))}
         </div>
     );

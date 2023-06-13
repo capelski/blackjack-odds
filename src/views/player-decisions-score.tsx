@@ -1,17 +1,16 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { useParams } from 'react-router-dom';
-import {
-    DecisionsProbabilityBreakdown,
-    FinalScoresGraph,
-    NextHandsTable,
-    PlayerDecisionsTable
-} from '../components';
+import { ActionDetails, OutcomeComponent, PlayerDecisionsTable } from '../components';
 import { ScoreBadges } from '../components/score-badges';
 import { desktopBreakpoint } from '../constants';
 import { getPlayerDecisionScoreParams } from '../logic';
-import { Action } from '../models';
-import { DealerFacts, GroupedPlayerFacts, PlayerActionOverridesByDealerCard } from '../types';
+import {
+    DealerFacts,
+    Dictionary,
+    GroupedPlayerFacts,
+    PlayerActionOverridesByDealerCard
+} from '../types';
 
 interface PlayerDecisionsScoreProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
@@ -31,56 +30,38 @@ export const PlayerDecisionsScore: React.FC<PlayerDecisionsScoreProps> = (props)
     );
 
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
+    const [expandedActions, setExpandedActions] = useState<Dictionary<boolean>>({});
 
     return (
         <div>
             <ScoreBadges playerFactsGroup={playerFactsGroup} />
-            {playerFactsGroup && (
-                <React.Fragment>
-                    <DecisionsProbabilityBreakdown playerFact={playerFactsGroup.allFacts[0]} />
-                    <br />
-                    <br />
-                </React.Fragment>
-            )}
+
             {playerFactsGroup !== undefined &&
-                playerFactsGroup.allFacts[0].vsDealerAverage.preferences
-                    .filter((x) => x.action !== Action.stand)
+                [...playerFactsGroup.allFacts[0].vsDealerAverage.preferences]
+                    .sort((a, b) => a.action.localeCompare(b.action))
                     .map((playerActionData) => (
-                        <React.Fragment key={playerActionData.action}>
-                            <h4>{playerActionData.action} final score probabilities</h4>
-                            {playerActionData.action === Action.hit &&
-                                props.dealerFacts &&
-                                props.playerFacts && (
-                                    <NextHandsTable
-                                        {...props}
-                                        data={playerFactsGroup.allFacts[0].hand.nextHands}
-                                        dealerFacts={props.dealerFacts}
-                                        direction="vertical"
-                                        playerFacts={props.playerFacts}
-                                    />
-                                )}
-                            {playerActionData.action === Action.split &&
-                                props.dealerFacts &&
-                                props.playerFacts && (
-                                    <NextHandsTable
-                                        {...props}
-                                        data={playerFactsGroup.allFacts[0].hand.splitNextHands}
-                                        dealerFacts={props.dealerFacts}
-                                        direction="vertical"
-                                        playerFacts={props.playerFacts}
-                                    />
-                                )}
-                            <FinalScoresGraph
-                                finalScores={playerActionData.finalScores}
-                                handDisplayKey={playerGroupCode!}
-                                playerFacts={props.playerFacts!}
-                            />
-                            <br />
-                            <br />
-                        </React.Fragment>
+                        <ActionDetails
+                            {...props}
+                            actionData={playerActionData}
+                            expand={() =>
+                                setExpandedActions({
+                                    ...expandedActions,
+                                    [playerActionData.action]:
+                                        !expandedActions[playerActionData.action]
+                                })
+                            }
+                            hand={playerFactsGroup.allFacts[0].hand}
+                            isExpanded={expandedActions[playerActionData.action]}
+                            key={playerActionData.action}
+                            playerFacts={props.playerFacts!}
+                            playerGroupCode={playerGroupCode!}
+                        />
                     ))}
 
             <h4>Dealer card based decisions</h4>
+            <OutcomeComponent
+                outcome={playerFactsGroup?.allFacts[0].vsDealerCard_average.vsDealerOutcome}
+            />
             {playerGroupCode &&
             playerFactsGroup !== undefined &&
             props.dealerFacts !== undefined ? (

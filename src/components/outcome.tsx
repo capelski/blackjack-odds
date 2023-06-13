@@ -1,11 +1,6 @@
 import React from 'react';
 import { useMediaQuery } from 'react-responsive';
-import {
-    colors,
-    desktopBreakpoint,
-    displayProbabilityTotals,
-    probabilityLabels
-} from '../constants';
+import { colors, desktopBreakpoint, displayProbabilityTotals, labels } from '../constants';
 import { VsDealerOutcome } from '../types';
 import { OutcomeBadge } from './outcome-badge';
 import { RoundedFloat } from './rounded-float';
@@ -27,35 +22,34 @@ export const OutcomeComponent: React.FC<OutcomeComponentProps> = (props) => {
             >
                 <OutcomeBadge
                     {...colors.win}
-                    name="winning hands"
+                    name={labels.win}
                     value={props.outcome?.winProbability || 0}
                 />
                 <OutcomeBadge
                     {...colors.loss}
-                    name="losing hands"
+                    name={labels.loss}
                     value={props.outcome?.lossProbability || 0}
                 />
                 <OutcomeBadge
                     {...colors.push}
-                    name="pushing hands"
+                    name={labels.push}
                     value={props.outcome?.pushProbability || 0}
                 />
                 <OutcomeBadge
                     {...colors.advantage}
-                    name="advantage (win - loss)"
+                    name={labels.advantage}
                     value={props.outcome?.playerAdvantage.hands || 0}
                 />
                 <OutcomeBadge
                     {...colors.payout}
-                    name="payout (€)"
+                    name={labels.payout}
                     value={props.outcome?.playerAdvantage.payout || 0}
                 />
             </div>
 
             {displayProbabilityTotals && (
                 <p>
-                    {probabilityLabels.playerTotal}:{' '}
-                    <RoundedFloat value={props.outcome?.totalProbability || 0} />
+                    Total: <RoundedFloat value={props.outcome?.totalProbability || 0} />
                 </p>
             )}
         </React.Fragment>

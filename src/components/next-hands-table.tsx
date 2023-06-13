@@ -1,18 +1,20 @@
 import React, { useMemo } from 'react';
 import { useMediaQuery } from 'react-responsive';
 import { Cell, Column } from 'react-table';
-import { colors, desktopBreakpoint } from '../constants';
+import { colors, desktopBreakpoint, labels } from '../constants';
 import {
     DealerFact,
     DealerFacts,
     GroupedPlayerFacts,
     NextHand,
+    PlayerActionData,
     PlayerActionOverridesByDealerCard,
     PlayerFact
 } from '../types';
-import { CustomTableDirection, CustomTable } from './custom-table';
+import { CustomTable, CustomTableDirection } from './custom-table';
 import { PlayerDecisionsEdit } from './player-decisions-edit';
 import { PlayerDecisionsTableCell } from './player-decisions-table-cell';
+import { RoundedFloat } from './rounded-float';
 
 interface NextHandsTableProps {
     actionOverrides: PlayerActionOverridesByDealerCard;
@@ -31,6 +33,7 @@ type RowData = {
     effectiveCode: string;
     nextHand: NextHand;
     playerFact?: PlayerFact;
+    playerActionData?: PlayerActionData;
 };
 
 type NextHandColumn = Column<RowData>;
@@ -55,10 +58,15 @@ export const NextHandsTable: React.FC<NextHandsTableProps> = (props) => {
                     ? String(playerFact.hand.effectiveScore)
                     : nextHand.codes.group;
 
+            const playerActionData = props.dealerFact
+                ? playerFact?.vsDealerCard[props.dealerFact.hand.codes.processing].preferences[0]
+                : playerFact?.vsDealerAverage.preferences[0];
+
             return {
                 effectiveCode,
                 nextHand,
-                playerFact
+                playerFact,
+                playerActionData
             };
         });
 
@@ -96,13 +104,93 @@ export const NextHandsTable: React.FC<NextHandsTableProps> = (props) => {
                         '-'
                     );
                 }
+            },
+            {
+                Header: labels.win,
+                id: 'next-hand-win',
+                Cell: (cellProps: NextHandCell) =>
+                    cellProps.row.original.playerActionData ? (
+                        <RoundedFloat
+                            displayPercent={false}
+                            value={
+                                cellProps.row.original.playerActionData.vsDealerOutcome
+                                    .winProbability
+                            }
+                        />
+                    ) : (
+                        '-'
+                    )
+            },
+            {
+                Header: labels.loss,
+                id: 'next-hand-loss',
+                Cell: (cellProps: NextHandCell) =>
+                    cellProps.row.original.playerActionData ? (
+                        <RoundedFloat
+                            displayPercent={false}
+                            value={
+                                cellProps.row.original.playerActionData.vsDealerOutcome
+                                    .lossProbability
+                            }
+                        />
+                    ) : (
+                        '-'
+                    )
+            },
+            {
+                Header: labels.push,
+                id: 'next-hand-push',
+                Cell: (cellProps: NextHandCell) =>
+                    cellProps.row.original.playerActionData ? (
+                        <RoundedFloat
+                            displayPercent={false}
+                            value={
+                                cellProps.row.original.playerActionData.vsDealerOutcome
+                                    .pushProbability
+                            }
+                        />
+                    ) : (
+                        '-'
+                    )
+            },
+            {
+                Header: labels.advantage,
+                id: 'next-hand-advantage',
+                Cell: (cellProps: NextHandCell) =>
+                    cellProps.row.original.playerActionData ? (
+                        <RoundedFloat
+                            displayPercent={false}
+                            value={
+                                cellProps.row.original.playerActionData.vsDealerOutcome
+                                    .playerAdvantage.hands
+                            }
+                        />
+                    ) : (
+                        '-'
+                    )
+            },
+            {
+                Header: labels.payout,
+                id: 'next-hand-payout',
+                Cell: (cellProps: NextHandCell) =>
+                    cellProps.row.original.playerActionData ? (
+                        <RoundedFloat
+                            displayPercent={false}
+                            value={
+                                cellProps.row.original.playerActionData.vsDealerOutcome
+                                    .playerAdvantage.payout
+                            }
+                        />
+                    ) : (
+                        '-'
+                    )
             }
         ];
         return { columns, data };
     }, [isDesktop, props.actionOverrides, props.data, props.playerDecisionsEdit]);
 
     return (
-        <React.Fragment>
+        <div style={{ maxWidth: '100%', overflow: 'auto' }}>
             <CustomTable
                 cellStyle={(cellProps) => {
                     const allFacts = cellProps.row.original.playerFact;
@@ -125,16 +213,20 @@ export const NextHandsTable: React.FC<NextHandsTableProps> = (props) => {
                 width="100%"
             />
             <br />
-            <PlayerDecisionsEdit
-                actionOverrides={props.actionOverrides}
-                actionOverridesSetter={props.actionOverridesSetter}
-                hideClearButton={true}
-                playerDecisionsEdit={props.playerDecisionsEdit}
-                playerDecisionsEditSetter={props.playerDecisionsEditSetter}
-                processing={props.processing}
-            />
+            {props.dealerFact && (
+                <React.Fragment>
+                    <PlayerDecisionsEdit
+                        actionOverrides={props.actionOverrides}
+                        actionOverridesSetter={props.actionOverridesSetter}
+                        hideClearButton={true}
+                        playerDecisionsEdit={props.playerDecisionsEdit}
+                        playerDecisionsEditSetter={props.playerDecisionsEditSetter}
+                        processing={props.processing}
+                    />
+                    <br />
+                </React.Fragment>
+            )}
             <br />
-            <br />
-        </React.Fragment>
+        </div>
     );
 };
