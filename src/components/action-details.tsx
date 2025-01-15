@@ -10,9 +10,11 @@ import {
     PlayerActionOverridesByDealerCard,
     RepresentativeHand
 } from '../types';
+import { Badge } from './badge';
 import { FinalScoresGraph } from './final-scores-graph';
 import { NextHandsTable } from './next-hands-table';
 import { OutcomeBadge } from './outcome-badge';
+import { RoundedFloat } from './rounded-float';
 
 interface ActionDetailsProps {
     actionData: PlayerActionData;
@@ -32,6 +34,16 @@ interface ActionDetailsProps {
 
 export const ActionDetails: React.FC<ActionDetailsProps> = (props) => {
     const isDesktop = useMediaQuery({ minWidth: desktopBreakpoint });
+
+    // const advantageRatio =
+    //     props.actionData.vsDealerOutcome.winProbability /
+    //     (props.actionData.vsDealerOutcome.winProbability +
+    //         props.actionData.vsDealerOutcome.lossProbability);
+    const payoutRatio =
+        (props.actionData.vsDealerOutcome.winProbability *
+            props.actionData.vsDealerOutcome.winPayout) /
+        (props.actionData.vsDealerOutcome.lossProbability *
+            props.actionData.vsDealerOutcome.lossPayout || 1);
 
     return (
         <div>
@@ -89,17 +101,29 @@ export const ActionDetails: React.FC<ActionDetailsProps> = (props) => {
                             name={labels.push}
                             value={props.actionData.vsDealerOutcome.pushProbability || 0}
                         />
-
-                        <OutcomeBadge
-                            {...colors.advantage}
-                            name={labels.advantage}
-                            value={props.actionData.vsDealerOutcome.playerAdvantage.hands || 0}
-                        />
-                        <OutcomeBadge
-                            {...colors.payout}
-                            name={labels.payout}
-                            value={props.actionData.vsDealerOutcome.playerAdvantage.payout || 0}
-                        />
+                        <Badge {...colors.advantage}>
+                            <div>{labels.advantage}</div>
+                            <div>
+                                <span style={{ fontSize: 24 }}>
+                                    <RoundedFloat
+                                        isPercentage={false}
+                                        value={
+                                            props.actionData.vsDealerOutcome.playerAdvantage.hands
+                                        }
+                                    />
+                                    :1
+                                </span>
+                            </div>
+                        </Badge>
+                        <Badge {...colors.payout}>
+                            <div>{labels.payout}</div>
+                            <div>
+                                <span style={{ fontSize: 24 }}>
+                                    <RoundedFloat isPercentage={false} value={payoutRatio} />
+                                    :1
+                                </span>
+                            </div>
+                        </Badge>
                     </div>
 
                     <br />

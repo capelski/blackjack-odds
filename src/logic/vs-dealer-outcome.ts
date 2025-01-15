@@ -27,7 +27,7 @@ export const getVsDealerOutcome = ({
         lossPayout,
         lossProbability,
         playerAdvantage: {
-            hands: winProbability - lossProbability,
+            hands: winProbability / (winProbability + lossProbability),
             payout: winProbability * winPayout - lossProbability * lossPayout
         },
         pushProbability: vsDealerBreakdown.playerEqualToDealer,
